@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  width: 100vw;
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.noise {
+  /* filter: contrast(100%) brightness(100%); */
+  background: linear-gradient(
+      132deg,
+      rgba(255, 253, 255, 0.64),
+      rgba(255, 250, 254, 0.64)
+    ),
+    url(./../../public/noise.svg);
+}
+
+button {
+  transition: all 0.2s ease-in-out;
+}

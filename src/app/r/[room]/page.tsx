@@ -6,7 +6,6 @@ import Cookies from "universal-cookie";
 import { Board, CustomJwtPayload, Ship } from "@/utils/types";
 import { jwtDecode } from "jwt-decode";
 import SignUp from "@/components/dialog/signup";
-// import { mysocket } from "@/utils/socket";
 import RoomFull from "@/components/dialog/roomfull";
 import MyBoard from "@/components/battleship/myboard";
 import { initialBoardConfig } from "@/utils/board";
@@ -14,15 +13,16 @@ import OpponentBoard from "@/components/battleship/opponentboard";
 import SelectShip from "@/components/battleship/selectship";
 import { ships } from "@/utils/ships";
 import toast, { Toaster } from "react-hot-toast";
-import ShareLink from "@/components/battleship/shareLink";
+import ShareLink from "@/components/dialog/shareLink";
 import MySocket from "@/utils/socket";
-// import { mysocket } from "@/components/hero";
-// import { Loading } from "@/assets/svgs";
+import GameOver from "@/components/dialog/gameover";
+
 const mysocket = new MySocket();
 
 function Page() {
   const [loggedin, setLoggedin] = useState<boolean>(true);
   const [whosTurn, setWhosTurn] = useState<string | null>(null);
+  const [playAgain, setPlayAgain] = useState<boolean>(false);
   const [playerReady, setPlayerReady] = useState<boolean>(false);
   const [display, setDisplay] = useState<string>("");
   const [winner, setWinner] = useState<string | null>(null);
@@ -44,12 +44,15 @@ function Page() {
       return;
     }
     const { nickname } = jwtDecode<CustomJwtPayload>(token);
+    setNickname(nickname);
     joinRoom(nickname);
 
     mysocket.setRoomFullCallback(handleRoomFull);
     mysocket.setOnPlayerJoined(handlePlayerJoined);
     mysocket.setOnGameOver(handleGameOver);
     mysocket.setOnPlayerLeft(handlePlayerleft);
+    mysocket.setOnPlayAgain(handlePlayAgain);
+    mysocket.setOnAcceptPlayAgain(handleAcceptPlayAgain);
     return () => mysocket.disconnect();
   }, []);
 
@@ -61,6 +64,14 @@ function Page() {
       setGameStatus("initiated");
     }
   }, [playerReady, opponentReady]);
+
+  useEffect(() => {
+    if (winner === "player") {
+      setDisplay("game_won");
+    } else if (winner === "opponent") {
+      setDisplay("game_lost");
+    }
+  }, [winner]);
 
   function handleGameOver({
     playerId,
@@ -76,7 +87,27 @@ function Page() {
     }
   }
 
-  function handlePlayerleft({ playerId }: { playerId: string }) {
+  function handleAcceptPlayAgain(playerId: string) {
+    if (playerId !== mysocket.getId()) {
+      setDisplay("");
+      setGameStatus("restart");
+    }
+  }
+
+  function handlePlayAgain(playerId: string) {
+    if (playerId !== mysocket.getId()) {
+      if (playAgain) {
+        setDisplay("");
+        setPlayAgain(false);
+        setGameStatus("restart");
+        mysocket.send("acceptPlayAgain", { playerId: mysocket.getId(), room });
+      } else {
+        setDisplay("play_again");
+      }
+    }
+  }
+
+  function handlePlayerleft() {
     toast.error("opponent left");
     console.log("opponent left");
     setDisplay("player_left");
@@ -125,15 +156,32 @@ function Page() {
   return (
     <main className="flex flex-col gap-5 items-center py-10 md:flex-row md:justify-center">
       <MyBoard
+        setPlayerReady={setPlayerReady}
+        gameStatus={gameStatus}
         mysocket={mysocket}
         playerReady={playerReady}
         setWhosTurn={setWhosTurn}
       />
       {display === "share_link" && <ShareLink room={room} />}
       {display === "player_left" && <RoomFull />}
+      {(display === "game_won" ||
+        display === "game_lost" ||
+        display === "play_again") && (
+        <GameOver
+          room={room}
+          setGameStatus={setGameStatus}
+          setDisplay={setDisplay}
+          playAgain={playAgain}
+          setPlayAgain={setPlayAgain}
+          mysocket={mysocket}
+          message={display}
+        />
+      )}
+
       <OpponentBoard
         whosTurn={whosTurn}
         mysocket={mysocket}
+        setWinner={setWinner}
         setPlayerReady={setPlayerReady}
         setOpponentReady={setOpponentReady}
         gameStatus={gameStatus}

@@ -24,15 +24,27 @@ function Hero() {
     push("/r/1234");
   };
 
-  const handleCheckUserExist = () => {
+  function userExist(): boolean {
     const cookies = new Cookies();
     const token = cookies.get("bt_oken");
     if (!token) {
       setDisplay("signup");
-      return;
+      return false;
     }
-    createRoom();
-  };
+    return true;
+  }
+
+  function handlePlayWithFriend() {
+    if (userExist()) {
+      createRoom();
+    }
+  }
+
+  function handlePlayWithRobot() {
+    if (userExist()) {
+      push("/play");
+    }
+  }
 
   useEffect(() => {
     if (display) {
@@ -53,17 +65,18 @@ function Hero() {
           <div className="flex flex-col justify-between h-[300px] py-1">
             <div className="flex flex-col gap-2">
               <button
-                onClick={handleCheckUserExist}
+                onClick={handlePlayWithRobot}
+                type="button"
+                className="focus:outline-none text-white bg-neutral-800 hover:bg-neutral-700 focus:ring-4  focus:ring-neutral-300 font-medium rounded-lg px-10 py-2"
+              >
+                Quick Game
+              </button>
+              <button
+                onClick={handlePlayWithFriend}
                 type="button"
                 className="focus:outline-none text-white bg-neutral-800 hover:bg-neutral-700 focus:ring-4  focus:ring-neutral-300 font-medium rounded-lg px-10 py-2"
               >
                 Play with friend
-              </button>
-              <button
-                type="button"
-                className="focus:outline-none text-white bg-neutral-800 hover:bg-neutral-700 focus:ring-4  focus:ring-neutral-300 font-medium rounded-lg px-10 py-2"
-              >
-                Play with robot
               </button>
             </div>
             <div className="flex flex-row gap-2">

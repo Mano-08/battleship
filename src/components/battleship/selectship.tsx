@@ -6,18 +6,24 @@ import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 function SelectShip({
+  gameStatus,
   hide,
   mysocket,
   myShipPlacements,
   myShips,
   setMyShips,
   resetBoard,
+  playerReady,
+  setPlayerReady,
   setSelectedShip,
   handleRandomize,
 }: {
   hide: boolean;
+  gameStatus: string;
   mysocket: MySocket;
   myShips: Ship[];
+  playerReady: boolean;
+  setPlayerReady: React.Dispatch<React.SetStateAction<boolean>>;
   myShipPlacements: MyShipPlacement;
   setMyShips: React.Dispatch<React.SetStateAction<Ship[]>>;
   resetBoard: () => void;
@@ -25,7 +31,6 @@ function SelectShip({
   handleRandomize: () => void;
 }) {
   const [displayShips, setDisplayShips] = useState<boolean>(false);
-  const [playerReady, setPlayerReady] = useState<boolean>(false);
   const { room }: { room: string } = useParams();
 
   function handleSelectShip(selectedShip: Ship) {
@@ -52,7 +57,7 @@ function SelectShip({
           resetBoard();
           setDisplayShips(true);
         }}
-        disabled={displayShips}
+        disabled={gameStatus === "initiated" && displayShips}
         className="w-full whitespace-nowrap overflow-hidden focus:outline-none text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
       >
         Place Manually

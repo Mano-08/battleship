@@ -14,6 +14,7 @@ function OpponentBoard({
   mysocket,
   setOpponentReady,
   setWhosTurn,
+  setWinner,
   gameStatus,
   setPlayerReady,
   setGameStatus,
@@ -23,6 +24,7 @@ function OpponentBoard({
   mysocket: MySocket;
   gameStatus: string;
   nickname: string;
+  setWinner: React.Dispatch<React.SetStateAction<string | null>>;
   setWhosTurn: React.Dispatch<React.SetStateAction<string | null>>;
   setOpponentReady: React.Dispatch<React.SetStateAction<boolean>>;
   setPlayerReady: React.Dispatch<React.SetStateAction<boolean>>;
@@ -37,6 +39,39 @@ function OpponentBoard({
   const [wreckedShips, setWreckedShips] = useState<{ [key: string]: boolean }>(
     {}
   );
+
+  useEffect(() => {
+    if (gameStatus === "restart") {
+      resetBoard();
+    }
+  }, [gameStatus]);
+
+  function resetBoard() {
+    setOpponentBoard((oldData) => {
+      for (let row = 0; row < 10; row++) {
+        for (let col = 0; col < 10; col++) {
+          oldData[row][col] = {
+            ship: false,
+            details: {
+              id: "noship",
+              burst: false,
+              start: false,
+              end: false,
+              vertical: false,
+            },
+
+            validHover: null,
+          };
+        }
+      }
+      return oldData;
+    });
+    setWreckedShips({});
+    setCoord(null);
+    setShipPlacement({});
+    setPlayerReady(false);
+    setOpponentReady(false);
+  }
 
   function handleOnReady({
     placement,
@@ -98,12 +133,14 @@ function OpponentBoard({
 
   useEffect(() => {
     mysocket.onReady = handleOnReady;
+    resetBoard();
   }, []);
 
   useEffect(() => {
-    if (Object.keys(wreckedShips).length === 5) {
+    if (Object.keys(wreckedShips).length === 1) {
       toast.success("You win!");
-      setGameStatus("finished");
+      setGameStatus("gameover");
+      setWinner("player");
       mysocket.send("gameOver", { room, playerId: mysocket.getId(), nickname });
     }
   }, [wreckedShips]);

@@ -7,23 +7,24 @@ import { Board, MyShipPlacement, RandomPlacement, Ship } from "@/utils/types";
 import React, { useEffect, useState } from "react";
 import SelectShip from "./selectship";
 import { getRandomCoord } from "@/helper/randomize";
-import { useRouter } from "next/navigation";
 
 function MyBoard({
+  gameStatus,
   mysocket,
   playerReady,
   setWhosTurn,
+  setPlayerReady,
 }: {
+  gameStatus: string;
   mysocket: MySocket;
   playerReady: boolean;
+  setPlayerReady: React.Dispatch<React.SetStateAction<boolean>>;
   setWhosTurn: React.Dispatch<React.SetStateAction<string | null>>;
 }) {
-  const router = useRouter();
   const [myBoard, setMyBoard] = useState<Board[][]>(initialBoardConfig());
   const [vertical, setVertical] = useState<boolean>(false);
   const [myShips, setMyShips] = useState<Ship[]>(ships);
   const [randomBoard, setRandomBoard] = useState<MyShipPlacement>({});
-  const [allShipsPlaced, setAllShipsPlaced] = useState<boolean>(false);
   const [selectedShip, setSelectedShip] = useState<null | Ship>(null);
   const [myShipPlacements, setMyShipPlacement] = useState<MyShipPlacement>({});
 
@@ -32,11 +33,17 @@ function MyBoard({
     const randomCoord = getRandomCoord();
     setRandomBoard(randomCoord);
     setMyShipPlacement(randomCoord);
+    mysocket.setOnAttack(handleTorpedoAttack);
   }, []);
 
   useEffect(() => {
-    mysocket.setOnAttack(handleTorpedoAttack);
-  }, []);
+    if (gameStatus === "restart") {
+      resetBoard();
+      const randomCoord = getRandomCoord();
+      setRandomBoard(randomCoord);
+      setMyShipPlacement(randomCoord);
+    }
+  }, [gameStatus]);
 
   useEffect(() => {
     if (Object.keys(randomBoard).length === 5) {
@@ -328,7 +335,6 @@ function MyBoard({
 
   function resetBoard() {
     setSelectedShip(null);
-    setAllShipsPlaced(false);
     setMyShips(ships);
     setMyShipPlacement({});
     setMyBoard((oldData) => {
@@ -352,11 +358,12 @@ function MyBoard({
     });
   }
 
-  function setBoard(randomCoord: any) {}
-
   return (
     <section className="flex flex-col gap-5 md:flex-row items-center ">
       <SelectShip
+        setPlayerReady={setPlayerReady}
+        playerReady={playerReady}
+        gameStatus={gameStatus}
         hide={playerReady}
         mysocket={mysocket}
         myShips={myShips}

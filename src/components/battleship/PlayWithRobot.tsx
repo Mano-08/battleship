@@ -274,11 +274,24 @@ function PlayWithRobot() {
   // }
 
   const [hitStack, setHitStack] = useState<
-    { row: number; col: number; shipId: string; direction: string | null }[]
+    {
+      row: number;
+      col: number;
+      shipId: string;
+      direction: "vertical" | "horizontal" | null;
+    }[]
   >([]);
 
-  function removeShipFromHitStack(shipId: string) {
-    return hitStack.filter((hit) => hit.shipId !== shipId);
+  function removeShipFromHitStack(
+    lastHits: {
+      row: number;
+      col: number;
+      shipId: string;
+      direction: "vertical" | "horizontal" | null;
+    }[],
+    shipId: string
+  ) {
+    return lastHits.filter((hit) => hit.shipId !== shipId);
   }
 
   async function guessNextMove() {
@@ -332,20 +345,22 @@ function PlayWithRobot() {
                 }
               }
 
-              if (curr >= 0 && curr < 10) {
-                if (!myBoard[row][curr].details.burst) {
-                  validDirections.push({
-                    row: row,
-                    col: curr,
-                    dir: "horizontal",
-                  });
-                } else {
-                  lastHits[lastHits.length - 1] = {
-                    ...lastHit,
-                    direction: "vertical",
-                  };
-                  continue;
-                }
+              if (curr >= 0 && curr < 10 && !myBoard[row][curr].details.burst) {
+                validDirections.push({
+                  row: row,
+                  col: curr,
+                  dir: "horizontal",
+                });
+              } else {
+                lastHits[lastHits.length - 1] = {
+                  ...lastHit,
+                  direction: "vertical",
+                };
+                lastHit = {
+                  ...lastHit,
+                  direction: "vertical",
+                };
+                continue;
               }
             }
           } else {
@@ -372,23 +387,105 @@ function PlayWithRobot() {
                 }
               }
 
-              if (curr >= 0 && curr < 10) {
-                if (!myBoard[curr][col].details.burst) {
-                  validDirections.push({
-                    row: curr,
-                    col: col,
-                    dir: "vertical",
-                  });
-                } else {
-                  lastHits[lastHits.length - 1] = {
-                    ...lastHit,
-                    direction: "horizontal",
-                  };
-                  continue;
-                }
+              if (curr >= 0 && curr < 10 && !myBoard[curr][col].details.burst) {
+                validDirections.push({
+                  row: curr,
+                  col: col,
+                  dir: "vertical",
+                });
+              } else {
+                lastHits[lastHits.length - 1] = {
+                  ...lastHit,
+                  direction: "horizontal",
+                };
+                lastHit = {
+                  ...lastHit,
+                  direction: "horizontal",
+                };
+                continue;
               }
             }
           }
+
+          // if (direction === "horizontal") {
+          //   let curr = col;
+          //   if (lastHits.length > 1) {
+          //     const secondLastHit = lastHits[lastHits.length - 2];
+          //     if (secondLastHit.col < col) {
+          //       curr = col - 1;
+          //       while (
+          //         curr >= 0 &&
+          //         myBoard[row][curr].details.burst &&
+          //         myBoard[row][curr].ship
+          //       ) {
+          //         curr = curr - 1;
+          //       }
+          //     } else {
+          //       curr = col + 1;
+          //       while (
+          //         curr < 10 &&
+          //         myBoard[row][curr].details.burst &&
+          //         myBoard[row][curr].ship
+          //       ) {
+          //         curr = curr + 1;
+          //       }
+          //     }
+
+          //     if (curr >= 0 && curr < 10 && !myBoard[row][curr].details.burst) {
+          //       validDirections.push({
+          //         row: row,
+          //         col: curr,
+          //         dir: "horizontal",
+          //       });
+          //     } else {
+          //       lastHits[lastHits.length - 1] = {
+          //         ...lastHit,
+          //         direction: "vertical",
+          //       };
+          //       lastHit = lastHits[lastHits.length - 1];
+          //       continue;
+          //     }
+          //   }
+          // } else {
+          //   let curr = row;
+          //   if (lastHits.length > 1) {
+          //     const secondLastHit = lastHits[lastHits.length - 2];
+          //     if (secondLastHit.row < row) {
+          //       curr = row - 1;
+          //       while (
+          //         curr >= 0 &&
+          //         myBoard[curr][col].details.burst &&
+          //         myBoard[curr][col].ship
+          //       ) {
+          //         curr = curr - 1;
+          //       }
+          //     } else {
+          //       curr = row + 1;
+          //       while (
+          //         curr < 10 &&
+          //         myBoard[curr][col].details.burst &&
+          //         myBoard[curr][col].ship
+          //       ) {
+          //         curr = curr + 1;
+          //       }
+          //     }
+
+          //     if (curr >= 0 && curr < 10 && !myBoard[curr][col].details.burst) {
+          //       validDirections.push({
+          //         row: curr,
+          //         col: col,
+          //         dir: "vertical",
+          //       });
+          //     } else {
+          //       lastHits[lastHits.length - 1] = {
+          //         ...lastHit,
+          //         direction: "horizontal",
+          //       };
+          //       lastHit = lastHits[lastHits.length - 1];
+          //       continue;
+          //     }
+          //   }
+          // }
         }
         if (validDirections.length > 0) {
           const { row, col, dir } =
@@ -407,13 +504,13 @@ function PlayWithRobot() {
               row,
               col,
               shipId: myBoard[row][col].details.id,
-              direction: dir,
+              direction: dir as "vertical" | "horizontal",
             };
             lastHits.push(lastHit);
             const shipId = handleShipBurst(row, col);
-
-            if (shipId) {
-              lastHits = removeShipFromHitStack(shipId);
+            console.log(shipId, "SHIP ID");
+            if (shipId !== null) {
+              lastHits = removeShipFromHitStack(lastHits, shipId);
               lastHit =
                 lastHits.length > 0 ? lastHits[lastHits.length - 1] : null;
             }
@@ -441,8 +538,8 @@ function PlayWithRobot() {
 
           if (myBoard[row][col].ship) {
             const shipId = handleShipBurst(row, col);
-            if (shipId) {
-              lastHits = removeShipFromHitStack(shipId);
+            if (shipId !== null) {
+              lastHits = removeShipFromHitStack(lastHits, shipId);
               lastHit =
                 lastHits.length > 0 ? lastHits[lastHits.length - 1] : null;
             } else {

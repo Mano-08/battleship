@@ -24,3 +24,54 @@ html {
 button {
   transition: all 0.2s ease-in-out;
 }
+
+*[data-description] {
+  position: relative;
+}
+
+*[data-description]::after {
+  content: attr(data-description);
+  position: absolute;
+  text-align: center;
+  opacity: 0;
+  font-size: 12px;
+  bottom: calc(100% + 3px);
+  margin: 0 auto;
+  transition: all 0.25s ease-in-out;
+  padding: 3px 10px;
+  min-width: inherit;
+  color: black;
+  background-color: rgb(251, 251, 251);
+  transform: scale(0.2);
+  box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.166);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+*[data-description]:hover::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.animation-delay-334 {
+  animation-delay: 334ms;
+}
+
+.animation-delay-167 {
+  animation-delay: 167ms;
+}
+
+@keyframes popup {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-popup {
+  animation: popup 0.3s ease-in-out;
+}

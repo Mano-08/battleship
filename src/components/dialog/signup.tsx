@@ -1,8 +1,9 @@
 "use client";
 
 import React, { FormEvent, useEffect, useState } from "react";
-import { Loading } from "@/assets/svgs";
 import Cookies from "universal-cookie";
+import Loading from "../Loading";
+import { v4 as uuidv4 } from "uuid";
 
 type setDisplayProp = React.Dispatch<React.SetStateAction<string | null>>;
 
@@ -30,6 +31,7 @@ function SignUp({
 
   const handleSubmit = async (e: FormEvent) => {
     setLoading(true);
+    const username = uuidv4();
     e.preventDefault();
     const res = await fetch("/api/create-user", {
       method: "POST",
@@ -38,6 +40,7 @@ function SignUp({
       },
       body: JSON.stringify({
         nickname,
+        username,
       }),
     });
     if (res.status === 200) {
@@ -55,15 +58,20 @@ function SignUp({
   return (
     <div
       onClick={handleCloseDialog}
-      className="fixed top-0 left-0 z-[100] h-screen w-screen flex bg-black/60 justify-center items-center"
+      className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center"
     >
-      <form
-        onSubmit={handleSubmit}
+      <div
         onClick={(e) => e.stopPropagation()}
-        className="rounded-lg flex flex-col items-center justify-center bg-white p-6"
+        className="animate-popup flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]"
       >
-        <div className="grid grid-cols-2 items-center">
-          <label htmlFor="nickname">nickname: </label>
+        <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
+          Enter Nickname
+        </h1>
+
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-row items-center justify-between gap-5 p-5"
+        >
           <input
             type="text"
             name="nickname"
@@ -72,25 +80,23 @@ function SignUp({
             autoComplete="off"
             onChange={handleChange}
             placeholder="thedracula"
-            className="border-b border-black outline-none px-0.5 py-1"
+            className="border-b text-center grow border-black outline-none px-0.5 py-1"
           />
-        </div>
 
-        <div className="flex flex-row items-center justify-end gap-2">
-          <button
-            type="submit"
-            disabled={loading}
-            className="my-12 rounded-md text-white px-5 py-1 bg-green-600 hover:bg-green-500 disabled:bg-green-500 disabled:cursor-not-allowed"
-          >
-            Play
-          </button>
-          {loading && (
-            <div className="animate-spin h-[24px] w-[24px]">
+          {!loading ? (
+            <button
+              disabled={loading}
+              className="transition-all duration-200 focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-300 font-medium rounded-lg px-5 py-1"
+            >
+              Go
+            </button>
+          ) : (
+            <div>
               <Loading />
             </div>
           )}
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

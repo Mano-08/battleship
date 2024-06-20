@@ -4,6 +4,13 @@ export interface CustomJwtPayload extends JwtPayload {
   nickname: string;
 }
 
+export type shipIds =
+  | "carrier"
+  | "battleship"
+  | "cruiser"
+  | "submarine"
+  | "destroyer";
+
 export type ShipColor = {
   [key: string]: string;
 };
@@ -38,8 +45,17 @@ export interface Board {
 }
 
 export type Ship = {
-  id: string;
+  id: shipIds;
   placed: boolean;
   selected: boolean;
   length: number;
 };
+
+export type displayOptions =
+  | "loading"
+  | "share_link"
+  | "player_left"
+  | "game_won"
+  | "game_lost"
+  | "play_again"
+  | "";

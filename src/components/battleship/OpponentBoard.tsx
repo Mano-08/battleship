@@ -17,6 +17,9 @@ function OpponentBoard({
   setWinner,
   mute,
   gameStatus,
+  setScore,
+  score,
+  username,
   setPlayerReady,
   setGameStatus,
   nickname,
@@ -25,7 +28,10 @@ function OpponentBoard({
   mysocket: MySocket;
   gameStatus: string;
   nickname: string;
+  score: number;
+  setScore: React.Dispatch<React.SetStateAction<number>>;
   mute: boolean;
+  username: string;
   setWinner: React.Dispatch<React.SetStateAction<string | null>>;
   setWhosTurn: React.Dispatch<React.SetStateAction<string | null>>;
   setOpponentReady: React.Dispatch<React.SetStateAction<boolean>>;
@@ -44,6 +50,7 @@ function OpponentBoard({
   const [wreckedShips, setWreckedShips] = useState<{ [key: string]: boolean }>(
     {}
   );
+  const [hitCount, setHitCount] = useState<number>(0);
 
   useEffect(() => {
     if (oppExplotionAudioRef.current) {
@@ -155,13 +162,31 @@ function OpponentBoard({
       toast.success("You win!");
       setGameStatus("gameover");
       setWinner("player");
+      updateScoreIntoCookie();
+      setHitCount(0);
       mysocket.send("gameOver", { room, playerId: mysocket.getId(), nickname });
     }
   }, [wreckedShips]);
 
-  // useEffect(() => {
-  //   console.log(whosTurn, mysocket.getId());
-  // }, [whosTurn]);
+  async function updateScoreIntoCookie() {
+    const bonus = hitCount <= 30 ? 250 : 100;
+    const newScore = score + bonus;
+    setScore(newScore);
+    const res = await fetch("/api/update-score", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        newScore,
+        nickname,
+        username,
+      }),
+    });
+    if (res.status === 200) {
+      console.log(res.json());
+    }
+  }
 
   function handleDropTorpedo(rindex: number, cindex: number) {
     console.log("HOOO");
@@ -179,6 +204,7 @@ function OpponentBoard({
       cindex,
       playerId: mysocket.getId(),
     });
+    setHitCount((old) => old + 1);
     if (!opponentBoard[rindex][cindex].ship) {
       setWhosTurn("opponent");
       !mute && (oppSplashAudioRef.current as HTMLAudioElement)?.play();

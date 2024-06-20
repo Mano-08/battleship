@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import MySocket from "@/utils/socket";
 import battleshipImage from "../../public/main.png";
 import { v4 as uuidv4 } from "uuid";
+import { SignUpModes } from "@/utils/types";
 // import { mysocket } from "@/utils/socket";
 
 // const mysocket = new MySocket();
@@ -32,25 +33,35 @@ function Hero() {
     push("/play");
   }
 
-  function userExist({ multiplayer }: { multiplayer: boolean }): boolean {
+  function enterOnlineBattlefield() {
+    push("/online");
+  }
+
+  function userExist({ mode }: { mode: SignUpModes }): boolean {
     const cookies = new Cookies();
     const token = cookies.get("bt_oken");
     if (!token) {
-      setDisplay(multiplayer ? "signup-multiplayer" : "signup-solo");
+      setDisplay(mode);
       return false;
     }
     return true;
   }
 
   function handlePlayWithFriend() {
-    if (userExist({ multiplayer: true })) {
+    if (userExist({ mode: "signup-multiplayer" })) {
       createRoom();
     }
   }
 
   function handlePlayWithRobot() {
-    if (userExist({ multiplayer: false })) {
+    if (userExist({ mode: "signup-solo" })) {
       enterBattlefield();
+    }
+  }
+
+  function handlePlayOnline() {
+    if (userExist({ mode: "signup-online" })) {
+      enterOnlineBattlefield();
     }
   }
 
@@ -70,8 +81,12 @@ function Hero() {
       {display === "signup-solo" && (
         <SignUp setDisplay={setDisplay} callback={enterBattlefield} />
       )}
+      {display === "signup-online" && (
+        <SignUp setDisplay={setDisplay} callback={enterOnlineBattlefield} />
+      )}
+
       <div className="min-h-[85vh] w-full flex items-center justify-center">
-        <section className="flex flex-col md:flex-row items-center gap-5">
+        <section className="flex flex-col justify-end lg:justify-start lg:flex-row items-center gap-5">
           <Image
             src={battleshipImage}
             height={300}
@@ -79,7 +94,7 @@ function Hero() {
             alt="battle ship"
             className="h-[300px] w-[300px] rounded-lg bg-white outline outline-black"
           />
-          <div className="w-[300px] lg:w-auto flex flex-col justify-start gap-7 lg:justify-between h-[300px] py-1">
+          <div className="w-[300px] lg:w-auto flex flex-col justify-start gap-7 lg:justify-between lg:h-[300px] py-1">
             <div className="flex flex-col gap-2">
               <button
                 onClick={handlePlayWithRobot}
@@ -89,11 +104,18 @@ function Hero() {
                 Quick Game
               </button>
               <button
+                onClick={handlePlayOnline}
+                type="button"
+                className="transition-all duration-200 focus:outline-none text-white bg-neutral-800 hover:bg-neutral-700 focus:ring-4  focus:ring-neutral-300 font-medium rounded-lg px-10 py-2"
+              >
+                Play Online
+              </button>
+              <button
                 onClick={handlePlayWithFriend}
                 type="button"
                 className="transition-all duration-200 focus:outline-none text-white bg-neutral-800 hover:bg-neutral-700 focus:ring-4  focus:ring-neutral-300 font-medium rounded-lg px-10 py-2"
               >
-                Play with friend
+                Play with Friend
               </button>
             </div>
             <div className="flex justify-center lg:justify-start flex-row gap-2">

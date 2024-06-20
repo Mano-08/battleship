@@ -22,7 +22,7 @@ function Navbar() {
   }, []);
 
   return (
-    <header className="w-full py-2 md:py-5">
+    <header className="h-[10vh] lg:h-auto w-full py-2 md:py-5">
       <nav className="flex flex-row justify-between items-center">
         <Link href="/">BATTLESHIP</Link>
         <div className="flex flex-row gap-3 items-end">
@@ -31,7 +31,6 @@ function Navbar() {
               score: <strong>{score}</strong>
             </div>
           )}
-          <button>settings</button>
         </div>
       </nav>
     </header>

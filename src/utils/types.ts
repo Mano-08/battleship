@@ -6,6 +6,11 @@ export interface CustomJwtPayload extends JwtPayload {
   score: number;
 }
 
+export type SignUpModes =
+  | "signup-multiplayer"
+  | "signup-solo"
+  | "signup-online";
+
 export type shipIds =
   | "carrier"
   | "battleship"

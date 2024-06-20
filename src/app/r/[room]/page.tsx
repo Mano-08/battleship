@@ -30,6 +30,7 @@ function Page() {
   const [exitGame, setExitGame] = useState<boolean>(false);
   const [mute, setMute] = useState<boolean>(false);
   const [score, setScore] = useState<number>(0);
+  const [username, setUsername] = useState<string>("");
   const [nickname, setNickname] = useState<string>("");
   const [opponentReady, setOpponentReady] = useState<boolean>(false);
   const [roomFull, setRoomFull] = useState<boolean>(false);
@@ -46,10 +47,11 @@ function Page() {
       setLoggedin(false);
       return;
     }
-    const { nickname, score } = jwtDecode<CustomJwtPayload>(token);
+    const { nickname, score, username } = jwtDecode<CustomJwtPayload>(token);
     setScore(score);
     setNickname(nickname);
     joinRoom(nickname);
+    setUsername(username);
 
     setTimeout(
       () => setDisplay((prev) => (prev === "share_link" ? "share_link" : "")),
@@ -179,8 +181,9 @@ function Page() {
           <div className="fixed top-0 left-0 h-screen w-screen bg-black/60 flex items-center justify-center">
             <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]">
               <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
-                Are you sure you want to exit?
+                Exit Game
               </h1>
+              <p className="p-2">Are you sure you want to exit?</p>
               <div className="flex flex-row justify-evenly pt-4">
                 <button
                   autoFocus={true}
@@ -221,6 +224,9 @@ function Page() {
           mysocket={mysocket}
           setWinner={setWinner}
           mute={mute}
+          username={username}
+          score={score}
+          setScore={setScore}
           setPlayerReady={setPlayerReady}
           setOpponentReady={setOpponentReady}
           gameStatus={gameStatus}

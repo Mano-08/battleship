@@ -14,6 +14,8 @@ import ShareLink from "@/components/dialog/ShareLink";
 import MySocket from "@/utils/socket";
 import GameOver from "@/components/dialog/GameOver";
 import Connecting from "@/components/dialog/Connecting";
+import { LogOut, Volume2, VolumeX } from "lucide-react";
+import Link from "next/link";
 
 const mysocket = new MySocket();
 
@@ -25,6 +27,9 @@ function Page() {
   const [display, setDisplay] = useState<displayOptions>("loading");
   const [winner, setWinner] = useState<string | null>(null);
   const [gameStatus, setGameStatus] = useState<string>("initiating");
+  const [exitGame, setExitGame] = useState<boolean>(false);
+  const [mute, setMute] = useState<boolean>(false);
+  const [score, setScore] = useState<number>(0);
   const [nickname, setNickname] = useState<string>("");
   const [opponentReady, setOpponentReady] = useState<boolean>(false);
   const [roomFull, setRoomFull] = useState<boolean>(false);
@@ -41,7 +46,8 @@ function Page() {
       setLoggedin(false);
       return;
     }
-    const { nickname } = jwtDecode<CustomJwtPayload>(token);
+    const { nickname, score } = jwtDecode<CustomJwtPayload>(token);
+    setScore(score);
     setNickname(nickname);
     joinRoom(nickname);
 
@@ -163,11 +169,36 @@ function Page() {
           setPlayerReady={setPlayerReady}
           gameStatus={gameStatus}
           winner={winner}
+          mute={mute}
           display={display}
           mysocket={mysocket}
           playerReady={playerReady}
           setWhosTurn={setWhosTurn}
         />
+        {exitGame && (
+          <div className="fixed top-0 left-0 h-screen w-screen bg-black/60 flex items-center justify-center">
+            <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]">
+              <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
+                Are you sure you want to exit?
+              </h1>
+              <div className="flex flex-row justify-evenly pt-4">
+                <button
+                  autoFocus={true}
+                  onClick={() => setExitGame(false)}
+                  className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-300 font-medium rounded-lg px-5 py-1"
+                >
+                  Stay
+                </button>
+                <Link
+                  href="/"
+                  className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-300 font-medium rounded-lg px-5 py-1"
+                >
+                  Exit
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
         {display === "loading" && <Connecting />}
         {display === "share_link" && <ShareLink room={room} />}
         {display === "player_left" && <RoomFull />}
@@ -189,6 +220,7 @@ function Page() {
           whosTurn={whosTurn}
           mysocket={mysocket}
           setWinner={setWinner}
+          mute={mute}
           setPlayerReady={setPlayerReady}
           setOpponentReady={setOpponentReady}
           gameStatus={gameStatus}
@@ -197,6 +229,38 @@ function Page() {
           nickname={nickname}
         />
       </div>
+
+      <footer className="w-full p-3 border-t border-neutral-400">
+        <div className="mx-auto w-[95%] lg:w-[860px] flex flex-row items-center justify-between gap-1">
+          <p>
+            score: <strong>{score}</strong>
+          </p>
+
+          <div className="flex flex-row items-center gap-2">
+            {mute ? (
+              <button
+                className="transition-all duration-200 text-gray-900 hover:bg-neutral-100 focus:outline-none focus:ring-4 focus:ring-gray-200 font-medium rounded-md p-2"
+                onClick={() => setMute(false)}
+              >
+                <VolumeX />
+              </button>
+            ) : (
+              <button
+                className="transition-all duration-200 text-gray-900 hover:bg-neutral-100 focus:outline-none focus:ring-4 focus:ring-gray-200 font-medium rounded-md p-2"
+                onClick={() => setMute(true)}
+              >
+                <Volume2 />
+              </button>
+            )}
+            <button
+              className="transition-all duration-200 text-gray-900 hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 font-medium rounded-md p-2"
+              onClick={() => setExitGame(true)}
+            >
+              <LogOut />
+            </button>
+          </div>
+        </div>
+      </footer>
       <Toaster position="bottom-center" reverseOrder={false} />
     </main>
   );

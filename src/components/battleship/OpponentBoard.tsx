@@ -15,6 +15,7 @@ function OpponentBoard({
   setOpponentReady,
   setWhosTurn,
   setWinner,
+  mute,
   gameStatus,
   setPlayerReady,
   setGameStatus,
@@ -24,6 +25,7 @@ function OpponentBoard({
   mysocket: MySocket;
   gameStatus: string;
   nickname: string;
+  mute: boolean;
   setWinner: React.Dispatch<React.SetStateAction<string | null>>;
   setWhosTurn: React.Dispatch<React.SetStateAction<string | null>>;
   setOpponentReady: React.Dispatch<React.SetStateAction<boolean>>;
@@ -162,6 +164,7 @@ function OpponentBoard({
   // }, [whosTurn]);
 
   function handleDropTorpedo(rindex: number, cindex: number) {
+    console.log("HOOO");
     if (gameStatus !== "initiated") {
       toast.error("game not initiated");
       return;
@@ -178,9 +181,9 @@ function OpponentBoard({
     });
     if (!opponentBoard[rindex][cindex].ship) {
       setWhosTurn("opponent");
-      (oppSplashAudioRef.current as HTMLAudioElement)?.play();
+      !mute && (oppSplashAudioRef.current as HTMLAudioElement)?.play();
     } else {
-      (oppExplotionAudioRef.current as HTMLAudioElement)?.play();
+      !mute && (oppExplotionAudioRef.current as HTMLAudioElement)?.play();
     }
     setOpponentBoard((old) => {
       const newData = [...old];

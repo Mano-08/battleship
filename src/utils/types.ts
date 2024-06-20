@@ -2,6 +2,8 @@ import { JwtPayload } from "jwt-decode";
 
 export interface CustomJwtPayload extends JwtPayload {
   nickname: string;
+  username: string;
+  score: number;
 }
 
 export type shipIds =

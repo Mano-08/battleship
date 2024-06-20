@@ -4,9 +4,11 @@ import Notepad from "@/assets/notepad";
 import Trophy from "@/assets/trophy";
 import React, { useEffect, useState } from "react";
 import Cookies from "universal-cookie";
+import Image from "next/image";
 import SignUp from "./dialog/SignUp";
 import { useRouter } from "next/navigation";
 import MySocket from "@/utils/socket";
+import battleshipImage from "../../public/main.png";
 import { v4 as uuidv4 } from "uuid";
 // import { mysocket } from "@/utils/socket";
 
@@ -70,7 +72,13 @@ function Hero() {
       )}
       <div className="min-h-[85vh] w-full flex items-center justify-center">
         <section className="flex flex-col md:flex-row items-center gap-5">
-          <div className="h-[300px] w-[300px] rounded-lg bg-white outline outline-black"></div>
+          <Image
+            src={battleshipImage}
+            height={300}
+            width={300}
+            alt="battle ship"
+            className="h-[300px] w-[300px] rounded-lg bg-white outline outline-black"
+          />
           <div className="w-[300px] lg:w-auto flex flex-col justify-start gap-7 lg:justify-between h-[300px] py-1">
             <div className="flex flex-col gap-2">
               <button

@@ -3,20 +3,33 @@
 import { initialBoardConfig } from "@/utils/board";
 import { shipColors, ships } from "@/utils/ships";
 import MySocket from "@/utils/socket";
-import { Board, MyShipPlacement, RandomPlacement, Ship } from "@/utils/types";
-import React, { useEffect, useState } from "react";
-import SelectShip from "./selectship";
+import {
+  Board,
+  MyShipPlacement,
+  RandomPlacement,
+  Ship,
+  displayOptions,
+  shipIds,
+} from "@/utils/types";
+import Confetti from "react-confetti";
+import React, { useEffect, useRef, useState } from "react";
+import SelectShip from "./SelectShip";
 import { getRandomCoord } from "@/helper/randomize";
+import useWindowSize from "react-use/lib/useWindowSize";
 
 function MyBoard({
   gameStatus,
   mysocket,
   playerReady,
+  display,
+  winner,
   setWhosTurn,
   setPlayerReady,
 }: {
   gameStatus: string;
   mysocket: MySocket;
+  display: displayOptions;
+  winner: string | null;
   playerReady: boolean;
   setPlayerReady: React.Dispatch<React.SetStateAction<boolean>>;
   setWhosTurn: React.Dispatch<React.SetStateAction<string | null>>;
@@ -28,12 +41,24 @@ function MyBoard({
   const [selectedShip, setSelectedShip] = useState<null | Ship>(null);
   const [myShipPlacements, setMyShipPlacement] = useState<MyShipPlacement>({});
 
+  const splashAudioRef = useRef<HTMLAudioElement | null>(null);
+  const explotionAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const { width, height } = useWindowSize();
+
   useEffect(() => {
     resetBoard();
     const randomCoord = getRandomCoord();
     setRandomBoard(randomCoord);
     setMyShipPlacement(randomCoord);
     mysocket.setOnAttack(handleTorpedoAttack);
+
+    if (splashAudioRef.current) {
+      splashAudioRef.current.volume = 0.2;
+    }
+    if (explotionAudioRef.current) {
+      explotionAudioRef.current.volume = 0.2;
+    }
   }, []);
 
   useEffect(() => {
@@ -112,13 +137,16 @@ function MyBoard({
     if (!myBoard[rindex][cindex].ship) {
       setWhosTurn("player");
     }
+    if (myBoard[rindex][cindex].ship) {
+      (explotionAudioRef.current as HTMLAudioElement)?.play();
+    } else {
+      (splashAudioRef.current as HTMLAudioElement)?.play();
+    }
     setMyBoard((oldData) => {
       const newData = [...oldData];
-      if (newData[rindex][cindex].ship) {
-        const updatedElement = { ...newData[rindex][cindex] };
-        updatedElement.details.burst = true;
-        newData[rindex][cindex] = updatedElement;
-      }
+      const updatedElement = { ...newData[rindex][cindex] };
+      updatedElement.details.burst = true;
+      newData[rindex][cindex] = updatedElement;
       return newData;
     });
   }
@@ -358,13 +386,48 @@ function MyBoard({
     });
   }
 
+  function removeShipFromPlacements(shipid: shipIds) {
+    setMyShipPlacement((oldData) => {
+      const newData = { ...oldData };
+      delete newData[shipid];
+      return newData;
+    });
+    setMyShips((oldData) =>
+      oldData.map((ship) =>
+        ship.id === shipid ? { ...ship, selected: false, placed: false } : ship
+      )
+    );
+    setMyBoard((oldData) => {
+      const newMyBoard = [...oldData];
+      for (let row = 0; row < 10; row++) {
+        for (let col = 0; col < 10; col++) {
+          const updatedElement = { ...oldData[row][col] };
+          if (updatedElement.details.id === shipid) {
+            updatedElement.ship = false;
+            updatedElement.details.id = "";
+            updatedElement.details.burst = false;
+            updatedElement.details.start = false;
+            updatedElement.details.end = false;
+            updatedElement.details.vertical = false;
+          }
+          newMyBoard[row][col] = updatedElement;
+        }
+      }
+      return newMyBoard;
+    });
+  }
+
   return (
     <section className="flex flex-col gap-5 md:flex-row items-center ">
       <SelectShip
         setPlayerReady={setPlayerReady}
+        removeShipFromPlacements={removeShipFromPlacements}
         playerReady={playerReady}
         gameStatus={gameStatus}
+        setVertical={setVertical}
+        vertical={vertical}
         hide={playerReady}
+        display={display}
         mysocket={mysocket}
         myShips={myShips}
         myShipPlacements={myShipPlacements}
@@ -394,7 +457,9 @@ function MyBoard({
                       ? ele.ship
                         ? ele.details.burst
                           ? { background: "rgba(7,0,27,0.8)" }
-                          : { background: shipColors[ele.details.id as string] }
+                          : {
+                              background: shipColors[ele.details.id as string],
+                            }
                         : ele.details.burst
                         ? { background: "rgba(79,79,79,0.80)" }
                         : { background: "rgba(0,0,0,0.1)" }
@@ -425,6 +490,10 @@ function MyBoard({
           </div>
         ))}
       </div>
+      <audio ref={splashAudioRef} src="/audio/splash.wav"></audio>
+      <audio ref={explotionAudioRef} src="/audio/explotion.wav"></audio>
+
+      {winner === "player" && <Confetti width={width} height={height} />}
     </section>
   );
 }

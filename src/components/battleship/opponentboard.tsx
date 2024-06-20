@@ -6,7 +6,7 @@ import { shipColors } from "@/utils/ships";
 import MySocket from "@/utils/socket";
 import { Board, MyShipPlacement } from "@/utils/types";
 import { useParams } from "next/navigation";
-import React, { use, useEffect, useState } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 function OpponentBoard({
@@ -35,10 +35,22 @@ function OpponentBoard({
   const [opponentBoard, setOpponentBoard] = useState<Board[][]>(
     initialBoardConfig()
   );
+
+  const oppExplotionAudioRef = useRef<HTMLAudioElement | null>(null);
+  const oppSplashAudioRef = useRef<HTMLAudioElement | null>(null);
   const [coord, setCoord] = useState<{ row: number; col: number } | null>(null);
   const [wreckedShips, setWreckedShips] = useState<{ [key: string]: boolean }>(
     {}
   );
+
+  useEffect(() => {
+    if (oppExplotionAudioRef.current) {
+      oppExplotionAudioRef.current.volume = 0.2;
+    }
+    if (oppSplashAudioRef.current) {
+      oppSplashAudioRef.current.volume = 0.2;
+    }
+  }, []);
 
   useEffect(() => {
     if (gameStatus === "restart") {
@@ -166,6 +178,9 @@ function OpponentBoard({
     });
     if (!opponentBoard[rindex][cindex].ship) {
       setWhosTurn("opponent");
+      (oppSplashAudioRef.current as HTMLAudioElement)?.play();
+    } else {
+      (oppExplotionAudioRef.current as HTMLAudioElement)?.play();
     }
     setOpponentBoard((old) => {
       const newData = [...old];
@@ -266,6 +281,8 @@ function OpponentBoard({
           ))}
         </div>
       ))}
+      <audio ref={oppSplashAudioRef} src="/audio/splash.wav"></audio>
+      <audio ref={oppExplotionAudioRef} src="/audio/explotion.wav"></audio>
     </section>
   );
 }

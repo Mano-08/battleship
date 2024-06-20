@@ -1,19 +1,48 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Cookies from "universal-cookie";
-import { Board, CustomJwtPayload, MyShipPlacement, Ship } from "@/utils/types";
+import {
+  Board,
+  CustomJwtPayload,
+  MyShipPlacement,
+  Ship,
+  shipIds,
+} from "@/utils/types";
 import { jwtDecode } from "jwt-decode";
-import SignUp from "@/components/dialog/signup";
+import SignUp from "@/components/dialog/SignUp";
 import { initialBoardConfig } from "@/utils/board";
 import { shipColors, ships } from "@/utils/ships";
 import toast, { Toaster } from "react-hot-toast";
 import { getRandomCoord } from "@/helper/randomize";
 import { Fire, Skeleton } from "@/assets/svgs";
+import { useRouter } from "next/navigation";
+import Confetti from "react-confetti";
+import useWindowSize from "react-use/lib/useWindowSize";
+import {
+  CircleArrowDown,
+  CircleArrowRight,
+  CircleArrowUp,
+  LogOut,
+  Minus,
+  RefreshCw,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 
 function PlayWithRobot() {
   const [loggedin, setLoggedin] = useState<boolean>(true);
-  const [whosTurn, setWhosTurn] = useState<"player" | "opponent" | null>();
+  const [exitGame, setExitGame] = useState<boolean>(false);
+  const [mute, setMute] = useState<boolean>(true);
+  const router = useRouter();
+  const { width, height } = useWindowSize();
+
+  const splashAudioRef = useRef<HTMLAudioElement | null>(null);
+  const explotionAudioRef = useRef<HTMLAudioElement | null>(null);
+  const oppExplotionAudioRef = useRef<HTMLAudioElement | null>(null);
+  const oppSplashAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const [whosTurn, setWhosTurn] = useState<"player" | "opponent">("player");
   const [winner, setWinner] = useState<"player" | "opponent" | null>(null);
   const [gameStatus, setGameStatus] = useState<
     "initiating" | "initiated" | "gameover"
@@ -59,6 +88,19 @@ function PlayWithRobot() {
     const { nickname } = jwtDecode<CustomJwtPayload>(token);
     setNickname(nickname);
 
+    if (splashAudioRef.current) {
+      splashAudioRef.current.volume = 0.2;
+    }
+    if (explotionAudioRef.current) {
+      explotionAudioRef.current.volume = 0.2;
+    }
+    if (oppExplotionAudioRef.current) {
+      oppExplotionAudioRef.current.volume = 0.2;
+    }
+    if (oppSplashAudioRef.current) {
+      oppSplashAudioRef.current.volume = 0.2;
+    }
+
     // Initialize Board with Random Ship Placement
     resetMyBoard();
     const randomCoord = getRandomCoord();
@@ -72,10 +114,10 @@ function PlayWithRobot() {
   }, []);
 
   useEffect(() => {
-    if (Object.keys(opponentsWreckedShips).length === 5) {
+    if (Object.keys(opponentsWreckedShips).length === 1) {
       setWinner("player");
       setGameStatus("gameover");
-    } else if (Object.keys(myWreckedShips).length === 5) {
+    } else if (Object.keys(myWreckedShips).length === 1) {
       setWinner("opponent");
       setGameStatus("gameover");
     }
@@ -131,148 +173,6 @@ function PlayWithRobot() {
     }
   }
 
-  // async function guessNextMove() {
-  //   let opponentsTurnOver = false;
-  //   let lastHit = hitByOpponent;
-  //   let lastHitShipOrientation = hitDirection;
-  //   while (!opponentsTurnOver) {
-  //     await sleep(550);
-  //     if (lastHit) {
-  //       const { row, col } = lastHit;
-  //       console.log(lastHit, lastHitShipOrientation);
-  //       const directions = [
-  //         { row: row - 1, col, direction: "vertical" },
-  //         { row: row + 1, col, direction: "vertical" },
-  //         { row, col: col - 1, direction: "horizontal" },
-  //         { row, col: col + 1, direction: "horizontal" },
-  //       ];
-  //       const validDirections = directions.filter(
-  //         ({ row, col, direction }) =>
-  //           row >= 0 &&
-  //           row < 10 &&
-  //           col >= 0 &&
-  //           col < 10 &&
-  //           !myBoard[row][col].details.burst &&
-  //           (lastHitShipOrientation === null ||
-  //             direction === lastHitShipOrientation)
-  //       );
-  //       console.log(validDirections, "VAlid directiosn");
-  //       if (validDirections.length === 0) {
-  //         if (lastHitShipOrientation === "horizontal") {
-  //           if (
-  //             col + 1 > 9 ||
-  //             (myBoard[row][col + 1].ship &&
-  //               myBoard[row][col + 1].details.burst)
-  //           ) {
-  //             for (let i = col - 1; i >= 0; i--) {
-  //               if (!myBoard[row][i].details.burst) {
-  //                 validDirections.push({
-  //                   row,
-  //                   col: i,
-  //                   direction: "horizontal",
-  //                 });
-  //                 break;
-  //               }
-  //             }
-  //           } else {
-  //             for (let i = col + 1; i < 10; i++) {
-  //               if (!myBoard[row][i].details.burst) {
-  //                 validDirections.push({
-  //                   row,
-  //                   col: i,
-  //                   direction: "horizontal",
-  //                 });
-  //                 break;
-  //               }
-  //             }
-  //           }
-  //         } else {
-  //           if (
-  //             row + 1 > 9 ||
-  //             (myBoard[row + 1][col].ship &&
-  //               myBoard[row + 1][col].details.burst)
-  //           ) {
-  //             for (let i = row - 1; i >= 0; i--) {
-  //               if (!myBoard[i][col].details.burst) {
-  //                 validDirections.push({ row: i, col, direction: "vertical" });
-  //                 break;
-  //               }
-  //             }
-  //           } else {
-  //             for (let i = row + 1; i < 10; i++) {
-  //               if (!myBoard[i][col].details.burst) {
-  //                 validDirections.push({ row: i, col, direction: "vertical" });
-  //                 break;
-  //               }
-  //             }
-  //           }
-  //         }
-  //       }
-  //       if (validDirections.length > 0) {
-  //         const { row, col, direction } =
-  //           validDirections[Math.floor(Math.random() * validDirections.length)];
-
-  //         setMyBoard((old) => {
-  //           const newData = [...old];
-  //           const updatedElement = { ...newData[row][col] };
-  //           updatedElement.details.burst = true;
-  //           newData[row][col] = updatedElement;
-  //           return newData;
-  //         });
-
-  //         if (myBoard[row][col].ship) {
-  //           lastHitShipOrientation = direction as "vertical" | "horizontal";
-  //           const shipId = handleShipBurst(row, col);
-  //           if (shipId) {
-  //             lastHitShipOrientation = null;
-  //             lastHit = null;
-  //           } else {
-  //             lastHit = { row, col };
-  //           }
-  //         } else {
-  //           lastHitShipOrientation =
-  //             direction === "vertical" ? "horizontal" : "vertical";
-  //           opponentsTurnOver = true;
-  //         }
-  //       } else {
-  //         lastHitShipOrientation =
-  //           lastHitShipOrientation === "vertical" ? "horizontal" : "vertical";
-  //       }
-  //     } else {
-  //       const row = Math.floor(Math.random() * 10);
-  //       const col = Math.floor(Math.random() * 10);
-  //       if (!myBoard[row][col].details.burst) {
-  //         setMyBoard((old) => {
-  //           const newData = [...old];
-  //           const updatedElement = { ...newData[row][col] };
-  //           updatedElement.details.burst = true;
-  //           newData[row][col] = updatedElement;
-  //           return newData;
-  //         });
-
-  //         if (myBoard[row][col].ship) {
-  //           const shipId = handleShipBurst(row, col);
-  //           if (shipId) {
-  //             lastHitShipOrientation = null;
-  //             lastHit = null;
-  //           } else {
-  //             lastHit = { row, col };
-  //           }
-  //         } else {
-  //           lastHit = null;
-  //           lastHitShipOrientation = null;
-  //           opponentsTurnOver = true;
-  //         }
-  //       } else {
-  //         continue;
-  //       }
-  //     }
-  //     setHitByOpponent(lastHit);
-  //     setHitDirection(lastHitShipOrientation);
-  //   }
-  //   setWhosTurn("player");
-  // }
-
   const [hitStack, setHitStack] = useState<
     {
       row: number;
@@ -299,7 +199,7 @@ function PlayWithRobot() {
     let lastHits = hitStack;
     let lastHit = hitStack.length > 0 ? hitStack[hitStack.length - 1] : null;
     while (!opponentsTurnOver) {
-      await sleep(550);
+      await sleep(1300);
       if (lastHit) {
         console.log(lastHit, "INISIDE LAST HIT");
         console.log(lastHits, "LAST HITS");
@@ -500,6 +400,7 @@ function PlayWithRobot() {
           });
 
           if (myBoard[row][col].ship) {
+            (oppExplotionAudioRef.current as HTMLAudioElement)?.play();
             lastHit = {
               row,
               col,
@@ -515,6 +416,7 @@ function PlayWithRobot() {
                 lastHits.length > 0 ? lastHits[lastHits.length - 1] : null;
             }
           } else {
+            (oppSplashAudioRef.current as HTMLAudioElement)?.play();
             lastHits[lastHits.length - 1].direction =
               dir === "vertical" ? "horizontal" : "vertical";
             opponentsTurnOver = true;
@@ -537,6 +439,7 @@ function PlayWithRobot() {
           });
 
           if (myBoard[row][col].ship) {
+            (oppExplotionAudioRef.current as HTMLAudioElement)?.play();
             const shipId = handleShipBurst(row, col);
             if (shipId !== null) {
               lastHits = removeShipFromHitStack(lastHits, shipId);
@@ -552,6 +455,7 @@ function PlayWithRobot() {
               lastHits.push(lastHit);
             }
           } else {
+            (oppSplashAudioRef.current as HTMLAudioElement)?.play();
             opponentsTurnOver = true;
           }
         } else {
@@ -562,6 +466,7 @@ function PlayWithRobot() {
     }
     setWhosTurn("player");
   }
+
   useEffect(() => {
     if (whosTurn === "opponent") {
       guessNextMove();
@@ -952,7 +857,6 @@ function PlayWithRobot() {
     if (!opponentBoard[rindex][cindex].ship) {
       setWhosTurn("opponent");
     }
-    return;
     setOpponentBoard((old) => {
       const newData = [...old];
       const updatedElement = { ...newData[rindex][cindex] };
@@ -962,6 +866,7 @@ function PlayWithRobot() {
     });
 
     if (opponentBoard[rindex][cindex].ship) {
+      (explotionAudioRef.current as HTMLAudioElement)?.play();
       const shipId = opponentBoard[rindex][cindex].details.id;
       const {
         length,
@@ -996,7 +901,53 @@ function PlayWithRobot() {
             return newData;
           });
       }
+    } else {
+      (splashAudioRef.current as HTMLAudioElement)?.play();
     }
+  }
+
+  function handlePlayAgain() {
+    resetMyBoard();
+    resetOpponentBoard();
+    handleRandomize();
+    setWinner(null);
+    setWhosTurn("player");
+    setGameStatus("initiating");
+  }
+
+  function removeShipFromPlacements(shipid: shipIds) {
+    setMyShipPlacement((oldData) => {
+      const newData = { ...oldData };
+      delete newData[shipid];
+      return newData;
+    });
+    setMyShips((oldData) =>
+      oldData.map((ship) =>
+        ship.id === shipid ? { ...ship, selected: false, placed: false } : ship
+      )
+    );
+    setMyBoard((oldData) => {
+      const newMyBoard = [...oldData];
+      for (let row = 0; row < 10; row++) {
+        for (let col = 0; col < 10; col++) {
+          const updatedElement = { ...oldData[row][col] };
+          if (updatedElement.details.id === shipid) {
+            updatedElement.ship = false;
+            updatedElement.details.id = "";
+            updatedElement.details.burst = false;
+            updatedElement.details.start = false;
+            updatedElement.details.end = false;
+            updatedElement.details.vertical = false;
+          }
+          newMyBoard[row][col] = updatedElement;
+        }
+      }
+      return newMyBoard;
+    });
+  }
+
+  function handleExitGame() {
+    router.push("/");
   }
 
   if (!loggedin) {
@@ -1004,198 +955,344 @@ function PlayWithRobot() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center gap-5 p-10 justify-center lg:flex-row">
-      <section className="flex flex-col-reverse gap-5 lg:flex-row items-center ">
-        <div
-          className={`flex flex-col items-start overflow-hidden ${
-            gameStatus === "initiated"
-              ? "max-h-0 lg:max-h-96 lg:max-w-0 opacity-0"
-              : "max-h-96 lg:max-h-96 lg:max-w-96"
-          } transition-all duration-[2s] ease-in-out w-full p-3`}
-        >
-          <button
-            onClick={() => {
-              resetMyBoard();
-              setDisplayShips(true);
-            }}
-            disabled={gameStatus === "initiated" || displayShips}
-            className="w-full whitespace-nowrap overflow-hidden focus:outline-none text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
-          >
-            Place Manually
-          </button>
-
-          <div
-            className={`${
-              displayShips ? "max-h-96" : "max-h-0"
-            } flex flex-col items-start overflow-hidden transition-all ease-linear duration-[2000ms] mb-2`}
-          >
-            {myShips.map((ship) => {
-              return (
-                <button
-                  key={ship.id}
-                  style={
-                    ship.selected
-                      ? { background: "blue" }
-                      : ship.placed
-                      ? { background: "red" }
-                      : {}
-                  }
-                  onClick={() => !ship.placed && handleSelectShip(ship)}
-                >
-                  {ship.id}-{ship.length}
-                </button>
-              );
-            })}
-            <button
-              onClick={(e) => {
-                resetMyBoard();
-                e.currentTarget.blur();
-              }}
-              className="w-full text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-2 focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
-            >
-              Reset
-            </button>
-          </div>
-
-          <div className="w-full flex flex-col items-start gap-2">
-            <button
-              onClick={(e) => {
-                setDisplayShips(false);
-                handleRandomize();
-                e.currentTarget.blur();
-              }}
-              className="w-full text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
-            >
-              Randomize
-            </button>
-            <button
-              onClick={(e) => {
-                e.currentTarget.blur();
-                toast.success("war begun!");
-                setGameStatus("initiated");
-              }}
-              disabled={gameStatus === "initiated"}
-              className="w-full text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
-            >
-              Start
-            </button>
+    <main className="min-h-screen flex flex-col justify-between px-10">
+      {gameStatus === "gameover" && (
+        <div className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center">
+          <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]">
+            <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
+              Game Over
+            </h1>
+            <div className="pb-5">
+              {winner === "player" ? <p>You Won!</p> : <p>You Lost</p>}
+            </div>
+            <div className="flex flex-row justify-evenly">
+              <button
+                onClick={handlePlayAgain}
+                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-300 font-medium rounded-lg px-5 py-1"
+              >
+                Play again
+              </button>
+              <button
+                onClick={handleExitGame}
+                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-300 font-medium rounded-lg px-5 py-1"
+              >
+                Exit
+              </button>
+            </div>
           </div>
         </div>
-        <div className="flex flex-col outline outline-black p-[7px] rounded-xl">
-          <h1 className="p-2 text-center">My Ships</h1>
+      )}
 
-          {myBoard.map((row: Board[], rindex: number) => (
+      {exitGame && (
+        <div className="fixed top-0 left-0 h-screen w-screen bg-black/60 flex items-center justify-center">
+          <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]">
+            <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
+              Are you sure you want to exit?
+            </h1>
+            <div className="flex flex-row justify-evenly pt-4">
+              <button
+                autoFocus={true}
+                onClick={() => setExitGame(false)}
+                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-300 font-medium rounded-lg px-5 py-1"
+              >
+                Stay
+              </button>
+              <button
+                onClick={handleExitGame}
+                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-300 font-medium rounded-lg px-5 py-1"
+              >
+                Exit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="flex grow flex-col items-center gap-5 py-10 justify-center lg:flex-row">
+        <section className="flex flex-col-reverse gap-5 lg:flex-row items-center ">
+          <div
+            className={`flex flex-col items-start overflow-hidden ${
+              gameStatus !== "initiating"
+                ? "max-h-0 lg:max-h-96 lg:max-w-0 opacity-0"
+                : "max-h-96 lg:max-h-96 lg:max-w-96"
+            } transition-all duration-[2s] ease-in-out w-full p-3`}
+          >
+            <button
+              onClick={() => {
+                resetMyBoard();
+                setDisplayShips(true);
+              }}
+              disabled={gameStatus === "initiated" || displayShips}
+              className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+            >
+              Place Manually
+            </button>
+
+            <div
+              className={`${
+                displayShips ? "max-h-96 pt-7 pb-2" : "max-h-0 p-0"
+              } flex flex-col w-full items-start gap-3 px-1 overflow-hidden transition-all ease-linear duration-[2000ms] mb-2`}
+            >
+              {myShips.map((ship) => {
+                return (
+                  <div
+                    key={ship.id}
+                    className="w-full px-5 flex flex-row items-center justify-between"
+                  >
+                    <button
+                      data-description={ship.id}
+                      className="transition-all duration-200 flex flex-row gap-[2px]"
+                      onClick={() => !ship.placed && handleSelectShip(ship)}
+                    >
+                      {Array(ship.length)
+                        .fill(null)
+                        .map((_, index) => (
+                          <div
+                            key={index}
+                            style={
+                              ship.selected
+                                ? {
+                                    backgroundColor: shipColors[ship.id],
+                                  }
+                                : ship.placed
+                                ? {
+                                    backgroundColor: shipColors[ship.id] + "1",
+                                  }
+                                : {
+                                    backgroundColor: shipColors[ship.id] + "8",
+                                  }
+                            }
+                            className={`${
+                              index === 0
+                                ? "h-[15px] w-[20px] rounded-s-full outline-black outline"
+                                : index === ship.length - 1
+                                ? "h-[15px] w-[20px] rounded-e-sm outline-black outline"
+                                : "w-[20px] h-[15px] outline-black outline"
+                            } outline-[2px]`}
+                          ></div>
+                        ))}
+                    </button>
+                    <button
+                      style={
+                        myShipPlacements[ship.id]
+                          ? { display: "block" }
+                          : { display: "none" }
+                      }
+                      onClick={() => removeShipFromPlacements(ship.id)}
+                      className="transition-all duration-200 h-[18px] text-[14px] leading-none w-[18px] flex items-center justify-center text-gray-900 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-100 font-medium rounded-md"
+                    >
+                      -{" "}
+                    </button>
+                  </div>
+                );
+              })}
+              <div className="flex flex-row items-center gap-2">
+                <button
+                  onClick={(e) => {
+                    resetMyBoard();
+                    e.currentTarget.blur();
+                  }}
+                  className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+                >
+                  Reset
+                </button>
+                <div>
+                  {vertical ? (
+                    <button
+                      onClick={() => setVertical(false)}
+                      className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+                    >
+                      vertical
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setVertical(true)}
+                      className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+                    >
+                      horizontal
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="w-full flex flex-col items-start gap-2">
+              <button
+                onClick={(e) => {
+                  setDisplayShips(false);
+                  handleRandomize();
+                  e.currentTarget.blur();
+                }}
+                className="transition-all duration-200 w-full text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+              >
+                Randomize
+              </button>
+              <button
+                onClick={(e) => {
+                  e.currentTarget.blur();
+                  toast.success("war begun!");
+                  setGameStatus("initiated");
+                }}
+                autoFocus={true}
+                disabled={gameStatus === "initiated"}
+                className="transition-all duration-200 w-full focus:outline-none text-white bg-neutral-800 hover:bg-neutral-700 focus:ring-4  focus:ring-neutral-300 font-medium rounded-lg px-5 py-1"
+              >
+                Start
+              </button>
+            </div>
+          </div>
+          <div className="flex flex-col outline outline-black p-[7px] rounded-xl">
+            <h1 className="p-2 text-center">My Ships</h1>
+
+            {myBoard.map((row: Board[], rindex: number) => (
+              <div
+                className="flex flex-row"
+                key={`mb-r-${rindex}`}
+                id={`mb-r-${rindex}`}
+              >
+                {row.map((ele: Board, cindex) => (
+                  <div
+                    className="h-[30px] w-[30px] flex items-center justify-center"
+                    key={`mb-r-${rindex}-c-${cindex}`}
+                    id={`mb-r-${rindex}-c-${cindex}`}
+                    onMouseEnter={() =>
+                      handleMouseEnterCell({ rindex, cindex })
+                    }
+                    onClick={() =>
+                      handlePlaceShip({ ship: ele, cindex, rindex })
+                    }
+                  >
+                    <div
+                      style={
+                        ele.validHover === null
+                          ? ele.ship
+                            ? ele.details.burst
+                              ? { background: "rgba(7,0,27,0.8)" }
+                              : {
+                                  background:
+                                    shipColors[ele.details.id as string],
+                                }
+                            : ele.details.burst
+                            ? { background: "rgba(79,79,79,0.80)" }
+                            : { background: "rgba(0,0,0,0.1)" }
+                          : ele.validHover === true
+                          ? { background: "rgba(0,0,0,0.5)" }
+                          : ele.validHover === false
+                          ? { background: "rgba(195,56,56,0.73)" }
+                          : {}
+                      }
+                      className={`${
+                        ele.ship
+                          ? ele.details.start
+                            ? ele.details.vertical
+                              ? "h-[30px] w-[25px] rounded-t-full outline-black outline"
+                              : "h-[25px] w-[30px] rounded-s-full outline-black outline"
+                            : ele.details.end
+                            ? ele.details.vertical
+                              ? "h-[30px] w-[25px] rounded-b-md outline-black outline"
+                              : "h-[25px] w-[30px] rounded-e-md outline-black outline"
+                            : ele.details.vertical
+                            ? "w-[25px] h-[30px] outline-black outline"
+                            : "w-[30px] h-[25px] outline-black outline"
+                          : "rounded-md h-[10px] w-[10px] outline-[0.01rem]"
+                      }`}
+                    ></div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="flex flex-col outline outline-black p-[7px] rounded-xl">
+          <h1 className="p-2 text-center">Opponent's Ships</h1>
+          {opponentBoard.map((row: Board[], rindex: number) => (
             <div
               className="flex flex-row"
-              key={`mb-r-${rindex}`}
-              id={`mb-r-${rindex}`}
+              id={`ob-r-${rindex}`}
+              key={`ob-r-${rindex}`}
             >
               {row.map((ele: Board, cindex) => (
                 <div
                   className="h-[30px] w-[30px] flex items-center justify-center"
-                  key={`mb-r-${rindex}-c-${cindex}`}
-                  id={`mb-r-${rindex}-c-${cindex}`}
-                  onMouseEnter={() => handleMouseEnterCell({ rindex, cindex })}
-                  onClick={() => handlePlaceShip({ ship: ele, cindex, rindex })}
+                  key={`ob-r-${rindex}-c-${cindex}`}
+                  id={`ob-r-${rindex}-c-${cindex}`}
+                  onMouseEnter={() =>
+                    !opponentBoard[rindex][cindex].details.burst &&
+                    gameStatus === "initiated" &&
+                    setCoord({ row: rindex, col: cindex })
+                  }
+                  onMouseLeave={() => setCoord(null)}
+                  onClick={() =>
+                    !opponentBoard[rindex][cindex].details.burst &&
+                    handleDropTorpedo(rindex, cindex)
+                  }
                 >
                   <div
                     style={
-                      ele.validHover === null
+                      ele.details.burst
                         ? ele.ship
-                          ? ele.details.burst
-                            ? { background: "rgba(7,0,27,0.8)" }
-                            : {
-                                background:
-                                  shipColors[ele.details.id as string],
-                              }
-                          : ele.details.burst
-                          ? { background: "rgba(79,79,79,0.80)" }
-                          : { background: "rgba(0,0,0,0.1)" }
-                        : ele.validHover === true
-                        ? { background: "rgba(0,0,0,0.5)" }
-                        : ele.validHover === false
-                        ? { background: "rgba(195,56,56,0.73)" }
-                        : {}
+                          ? {}
+                          : { background: "#000" }
+                        : { background: "rgb(0,0,0,0.1)" }
                     }
                     className={`${
-                      ele.ship
-                        ? ele.details.start
-                          ? ele.details.vertical
-                            ? "h-[30px] w-[25px] rounded-t-full outline-black outline"
-                            : "h-[25px] w-[30px] rounded-s-full outline-black outline"
-                          : ele.details.end
-                          ? ele.details.vertical
-                            ? "h-[30px] w-[25px] rounded-b-md outline-black outline"
-                            : "h-[25px] w-[30px] rounded-e-md outline-black outline"
-                          : ele.details.vertical
-                          ? "w-[25px] h-[30px] outline-black outline"
-                          : "w-[30px] h-[25px] outline-black outline"
-                        : "rounded-md h-[10px] w-[10px] outline-[0.01rem]"
+                      (!ele.ship && ele.details.burst) || !ele.details.burst
+                        ? "rounded-md h-[10px] w-[10px] outline-[0.01rem]"
+                        : ""
+                    } ${
+                      rindex === coord?.row &&
+                      cindex === coord?.col &&
+                      "ring-2 ring-black m-2"
                     }`}
-                  ></div>
+                  >
+                    {ele.ship &&
+                      ele.details.burst &&
+                      opponentsWreckedShips[ele.details.id] && <Skeleton />}
+                    {ele.ship &&
+                      ele.details.burst &&
+                      !opponentsWreckedShips[ele.details.id] && <Fire />}
+                  </div>
                 </div>
               ))}
             </div>
           ))}
-        </div>
-      </section>
+        </section>
 
-      <section className="flex flex-col outline outline-black p-[7px] rounded-xl">
-        <h1 className="p-2 text-center">Opponent's Ships</h1>
-        {opponentBoard.map((row: Board[], rindex: number) => (
-          <div
-            className="flex flex-row"
-            id={`ob-r-${rindex}`}
-            key={`ob-r-${rindex}`}
+        <audio ref={splashAudioRef} src="/audio/splash.wav"></audio>
+        <audio ref={explotionAudioRef} src="/audio/explotion.wav"></audio>
+
+        <audio ref={oppSplashAudioRef} src="/audio/splash.wav"></audio>
+        <audio ref={oppExplotionAudioRef} src="/audio/explotion.wav"></audio>
+
+        {winner === "player" && <Confetti width={width} height={height} />}
+
+        <Toaster position="bottom-center" reverseOrder={false} />
+      </div>
+      <footer className="w-full p-3 border-t border-neutral-400">
+        <div className="mx-auto w-[95%] lg:w-[860px] flex flex-row items-center justify-end gap-1">
+          {mute ? (
+            <button
+              className="transition-all duration-200 text-gray-900 hover:bg-neutral-100 focus:outline-none focus:ring-4 focus:ring-gray-200 font-medium rounded-md p-2"
+              onClick={() => setMute(false)}
+            >
+              <VolumeX />
+            </button>
+          ) : (
+            <button
+              className="transition-all duration-200 text-gray-900 hover:bg-neutral-100 focus:outline-none focus:ring-4 focus:ring-gray-200 font-medium rounded-md p-2"
+              onClick={() => setMute(true)}
+            >
+              <Volume2 />
+            </button>
+          )}
+          <button
+            className="transition-all duration-200 text-gray-900 hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 font-medium rounded-md p-2"
+            onClick={() => setExitGame(true)}
           >
-            {row.map((ele: Board, cindex) => (
-              <div
-                className="h-[30px] w-[30px] flex items-center justify-center"
-                key={`ob-r-${rindex}-c-${cindex}`}
-                id={`ob-r-${rindex}-c-${cindex}`}
-                onMouseEnter={() =>
-                  !opponentBoard[rindex][cindex].details.burst &&
-                  gameStatus === "initiated" &&
-                  setCoord({ row: rindex, col: cindex })
-                }
-                onMouseLeave={() => setCoord(null)}
-                onClick={() =>
-                  !opponentBoard[rindex][cindex].details.burst &&
-                  handleDropTorpedo(rindex, cindex)
-                }
-              >
-                <div
-                  style={
-                    ele.details.burst
-                      ? ele.ship
-                        ? {}
-                        : { background: "#000" }
-                      : { background: "rgb(0,0,0,0.1)" }
-                  }
-                  className={`${
-                    (!ele.ship && ele.details.burst) || !ele.details.burst
-                      ? "rounded-md h-[10px] w-[10px] outline-[0.01rem]"
-                      : ""
-                  } ${
-                    rindex === coord?.row &&
-                    cindex === coord?.col &&
-                    "ring-2 ring-black m-2"
-                  }`}
-                >
-                  {ele.ship &&
-                    ele.details.burst &&
-                    opponentsWreckedShips[ele.details.id] && <Skeleton />}
-                  {ele.ship &&
-                    ele.details.burst &&
-                    !opponentsWreckedShips[ele.details.id] && <Fire />}
-                </div>
-              </div>
-            ))}
-          </div>
-        ))}
-      </section>
-
-      <Toaster position="bottom-center" reverseOrder={false} />
+            <LogOut />
+          </button>
+        </div>
+      </footer>
     </main>
   );
 }

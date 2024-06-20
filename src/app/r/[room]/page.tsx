@@ -3,19 +3,17 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Cookies from "universal-cookie";
-import { Board, CustomJwtPayload, Ship } from "@/utils/types";
+import { CustomJwtPayload, displayOptions } from "@/utils/types";
 import { jwtDecode } from "jwt-decode";
-import SignUp from "@/components/dialog/signup";
-import RoomFull from "@/components/dialog/roomfull";
-import MyBoard from "@/components/battleship/myboard";
-import { initialBoardConfig } from "@/utils/board";
-import OpponentBoard from "@/components/battleship/opponentboard";
-import SelectShip from "@/components/battleship/selectship";
-import { ships } from "@/utils/ships";
+import SignUp from "@/components/dialog/SignUp";
+import RoomFull from "@/components/dialog/Roomfull";
+import MyBoard from "@/components/battleship/MyBoard";
+import OpponentBoard from "@/components/battleship/OpponentBoard";
 import toast, { Toaster } from "react-hot-toast";
-import ShareLink from "@/components/dialog/shareLink";
+import ShareLink from "@/components/dialog/ShareLink";
 import MySocket from "@/utils/socket";
-import GameOver from "@/components/dialog/gameover";
+import GameOver from "@/components/dialog/GameOver";
+import Connecting from "@/components/dialog/Connecting";
 
 const mysocket = new MySocket();
 
@@ -24,7 +22,7 @@ function Page() {
   const [whosTurn, setWhosTurn] = useState<string | null>(null);
   const [playAgain, setPlayAgain] = useState<boolean>(false);
   const [playerReady, setPlayerReady] = useState<boolean>(false);
-  const [display, setDisplay] = useState<string>("");
+  const [display, setDisplay] = useState<displayOptions>("loading");
   const [winner, setWinner] = useState<string | null>(null);
   const [gameStatus, setGameStatus] = useState<string>("initiating");
   const [nickname, setNickname] = useState<string>("");
@@ -46,6 +44,11 @@ function Page() {
     const { nickname } = jwtDecode<CustomJwtPayload>(token);
     setNickname(nickname);
     joinRoom(nickname);
+
+    setTimeout(
+      () => setDisplay((prev) => (prev === "share_link" ? "share_link" : "")),
+      3000
+    );
 
     mysocket.setRoomFullCallback(handleRoomFull);
     mysocket.setOnPlayerJoined(handlePlayerJoined);
@@ -154,41 +157,46 @@ function Page() {
   }
 
   return (
-    <main className="flex flex-col gap-5 items-center py-10 md:flex-row md:justify-center">
-      <MyBoard
-        setPlayerReady={setPlayerReady}
-        gameStatus={gameStatus}
-        mysocket={mysocket}
-        playerReady={playerReady}
-        setWhosTurn={setWhosTurn}
-      />
-      {display === "share_link" && <ShareLink room={room} />}
-      {display === "player_left" && <RoomFull />}
-      {(display === "game_won" ||
-        display === "game_lost" ||
-        display === "play_again") && (
-        <GameOver
-          room={room}
-          setGameStatus={setGameStatus}
-          setDisplay={setDisplay}
-          playAgain={playAgain}
-          setPlayAgain={setPlayAgain}
+    <main className="min-h-screen flex flex-col justify-between px-10">
+      <div className="flex grow flex-col items-center gap-5 py-10 justify-center lg:flex-row">
+        <MyBoard
+          setPlayerReady={setPlayerReady}
+          gameStatus={gameStatus}
+          winner={winner}
+          display={display}
           mysocket={mysocket}
-          message={display}
+          playerReady={playerReady}
+          setWhosTurn={setWhosTurn}
         />
-      )}
+        {display === "loading" && <Connecting />}
+        {display === "share_link" && <ShareLink room={room} />}
+        {display === "player_left" && <RoomFull />}
+        {(display === "game_won" ||
+          display === "game_lost" ||
+          display === "play_again") && (
+          <GameOver
+            room={room}
+            setGameStatus={setGameStatus}
+            setDisplay={setDisplay}
+            playAgain={playAgain}
+            setPlayAgain={setPlayAgain}
+            mysocket={mysocket}
+            message={display}
+          />
+        )}
 
-      <OpponentBoard
-        whosTurn={whosTurn}
-        mysocket={mysocket}
-        setWinner={setWinner}
-        setPlayerReady={setPlayerReady}
-        setOpponentReady={setOpponentReady}
-        gameStatus={gameStatus}
-        setWhosTurn={setWhosTurn}
-        setGameStatus={setGameStatus}
-        nickname={nickname}
-      />
+        <OpponentBoard
+          whosTurn={whosTurn}
+          mysocket={mysocket}
+          setWinner={setWinner}
+          setPlayerReady={setPlayerReady}
+          setOpponentReady={setOpponentReady}
+          gameStatus={gameStatus}
+          setWhosTurn={setWhosTurn}
+          setGameStatus={setGameStatus}
+          nickname={nickname}
+        />
+      </div>
       <Toaster position="bottom-center" reverseOrder={false} />
     </main>
   );

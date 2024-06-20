@@ -7,7 +7,9 @@ class MySocket {
   public onPlayerJoined: (data: any) => void = () => {};
   public onAttack: (data: any) => void = () => {};
   public alertFull: () => void = () => {};
-  public onPlayerLeft: (data: any) => void = () => {};
+  public onPlayAgain: (playerId: string) => void = () => {};
+  public onAcceptPlayAgain: (playerId: string) => void = () => {};
+  public onPlayerLeft: () => void = () => {};
   public onGameOver: (data: any) => void = () => {};
   public onReady: ({
     placement,
@@ -32,8 +34,8 @@ class MySocket {
     this.socket.on("gameOver", (data: any) => {
       this.onGameOver(data);
     });
-    this.socket.on("playerLeft", ({ playerId }: { playerId: string }) => {
-      this.onPlayerLeft({ playerId });
+    this.socket.on("playerLeft", () => {
+      this.onPlayerLeft();
     });
     this.socket.on(
       "ready",
@@ -47,6 +49,12 @@ class MySocket {
         this.onReady({ placement, playerId });
       }
     );
+    this.socket.on("requestPlayAgain", (playerId: string) => {
+      this.onPlayAgain(playerId);
+    });
+    this.socket.on("acceptPlayAgain", (playerId: string) => {
+      this.onAcceptPlayAgain(playerId);
+    });
     this.socket.on("dropTorpedo", (data: any) => {
       this.onAttack(data);
     });
@@ -82,7 +90,15 @@ class MySocket {
     this.socket.emit("join", { room, nickname, playerId: this.getId() });
   }
 
-  setOnPlayerLeft(callback: (data: any) => void) {
+  setOnPlayAgain(callback: (playerId: string) => void) {
+    this.onPlayAgain = callback;
+  }
+
+  setOnAcceptPlayAgain(callback: (playerId: string) => void) {
+    this.onAcceptPlayAgain = callback;
+  }
+
+  setOnPlayerLeft(callback: () => void) {
     this.onPlayerLeft = callback;
   }
 

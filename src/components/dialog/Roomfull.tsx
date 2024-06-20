@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
@@ -21,15 +22,21 @@ function RoomFull() {
   }, [timer]);
 
   return (
-    <div className="fixed top-0 left-0 z-[100] h-screen w-screen flex bg-black/60 justify-center items-center">
-      <div className="rounded-lg flex flex-col items-center justify-center bg-white p-6">
-        <div>The room is Already full!</div>
-        <p>
+    <div className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center">
+      <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]">
+        <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
+          The room is Already full!{" "}
+        </h1>
+        <div className="pb-5">
           You would be redirected automatically to home page in {timer} seconds
-        </p>
-        <button className="my-12 rounded-md text-white px-5 py-1 bg-green-600 hover:bg-green-500 disabled:bg-green-500 disabled:cursor-not-allowed">
+        </div>
+
+        <Link
+          href="/"
+          className="min-w-[120px] focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-300 font-medium rounded-lg px-5 py-1"
+        >
           Return
-        </button>
+        </Link>
       </div>
     </div>
   );

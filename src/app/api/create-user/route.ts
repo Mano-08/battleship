@@ -5,7 +5,7 @@ import CryptoJS from "crypto-js";
 
 export async function POST(req: Request) {
   try {
-    const { nickname } = await req.json();
+    const { nickname, username } = await req.json();
     // const data = { score: 0 };
     // var ciphertext = CryptoJS.AES.encrypt(
     //   JSON.stringify(data),
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     // var bytes  = CryptoJS.AES.decrypt(ciphertext, process.env.ENCRYPTION_KEY as string);
     // var decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
     const token = jwt.sign(
-      { score: 0, nickname },
+      { score: 0, nickname, username },
       process.env.JWTSECRETKEY as string,
       {
         expiresIn: "365d",

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, Inter, Karla } from "next/font/google";
+import { Karla } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
-const bricolageGrotesque = Bricolage_Grotesque({ subsets: ["latin"] });
+// Bricolage_Grotesque
+
 const karla = Karla({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Battleship",

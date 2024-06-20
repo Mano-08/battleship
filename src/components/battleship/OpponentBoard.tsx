@@ -6,7 +6,7 @@ import { shipColors } from "@/utils/ships";
 import MySocket from "@/utils/socket";
 import { Board, MyShipPlacement } from "@/utils/types";
 import { useParams } from "next/navigation";
-import React, { use, useEffect, useState } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 function OpponentBoard({
@@ -14,6 +14,7 @@ function OpponentBoard({
   mysocket,
   setOpponentReady,
   setWhosTurn,
+  setWinner,
   gameStatus,
   setPlayerReady,
   setGameStatus,
@@ -23,6 +24,7 @@ function OpponentBoard({
   mysocket: MySocket;
   gameStatus: string;
   nickname: string;
+  setWinner: React.Dispatch<React.SetStateAction<string | null>>;
   setWhosTurn: React.Dispatch<React.SetStateAction<string | null>>;
   setOpponentReady: React.Dispatch<React.SetStateAction<boolean>>;
   setPlayerReady: React.Dispatch<React.SetStateAction<boolean>>;
@@ -33,10 +35,55 @@ function OpponentBoard({
   const [opponentBoard, setOpponentBoard] = useState<Board[][]>(
     initialBoardConfig()
   );
+
+  const oppExplotionAudioRef = useRef<HTMLAudioElement | null>(null);
+  const oppSplashAudioRef = useRef<HTMLAudioElement | null>(null);
   const [coord, setCoord] = useState<{ row: number; col: number } | null>(null);
   const [wreckedShips, setWreckedShips] = useState<{ [key: string]: boolean }>(
     {}
   );
+
+  useEffect(() => {
+    if (oppExplotionAudioRef.current) {
+      oppExplotionAudioRef.current.volume = 0.2;
+    }
+    if (oppSplashAudioRef.current) {
+      oppSplashAudioRef.current.volume = 0.2;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (gameStatus === "restart") {
+      resetBoard();
+    }
+  }, [gameStatus]);
+
+  function resetBoard() {
+    setOpponentBoard((oldData) => {
+      for (let row = 0; row < 10; row++) {
+        for (let col = 0; col < 10; col++) {
+          oldData[row][col] = {
+            ship: false,
+            details: {
+              id: "noship",
+              burst: false,
+              start: false,
+              end: false,
+              vertical: false,
+            },
+
+            validHover: null,
+          };
+        }
+      }
+      return oldData;
+    });
+    setWreckedShips({});
+    setCoord(null);
+    setShipPlacement({});
+    setPlayerReady(false);
+    setOpponentReady(false);
+  }
 
   function handleOnReady({
     placement,
@@ -98,12 +145,14 @@ function OpponentBoard({
 
   useEffect(() => {
     mysocket.onReady = handleOnReady;
+    resetBoard();
   }, []);
 
   useEffect(() => {
-    if (Object.keys(wreckedShips).length === 5) {
+    if (Object.keys(wreckedShips).length === 1) {
       toast.success("You win!");
-      setGameStatus("finished");
+      setGameStatus("gameover");
+      setWinner("player");
       mysocket.send("gameOver", { room, playerId: mysocket.getId(), nickname });
     }
   }, [wreckedShips]);
@@ -129,6 +178,9 @@ function OpponentBoard({
     });
     if (!opponentBoard[rindex][cindex].ship) {
       setWhosTurn("opponent");
+      (oppSplashAudioRef.current as HTMLAudioElement)?.play();
+    } else {
+      (oppExplotionAudioRef.current as HTMLAudioElement)?.play();
     }
     setOpponentBoard((old) => {
       const newData = [...old];
@@ -229,6 +281,8 @@ function OpponentBoard({
           ))}
         </div>
       ))}
+      <audio ref={oppSplashAudioRef} src="/audio/splash.wav"></audio>
+      <audio ref={oppExplotionAudioRef} src="/audio/explotion.wav"></audio>
     </section>
   );
 }

@@ -33,10 +33,6 @@ function Hero() {
     push("/play");
   }
 
-  function enterOnlineBattlefield() {
-    push("/online");
-  }
-
   function userExist({ mode }: { mode: SignUpModes }): boolean {
     const cookies = new Cookies();
     const token = cookies.get("bt_oken");
@@ -59,12 +55,6 @@ function Hero() {
     }
   }
 
-  function handlePlayOnline() {
-    if (userExist({ mode: "signup-online" })) {
-      enterOnlineBattlefield();
-    }
-  }
-
   useEffect(() => {
     if (display) {
       document.getElementsByTagName("html")[0].style.overflowY = "hidden";
@@ -80,9 +70,6 @@ function Hero() {
       )}
       {display === "signup-solo" && (
         <SignUp setDisplay={setDisplay} callback={enterBattlefield} />
-      )}
-      {display === "signup-online" && (
-        <SignUp setDisplay={setDisplay} callback={enterOnlineBattlefield} />
       )}
 
       <div className="min-h-[85vh] w-full flex items-center justify-center">
@@ -102,13 +89,6 @@ function Hero() {
                 className="transition-all duration-200 focus:outline-none text-white bg-neutral-800 hover:bg-neutral-700 focus:ring-4  focus:ring-neutral-300 font-medium rounded-lg px-10 py-2"
               >
                 Quick Game
-              </button>
-              <button
-                onClick={handlePlayOnline}
-                type="button"
-                className="transition-all duration-200 focus:outline-none text-white bg-neutral-800 hover:bg-neutral-700 focus:ring-4  focus:ring-neutral-300 font-medium rounded-lg px-10 py-2"
-              >
-                Play Online
               </button>
               <button
                 onClick={handlePlayWithFriend}

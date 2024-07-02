@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import Cookies from "universal-cookie";
 import {
   Board,
@@ -19,22 +20,15 @@ import { Fire, Skeleton } from "@/assets/svgs";
 import { useRouter } from "next/navigation";
 import Confetti from "react-confetti";
 import useWindowSize from "react-use/lib/useWindowSize";
-import {
-  CircleArrowDown,
-  CircleArrowRight,
-  CircleArrowUp,
-  LogOut,
-  Minus,
-  RefreshCw,
-  Volume2,
-  VolumeX,
-} from "lucide-react";
+import { LogOut, Volume2, VolumeX } from "lucide-react";
 
 function PlayWithRobot() {
   const [loggedin, setLoggedin] = useState<boolean>(true);
   const [exitGame, setExitGame] = useState<boolean>(false);
   const [mute, setMute] = useState<boolean>(true);
   const router = useRouter();
+  const [score, setScore] = useState<number>(0);
+  const [username, setUsername] = useState<string>("");
   const { width, height } = useWindowSize();
 
   const splashAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -42,6 +36,7 @@ function PlayWithRobot() {
   const oppExplotionAudioRef = useRef<HTMLAudioElement | null>(null);
   const oppSplashAudioRef = useRef<HTMLAudioElement | null>(null);
 
+  const [hitCount, setHitCount] = useState<number>(0);
   const [whosTurn, setWhosTurn] = useState<"player" | "opponent">("player");
   const [winner, setWinner] = useState<"player" | "opponent" | null>(null);
   const [gameStatus, setGameStatus] = useState<
@@ -56,14 +51,6 @@ function PlayWithRobot() {
   const [randomBoard, setRandomBoard] = useState<MyShipPlacement>({});
   const [selectedShip, setSelectedShip] = useState<null | Ship>(null);
   const [displayShips, setDisplayShips] = useState<boolean>(false);
-  const [hitDirection, setHitDirection] = useState<
-    "vertical" | "horizontal" | null
-  >(null);
-
-  const [hitByOpponent, setHitByOpponent] = useState<{
-    row: number;
-    col: number;
-  } | null>(null);
   const [myShipPlacements, setMyShipPlacement] = useState<MyShipPlacement>({});
   const [opponentShipPlacement, setOpponentsShipPlacement] =
     useState<MyShipPlacement>({});
@@ -85,8 +72,11 @@ function PlayWithRobot() {
       setLoggedin(false);
       return;
     }
-    const { nickname } = jwtDecode<CustomJwtPayload>(token);
+    const { nickname, score, username } = jwtDecode<CustomJwtPayload>(token);
+    console.log(nickname, score, username);
     setNickname(nickname);
+    setUsername(username);
+    setScore(score);
 
     if (splashAudioRef.current) {
       splashAudioRef.current.volume = 0.2;
@@ -100,23 +90,31 @@ function PlayWithRobot() {
     if (oppSplashAudioRef.current) {
       oppSplashAudioRef.current.volume = 0.2;
     }
-
-    // Initialize Board with Random Ship Placement
-    resetMyBoard();
-    const randomCoord = getRandomCoord();
-    setRandomBoard(randomCoord);
-    setMyShipPlacement(randomCoord);
-
-    resetOpponentBoard();
-    const randomOpponentCoord = getRandomCoord();
-    setOpponentsShipPlacement(randomOpponentCoord);
-    setRandomOpponentBoard(randomOpponentCoord);
   }, []);
+
+  useEffect(() => {
+    if (gameStatus === "initiating") {
+      setHitCount(0);
+      // Initialize Board with Random Ship Placement
+      resetMyBoard();
+      const randomCoord = getRandomCoord();
+      setRandomBoard(randomCoord);
+      setMyShipPlacement(randomCoord);
+      setMyWreckedShips({});
+
+      resetOpponentBoard();
+      const randomOpponentCoord = getRandomCoord();
+      setOpponentsShipPlacement(randomOpponentCoord);
+      setRandomOpponentBoard(randomOpponentCoord);
+      setOpponentsWreckedShips({});
+    }
+  }, [gameStatus]);
 
   useEffect(() => {
     if (Object.keys(opponentsWreckedShips).length === 1) {
       setWinner("player");
       setGameStatus("gameover");
+      updateScoreIntoCookie();
     } else if (Object.keys(myWreckedShips).length === 1) {
       setWinner("opponent");
       setGameStatus("gameover");
@@ -129,6 +127,26 @@ function PlayWithRobot() {
         resolve();
       }, duration);
     });
+  }
+
+  async function updateScoreIntoCookie() {
+    const bonus = hitCount <= 30 ? 250 : 100;
+    const newScore = score + bonus;
+    setScore(newScore);
+    const res = await fetch("/api/update-score", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        newScore,
+        nickname,
+        username,
+      }),
+    });
+    if (res.status === 200) {
+      console.log(res.json());
+    }
   }
 
   function handleShipBurst(row: number, col: number) {
@@ -306,86 +324,6 @@ function PlayWithRobot() {
               }
             }
           }
-
-          // if (direction === "horizontal") {
-          //   let curr = col;
-          //   if (lastHits.length > 1) {
-          //     const secondLastHit = lastHits[lastHits.length - 2];
-          //     if (secondLastHit.col < col) {
-          //       curr = col - 1;
-          //       while (
-          //         curr >= 0 &&
-          //         myBoard[row][curr].details.burst &&
-          //         myBoard[row][curr].ship
-          //       ) {
-          //         curr = curr - 1;
-          //       }
-          //     } else {
-          //       curr = col + 1;
-          //       while (
-          //         curr < 10 &&
-          //         myBoard[row][curr].details.burst &&
-          //         myBoard[row][curr].ship
-          //       ) {
-          //         curr = curr + 1;
-          //       }
-          //     }
-
-          //     if (curr >= 0 && curr < 10 && !myBoard[row][curr].details.burst) {
-          //       validDirections.push({
-          //         row: row,
-          //         col: curr,
-          //         dir: "horizontal",
-          //       });
-          //     } else {
-          //       lastHits[lastHits.length - 1] = {
-          //         ...lastHit,
-          //         direction: "vertical",
-          //       };
-          //       lastHit = lastHits[lastHits.length - 1];
-          //       continue;
-          //     }
-          //   }
-          // } else {
-          //   let curr = row;
-          //   if (lastHits.length > 1) {
-          //     const secondLastHit = lastHits[lastHits.length - 2];
-          //     if (secondLastHit.row < row) {
-          //       curr = row - 1;
-          //       while (
-          //         curr >= 0 &&
-          //         myBoard[curr][col].details.burst &&
-          //         myBoard[curr][col].ship
-          //       ) {
-          //         curr = curr - 1;
-          //       }
-          //     } else {
-          //       curr = row + 1;
-          //       while (
-          //         curr < 10 &&
-          //         myBoard[curr][col].details.burst &&
-          //         myBoard[curr][col].ship
-          //       ) {
-          //         curr = curr + 1;
-          //       }
-          //     }
-
-          //     if (curr >= 0 && curr < 10 && !myBoard[curr][col].details.burst) {
-          //       validDirections.push({
-          //         row: curr,
-          //         col: col,
-          //         dir: "vertical",
-          //       });
-          //     } else {
-          //       lastHits[lastHits.length - 1] = {
-          //         ...lastHit,
-          //         direction: "horizontal",
-          //       };
-          //       lastHit = lastHits[lastHits.length - 1];
-          //       continue;
-          //     }
-          //   }
-          // }
         }
         if (validDirections.length > 0) {
           const { row, col, dir } =
@@ -400,7 +338,7 @@ function PlayWithRobot() {
           });
 
           if (myBoard[row][col].ship) {
-            (oppExplotionAudioRef.current as HTMLAudioElement)?.play();
+            !mute && (oppExplotionAudioRef.current as HTMLAudioElement)?.play();
             lastHit = {
               row,
               col,
@@ -416,7 +354,7 @@ function PlayWithRobot() {
                 lastHits.length > 0 ? lastHits[lastHits.length - 1] : null;
             }
           } else {
-            (oppSplashAudioRef.current as HTMLAudioElement)?.play();
+            !mute && (oppSplashAudioRef.current as HTMLAudioElement)?.play();
             lastHits[lastHits.length - 1].direction =
               dir === "vertical" ? "horizontal" : "vertical";
             opponentsTurnOver = true;
@@ -439,7 +377,7 @@ function PlayWithRobot() {
           });
 
           if (myBoard[row][col].ship) {
-            (oppExplotionAudioRef.current as HTMLAudioElement)?.play();
+            !mute && (oppExplotionAudioRef.current as HTMLAudioElement)?.play();
             const shipId = handleShipBurst(row, col);
             if (shipId !== null) {
               lastHits = removeShipFromHitStack(lastHits, shipId);
@@ -455,7 +393,7 @@ function PlayWithRobot() {
               lastHits.push(lastHit);
             }
           } else {
-            (oppSplashAudioRef.current as HTMLAudioElement)?.play();
+            !mute && (oppSplashAudioRef.current as HTMLAudioElement)?.play();
             opponentsTurnOver = true;
           }
         } else {
@@ -857,6 +795,8 @@ function PlayWithRobot() {
     if (!opponentBoard[rindex][cindex].ship) {
       setWhosTurn("opponent");
     }
+
+    setHitCount((prev) => prev + 1);
     setOpponentBoard((old) => {
       const newData = [...old];
       const updatedElement = { ...newData[rindex][cindex] };
@@ -866,7 +806,7 @@ function PlayWithRobot() {
     });
 
     if (opponentBoard[rindex][cindex].ship) {
-      (explotionAudioRef.current as HTMLAudioElement)?.play();
+      !mute && (explotionAudioRef.current as HTMLAudioElement)?.play();
       const shipId = opponentBoard[rindex][cindex].details.id;
       const {
         length,
@@ -902,17 +842,14 @@ function PlayWithRobot() {
           });
       }
     } else {
-      (splashAudioRef.current as HTMLAudioElement)?.play();
+      !mute && (splashAudioRef.current as HTMLAudioElement)?.play();
     }
   }
 
   function handlePlayAgain() {
-    resetMyBoard();
-    resetOpponentBoard();
-    handleRandomize();
     setWinner(null);
-    setWhosTurn("player");
     setGameStatus("initiating");
+    setWhosTurn("player");
   }
 
   function removeShipFromPlacements(shipid: shipIds) {
@@ -946,10 +883,6 @@ function PlayWithRobot() {
     });
   }
 
-  function handleExitGame() {
-    router.push("/");
-  }
-
   if (!loggedin) {
     return <SignUp setDisplay={null} callback={handleLoggedIn} />;
   }
@@ -958,6 +891,7 @@ function PlayWithRobot() {
     <main className="min-h-screen flex flex-col justify-between px-10">
       {gameStatus === "gameover" && (
         <div className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center">
+          {winner === "player" && <Confetti width={width} height={height} />}
           <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]">
             <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
               Game Over
@@ -967,17 +901,18 @@ function PlayWithRobot() {
             </div>
             <div className="flex flex-row justify-evenly">
               <button
+                autoFocus={true}
                 onClick={handlePlayAgain}
                 className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-300 font-medium rounded-lg px-5 py-1"
               >
                 Play again
               </button>
-              <button
-                onClick={handleExitGame}
+              <Link
+                href="/"
                 className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-300 font-medium rounded-lg px-5 py-1"
               >
                 Exit
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -987,8 +922,9 @@ function PlayWithRobot() {
         <div className="fixed top-0 left-0 h-screen w-screen bg-black/60 flex items-center justify-center">
           <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]">
             <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
-              Are you sure you want to exit?
+              Exit Game
             </h1>
+            <p className="p-2">Are you sure you want to exit?</p>
             <div className="flex flex-row justify-evenly pt-4">
               <button
                 autoFocus={true}
@@ -997,16 +933,17 @@ function PlayWithRobot() {
               >
                 Stay
               </button>
-              <button
-                onClick={handleExitGame}
+              <Link
+                href="/"
                 className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-300 font-medium rounded-lg px-5 py-1"
               >
                 Exit
-              </button>
+              </Link>
             </div>
           </div>
         </div>
       )}
+
       <div className="flex grow flex-col items-center gap-5 py-10 justify-center lg:flex-row">
         <section className="flex flex-col-reverse gap-5 lg:flex-row items-center ">
           <div
@@ -1264,33 +1201,37 @@ function PlayWithRobot() {
         <audio ref={oppSplashAudioRef} src="/audio/splash.wav"></audio>
         <audio ref={oppExplotionAudioRef} src="/audio/explotion.wav"></audio>
 
-        {winner === "player" && <Confetti width={width} height={height} />}
-
         <Toaster position="bottom-center" reverseOrder={false} />
       </div>
       <footer className="w-full p-3 border-t border-neutral-400">
-        <div className="mx-auto w-[95%] lg:w-[860px] flex flex-row items-center justify-end gap-1">
-          {mute ? (
+        <div className="mx-auto w-[95%] lg:w-[860px] flex flex-row items-center justify-between gap-1">
+          <p>
+            score: <strong>{score}</strong>
+          </p>
+
+          <div className="flex flex-row items-center gap-2">
+            {mute ? (
+              <button
+                className="transition-all duration-200 text-gray-900 hover:bg-neutral-100 focus:outline-none focus:ring-4 focus:ring-gray-200 font-medium rounded-md p-2"
+                onClick={() => setMute(false)}
+              >
+                <VolumeX />
+              </button>
+            ) : (
+              <button
+                className="transition-all duration-200 text-gray-900 hover:bg-neutral-100 focus:outline-none focus:ring-4 focus:ring-gray-200 font-medium rounded-md p-2"
+                onClick={() => setMute(true)}
+              >
+                <Volume2 />
+              </button>
+            )}
             <button
-              className="transition-all duration-200 text-gray-900 hover:bg-neutral-100 focus:outline-none focus:ring-4 focus:ring-gray-200 font-medium rounded-md p-2"
-              onClick={() => setMute(false)}
+              className="transition-all duration-200 text-gray-900 hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 font-medium rounded-md p-2"
+              onClick={() => setExitGame(true)}
             >
-              <VolumeX />
+              <LogOut />
             </button>
-          ) : (
-            <button
-              className="transition-all duration-200 text-gray-900 hover:bg-neutral-100 focus:outline-none focus:ring-4 focus:ring-gray-200 font-medium rounded-md p-2"
-              onClick={() => setMute(true)}
-            >
-              <Volume2 />
-            </button>
-          )}
-          <button
-            className="transition-all duration-200 text-gray-900 hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 font-medium rounded-md p-2"
-            onClick={() => setExitGame(true)}
-          >
-            <LogOut />
-          </button>
+          </div>
         </div>
       </footer>
     </main>

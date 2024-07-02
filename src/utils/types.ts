@@ -2,7 +2,11 @@ import { JwtPayload } from "jwt-decode";
 
 export interface CustomJwtPayload extends JwtPayload {
   nickname: string;
+  username: string;
+  score: number;
 }
+
+export type SignUpModes = "signup-multiplayer" | "signup-solo";
 
 export type shipIds =
   | "carrier"

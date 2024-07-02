@@ -11,11 +11,21 @@ html {
   box-sizing: border-box;
 }
 
-.noise {
-  /* filter: contrast(100%) brightness(100%); */
+/* .noise {
   background: linear-gradient(
       132deg,
       rgba(255, 253, 255, 0.64),
+      rgba(255, 250, 254, 0.64)
+    ),
+    url(./../../public/noise.svg);
+} */
+
+.noise {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(
+      90deg,
+      rgba(219, 219, 255, 0.64),
       rgba(255, 250, 254, 0.64)
     ),
     url(./../../public/noise.svg);

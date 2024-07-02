@@ -6,7 +6,6 @@ import MySocket from "@/utils/socket";
 import {
   Board,
   MyShipPlacement,
-  RandomPlacement,
   Ship,
   displayOptions,
   shipIds,
@@ -24,6 +23,7 @@ function MyBoard({
   display,
   winner,
   setWhosTurn,
+  mute,
   setPlayerReady,
 }: {
   gameStatus: string;
@@ -31,6 +31,7 @@ function MyBoard({
   display: displayOptions;
   winner: string | null;
   playerReady: boolean;
+  mute: boolean;
   setPlayerReady: React.Dispatch<React.SetStateAction<boolean>>;
   setWhosTurn: React.Dispatch<React.SetStateAction<string | null>>;
 }) {
@@ -138,9 +139,9 @@ function MyBoard({
       setWhosTurn("player");
     }
     if (myBoard[rindex][cindex].ship) {
-      (explotionAudioRef.current as HTMLAudioElement)?.play();
+      !mute && (explotionAudioRef.current as HTMLAudioElement)?.play();
     } else {
-      (splashAudioRef.current as HTMLAudioElement)?.play();
+      !mute && (splashAudioRef.current as HTMLAudioElement)?.play();
     }
     setMyBoard((oldData) => {
       const newData = [...oldData];

@@ -111,11 +111,19 @@ function PlayWithRobot() {
   }, [gameStatus]);
 
   useEffect(() => {
-    if (Object.keys(opponentsWreckedShips).length === 1) {
+    function handleEscape(e: Event) {
+      if ((e as KeyboardEvent).key === "Escape" && exitGame) setExitGame(false);
+    }
+    document.addEventListener("keyup", handleEscape);
+    return () => document.removeEventListener("keyup", handleEscape);
+  }, []);
+
+  useEffect(() => {
+    if (Object.keys(opponentsWreckedShips).length === 5) {
       setWinner("player");
       setGameStatus("gameover");
       updateScoreIntoCookie();
-    } else if (Object.keys(myWreckedShips).length === 1) {
+    } else if (Object.keys(myWreckedShips).length === 5) {
       setWinner("opponent");
       setGameStatus("gameover");
     }
@@ -888,11 +896,11 @@ function PlayWithRobot() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col justify-between px-10">
+    <main className="min-h-screen flex flex-col justify-between px-5 lg:px-10">
       {gameStatus === "gameover" && (
         <div className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center">
           {winner === "player" && <Confetti width={width} height={height} />}
-          <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]">
+          <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-orange-50 w-[90vw] lg:w-[400px]">
             <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
               Game Over
             </h1>
@@ -903,13 +911,13 @@ function PlayWithRobot() {
               <button
                 autoFocus={true}
                 onClick={handlePlayAgain}
-                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-300 font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-200 font-medium rounded-lg px-5 py-1"
               >
                 Play again
               </button>
               <Link
                 href="/"
-                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-300 font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-200 font-medium rounded-lg px-5 py-1"
               >
                 Exit
               </Link>
@@ -920,7 +928,7 @@ function PlayWithRobot() {
 
       {exitGame && (
         <div className="fixed top-0 left-0 h-screen w-screen bg-black/60 flex items-center justify-center">
-          <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]">
+          <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-orange-50 w-[90vw] lg:w-[400px]">
             <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
               Exit Game
             </h1>
@@ -929,13 +937,13 @@ function PlayWithRobot() {
               <button
                 autoFocus={true}
                 onClick={() => setExitGame(false)}
-                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-300 font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-200 font-medium rounded-lg px-5 py-1"
               >
                 Stay
               </button>
               <Link
                 href="/"
-                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-300 font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-200 font-medium rounded-lg px-5 py-1"
               >
                 Exit
               </Link>
@@ -944,14 +952,14 @@ function PlayWithRobot() {
         </div>
       )}
 
-      <div className="flex grow flex-col items-center gap-5 py-10 justify-center lg:flex-row">
+      <div className="flex grow flex-col items-center gap-6 py-10 justify-center lg:flex-row">
         <section className="flex flex-col-reverse gap-5 lg:flex-row items-center ">
           <div
-            className={`flex flex-col items-start overflow-hidden ${
+            className={`flex flex-col gap-0.5 items-start overflow-hidden ${
               gameStatus !== "initiating"
-                ? "max-h-0 lg:max-h-96 lg:max-w-0 opacity-0"
-                : "max-h-96 lg:max-h-96 lg:max-w-96"
-            } transition-all duration-[2s] ease-in-out w-full p-3`}
+                ? "max-h-0 lg:max-h-96 lg:max-w-0 opacity-0 py-0"
+                : "max-h-96 lg:max-h-96 lg:max-w-96 py-3"
+            } transition-all duration-[2s] ease-in-out w-full px-3`}
           >
             <button
               onClick={() => {
@@ -959,7 +967,7 @@ function PlayWithRobot() {
                 setDisplayShips(true);
               }}
               disabled={gameStatus === "initiated" || displayShips}
-              className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+              className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black hover:bg-orange-200 outline outline-black font-medium rounded-lg px-5 py-1"
             >
               Place Manually
             </button>
@@ -1015,7 +1023,7 @@ function PlayWithRobot() {
                           : { display: "none" }
                       }
                       onClick={() => removeShipFromPlacements(ship.id)}
-                      className="transition-all duration-200 h-[18px] text-[14px] leading-none w-[18px] flex items-center justify-center text-gray-900 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-100 font-medium rounded-md"
+                      className="transition-all duration-200 h-[18px] text-[14px] leading-none w-[18px] flex items-center justify-center text-gray-900 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-200 font-medium rounded-md"
                     >
                       -{" "}
                     </button>
@@ -1028,7 +1036,7 @@ function PlayWithRobot() {
                     resetMyBoard();
                     e.currentTarget.blur();
                   }}
-                  className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+                  className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
                 >
                   Reset
                 </button>
@@ -1036,14 +1044,14 @@ function PlayWithRobot() {
                   {vertical ? (
                     <button
                       onClick={() => setVertical(false)}
-                      className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+                      className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
                     >
                       vertical
                     </button>
                   ) : (
                     <button
                       onClick={() => setVertical(true)}
-                      className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+                      className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
                     >
                       horizontal
                     </button>
@@ -1052,14 +1060,14 @@ function PlayWithRobot() {
               </div>
             </div>
 
-            <div className="w-full flex flex-col items-start gap-2">
+            <div className="w-full flex flex-col items-start gap-3">
               <button
                 onClick={(e) => {
                   setDisplayShips(false);
                   handleRandomize();
                   e.currentTarget.blur();
                 }}
-                className="transition-all duration-200 w-full text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black hover:bg-orange-200 outline outline-black font-medium rounded-lg px-5 py-1"
               >
                 Randomize
               </button>
@@ -1071,13 +1079,23 @@ function PlayWithRobot() {
                 }}
                 autoFocus={true}
                 disabled={gameStatus === "initiated"}
-                className="transition-all duration-200 w-full focus:outline-none text-white bg-neutral-800 hover:bg-neutral-700 focus:ring-4  focus:ring-neutral-300 font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden text-white bg-black hover:bg-neutral-800 outline outline-black font-medium rounded-lg px-5 py-1"
               >
                 Start
               </button>
             </div>
           </div>
-          <div className="flex flex-col outline outline-black p-[7px] rounded-xl">
+          <div
+            style={{
+              outlineWidth:
+                gameStatus === "initiated"
+                  ? whosTurn === "opponent"
+                    ? "4px"
+                    : ""
+                  : "",
+            }}
+            className="flex flex-col outline outline-black p-[7px] rounded-xl transition-all duration-300"
+          >
             <h1 className="p-2 text-center">My Ships</h1>
 
             {myBoard.map((row: Board[], rindex: number) => (
@@ -1140,7 +1158,19 @@ function PlayWithRobot() {
           </div>
         </section>
 
-        <section className="flex flex-col outline outline-black p-[7px] rounded-xl">
+        <section
+          style={{
+            outlineWidth:
+              gameStatus === "initiated"
+                ? whosTurn === "player"
+                  ? "4px"
+                  : ""
+                : "",
+          }}
+          className={`${
+            gameStatus === "initiating" && "hidden"
+          } lg:flex flex-col outline outline-black p-[7px] rounded-xl transition-all duration-300`}
+        >
           <h1 className="p-2 text-center">Opponent's Ships</h1>
           {opponentBoard.map((row: Board[], rindex: number) => (
             <div
@@ -1204,7 +1234,7 @@ function PlayWithRobot() {
         <Toaster position="bottom-center" reverseOrder={false} />
       </div>
       <footer className="w-full p-3 border-t border-neutral-400">
-        <div className="mx-auto w-[95%] lg:w-[860px] flex flex-row items-center justify-between gap-1">
+        <div className="mx-auto w-full lg:w-[860px] flex flex-row items-center justify-between gap-1">
           <p>
             score: <strong>{score}</strong>
           </p>
@@ -1212,21 +1242,21 @@ function PlayWithRobot() {
           <div className="flex flex-row items-center gap-2">
             {mute ? (
               <button
-                className="transition-all duration-200 text-gray-900 hover:bg-neutral-100 focus:outline-none focus:ring-4 focus:ring-gray-200 font-medium rounded-md p-2"
+                className="transition-all duration-200 text-gray-900 hover:bg-orange-100 focus:outline-none focus:ring-4 focus:ring-orange-200 font-medium rounded-md p-2"
                 onClick={() => setMute(false)}
               >
                 <VolumeX />
               </button>
             ) : (
               <button
-                className="transition-all duration-200 text-gray-900 hover:bg-neutral-100 focus:outline-none focus:ring-4 focus:ring-gray-200 font-medium rounded-md p-2"
+                className="transition-all duration-200 text-gray-900 hover:bg-orange-100 focus:outline-none focus:ring-4 focus:ring-orange-200 font-medium rounded-md p-2"
                 onClick={() => setMute(true)}
               >
                 <Volume2 />
               </button>
             )}
             <button
-              className="transition-all duration-200 text-gray-900 hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 font-medium rounded-md p-2"
+              className="transition-all duration-200 text-gray-900 hover:bg-red-100 focus:outline-none focus:ring-4 focus:ring-red-200 font-medium rounded-md p-2"
               onClick={() => setExitGame(true)}
             >
               <LogOut />

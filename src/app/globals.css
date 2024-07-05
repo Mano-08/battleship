@@ -2,7 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --orange: rgba(255, 245, 220, 0.64);
+}
+
 html {
+  width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
   width: 100vw;
   overflow-x: hidden;
 }
@@ -11,22 +20,11 @@ html {
   box-sizing: border-box;
 }
 
-/* .noise {
+.noise {
   background: linear-gradient(
       132deg,
-      rgba(255, 253, 255, 0.64),
-      rgba(255, 250, 254, 0.64)
-    ),
-    url(./../../public/noise.svg);
-} */
-
-.noise {
-  height: 100%;
-  width: 100%;
-  background: linear-gradient(
-      90deg,
-      rgba(219, 219, 255, 0.64),
-      rgba(255, 250, 254, 0.64)
+      rgba(255, 245, 220, 0.64),
+      rgba(255, 245, 220, 0.64)
     ),
     url(./../../public/noise.svg);
 }

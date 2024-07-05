@@ -6,6 +6,7 @@ import Link from "next/link";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
 import { CustomJwtPayload } from "@/utils/types";
+import { Anchor } from "lucide-react";
 
 function Navbar() {
   const [nickname, setNickname] = useState<string>("");
@@ -22,9 +23,11 @@ function Navbar() {
   }, []);
 
   return (
-    <header className="h-[10vh] lg:h-auto w-full py-2 md:py-5">
-      <nav className="flex flex-row justify-between items-center">
-        <Link href="/">BATTLESHIP</Link>
+    <header className="w-full p-3 border-t border-neutral-400 h-[10vh] lg:h-auto py-2 md:py-5">
+      <nav className="mx-auto w-[95%] lg:w-[860px] gap-1 flex flex-row justify-between items-center">
+        <Link href="/">
+          <Anchor />
+        </Link>
         <div className="flex flex-row gap-3 items-end">
           {nickname !== "" && (
             <div>

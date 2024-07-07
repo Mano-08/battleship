@@ -84,7 +84,7 @@ function Hero() {
               Dominate the seas, one battle at a time <br />
               Sink your enemies before they sink you!
             </p>
-            <div className="grid grid-rows-2 lg:grid-cols-2 gap-4 font-semibold">
+            <div className="grid grid-rows-2 grid-cols-1  lg:grid-cols-2 lg:grid-rows-1 gap-4 font-semibold">
               <button
                 onClick={handlePlayWithFriend}
                 type="button"
@@ -102,18 +102,19 @@ function Hero() {
             </div>
           </div>
 
-          <div className="relative flex grow h-[230px] lg:h-auto lg:w-auto w-full">
+          <div className="relative flex flex-row items-center w-full lg:w-auto">
             <img
               src={OppImage.src}
               alt="battle ship"
-              className="absolute z-[300] -rotate-3 lg:translate-x-1/2 bottom-12  lg:translate-y-1/2 h-[230px] lg:h-[300px] w-auto bg-[--orange] rounded-lg overflow-hidden"
+              className="relative z-[200] hover:scale-105 transition-all duration-1000 -rotate-3 h-[230px] lg:h-[320px] w-auto bg-[--orange] rounded-lg overflow-hidden"
             />
             <img
               src={PlayerImage.src}
               alt="battle ship"
-              className="absolute z-[300] lg:translate-x-1/2 lg:translate-y-1/2 left-32  bottom-0 rotate-12 h-[230px] lg:h-[300px] w-auto bg-[--orange] rounded-lg overflow-hidden"
+              className="absolute hover:scale-105 transition-all duration-1000 z-[300] left-36  bottom-0 rotate-12 h-[230px] lg:h-[320px] w-auto bg-[--orange] rounded-lg overflow-hidden"
             />
           </div>
+          <span></span>
         </div>
       </div>
     </>

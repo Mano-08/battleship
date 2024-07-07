@@ -3,12 +3,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Cookies from "universal-cookie";
+
 import {
   Board,
   CustomJwtPayload,
+  defaultUserData,
   MyShipPlacement,
   Ship,
   shipIds,
+  UserData,
 } from "@/utils/types";
 import { jwtDecode } from "jwt-decode";
 import SignUp from "@/components/dialog/SignUp";
@@ -17,18 +20,17 @@ import { shipColors, ships } from "@/utils/ships";
 import toast, { Toaster } from "react-hot-toast";
 import { getRandomCoord } from "@/helper/randomize";
 import { Fire, Skeleton } from "@/assets/svgs";
-import { useRouter } from "next/navigation";
 import Confetti from "react-confetti";
 import useWindowSize from "react-use/lib/useWindowSize";
 import { LogOut, Volume2, VolumeX } from "lucide-react";
+import { updateScoreIntoCookie } from "@/utils/utils";
 
 function PlayWithRobot() {
   const [loggedin, setLoggedin] = useState<boolean>(true);
   const [exitGame, setExitGame] = useState<boolean>(false);
   const [mute, setMute] = useState<boolean>(true);
-  const router = useRouter();
-  const [score, setScore] = useState<number>(0);
-  const [username, setUsername] = useState<string>("");
+  // const [score, setScore] = useState<number>(0);
+  // const [username, setUsername] = useState<string>("");
   const { width, height } = useWindowSize();
 
   const splashAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -42,7 +44,7 @@ function PlayWithRobot() {
   const [gameStatus, setGameStatus] = useState<
     "initiating" | "initiated" | "gameover"
   >("initiating");
-  const [nickname, setNickname] = useState<string>("");
+  // const [nickname, setNickname] = useState<string>("");
   const [myBoard, setMyBoard] = useState<Board[][]>(initialBoardConfig());
   const [vertical, setVertical] = useState<boolean>(false);
   const [myShips, setMyShips] = useState<Ship[]>(ships);
@@ -50,7 +52,11 @@ function PlayWithRobot() {
     useState<MyShipPlacement>({});
   const [randomBoard, setRandomBoard] = useState<MyShipPlacement>({});
   const [selectedShip, setSelectedShip] = useState<null | Ship>(null);
+  // const [gmail, setGmail] = useState<null | string>(null);
   const [displayShips, setDisplayShips] = useState<boolean>(false);
+  // const [googleSignIn, setGoogleSignIn] = useState<boolean>(false);
+  const [userData, setUserData] = useState<UserData>(defaultUserData);
+
   const [myShipPlacements, setMyShipPlacement] = useState<MyShipPlacement>({});
   const [opponentShipPlacement, setOpponentsShipPlacement] =
     useState<MyShipPlacement>({});
@@ -65,18 +71,16 @@ function PlayWithRobot() {
     [key: string]: boolean;
   }>({});
 
+  const cookies = new Cookies();
+
   useEffect(() => {
-    const cookies = new Cookies();
     const token = cookies.get("bt_oken");
     if (!token) {
       setLoggedin(false);
       return;
     }
-    const { nickname, score, username } = jwtDecode<CustomJwtPayload>(token);
-    console.log(nickname, score, username);
-    setNickname(nickname);
-    setUsername(username);
-    setScore(score);
+    const dataFromToken = jwtDecode<CustomJwtPayload>(token);
+    setUserData(dataFromToken);
 
     if (splashAudioRef.current) {
       splashAudioRef.current.volume = 0.2;
@@ -122,7 +126,11 @@ function PlayWithRobot() {
     if (Object.keys(opponentsWreckedShips).length === 5) {
       setWinner("player");
       setGameStatus("gameover");
-      updateScoreIntoCookie();
+      updateScoreIntoCookie({
+        hitCount,
+        userData,
+        setUserData,
+      });
     } else if (Object.keys(myWreckedShips).length === 5) {
       setWinner("opponent");
       setGameStatus("gameover");
@@ -135,26 +143,6 @@ function PlayWithRobot() {
         resolve();
       }, duration);
     });
-  }
-
-  async function updateScoreIntoCookie() {
-    const bonus = hitCount <= 30 ? 250 : 100;
-    const newScore = score + bonus;
-    setScore(newScore);
-    const res = await fetch("/api/update-score", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        newScore,
-        nickname,
-        username,
-      }),
-    });
-    if (res.status === 200) {
-      console.log(res.json());
-    }
   }
 
   function handleShipBurst(row: number, col: number) {
@@ -537,7 +525,10 @@ function PlayWithRobot() {
   }, [randomOpponentBoard]);
 
   function handleLoggedIn(nickname: string) {
-    setNickname(nickname);
+    setUserData((old) => {
+      const newData = { ...old, nickname: nickname };
+      return newData;
+    });
     setLoggedin(true);
   }
 
@@ -1236,7 +1227,7 @@ function PlayWithRobot() {
       <footer className="w-full p-3 border-t border-neutral-400">
         <div className="mx-auto w-full lg:w-[860px] flex flex-row items-center justify-between gap-1">
           <p>
-            score: <strong>{score}</strong>
+            score: <strong>{userData.score}</strong>
           </p>
 
           <div className="flex flex-row items-center gap-2">

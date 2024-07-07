@@ -3,40 +3,206 @@
 import { useEffect, useState } from "react";
 import React from "react";
 import Link from "next/link";
+import { v4 as uuidv4 } from "uuid";
+
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
-import { CustomJwtPayload } from "@/utils/types";
-import { Anchor } from "lucide-react";
+import { CustomJwtPayload, defaultUserData, UserData } from "@/utils/types";
+import { Anchor, Settings } from "lucide-react";
+import { auth, db, provider } from "@/db/firebase";
+import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
+import toast from "react-hot-toast";
+import { doc, setDoc } from "firebase/firestore";
 
 function Navbar() {
-  const [nickname, setNickname] = useState<string>("");
-  const [score, setScore] = useState<number>(0);
+  const [googleAuth, setGoogleAuth] = useState<boolean>(false);
+  const [openSettings, setOpenSettings] = useState<boolean>(false);
+  const [userData, setUserData] = useState<UserData>(defaultUserData);
+  const cookies = new Cookies();
+
   useEffect(() => {
-    const cookies = new Cookies();
+    // setGoogleAuth(user === null ? false : true);
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in, see docs for a list of available properties
+        // https://firebase.google.com/docs/reference/js/auth.user
+        setGoogleAuth(true);
+        // ...
+      } else {
+        // User is signed out
+        // ...
+        setGoogleAuth(false);
+      }
+    });
     const token = cookies.get("bt_oken");
     if (!token) {
       return;
     }
-    const { nickname, score } = jwtDecode<CustomJwtPayload>(token);
-    setNickname(nickname);
-    setScore(score);
+    const dataFromToken = jwtDecode<CustomJwtPayload>(token);
+    setUserData(dataFromToken);
   }, []);
 
+  useEffect(() => {}, []);
+
+  function handleSaveProgress() {
+    // STEP 1 : Sign in with google
+    signInWithPopup(auth, provider)
+      .then(async (result) => {
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        // const credential = GoogleAuthProvider.credentialFromResult(result);
+        const user = result.user;
+
+        //  STEP 2 : grab userid, score, nickname, email, update googleSignIn to true and set up a  cookies
+
+        const data = {
+          nickname: userData.nickname,
+          username:
+            userData.username === ""
+              ? uuidv4().replace(/-/g, "")
+              : userData.username,
+          gmail: user.email,
+          score: userData.score,
+          googleSignIn: true,
+        };
+
+        try {
+          const res = await fetch("/api/update-token", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+        } catch (error) {
+          console.log(error);
+        }
+
+        // STEP 3 :  push to DB
+        try {
+          await setDoc(doc(db, "users", data.username), data);
+        } catch (e) {
+          console.error("Error adding document: ", e);
+        }
+      })
+      .catch(() => {
+        toast.error("Sign in Failed");
+      });
+  }
+
+  function handleDeleteAccount() {
+    signOut(auth)
+      .then(() => {
+        setUserData(defaultUserData);
+        cookies.remove("bt_oken");
+      })
+      .catch(() => {
+        return false;
+      });
+  }
   return (
-    <header className="w-full p-3 border-t border-neutral-400 h-[10vh] lg:h-auto py-2 md:py-5">
+    <header className="w-full p-3 border-t border-neutral-400 min-h-[10vh] lg:h-auto py-5">
       <nav className="mx-auto w-[95%] lg:w-[860px] gap-1 flex flex-row justify-between items-center">
         <Link href="/">
           <Anchor />
         </Link>
         <div className="flex flex-row gap-3 items-end">
-          {nickname !== "" && (
-            <div>
-              score: <strong>{score}</strong>
+          <div className="flex flex-row relative items-center gap-4">
+            {userData.nickname !== "" && (
+              <div>
+                score: <strong>{userData.score}</strong>
+              </div>
+            )}
+            <div
+              className={`${
+                openSettings && "rotate-45"
+              } transition-all duration-300  cursor-pointer`}
+              onClick={() => setOpenSettings(!openSettings)}
+            >
+              <Settings />
             </div>
-          )}
+            <div
+              className={`${
+                openSettings ? "flex" : "hidden"
+              } flex-col items-start p-2 rounded-lg bg-orange-50 absolute z-[500] top-9 right-0`}
+            >
+              {(!userData.googleSignIn || !googleAuth) && (
+                <button
+                  onClick={
+                    // nickname === ""
+                    // ?
+                    userData.googleSignIn ? undefined : handleSaveProgress
+                    // : googleSignIn
+                    // ? undefined
+                    // : handleSaveProgress
+                  }
+                  className="w-full flex transition-all duration-300 p-1 px-2 flex-row gap-2 hover:bg-orange-100 rounded-md items-center whitespace-nowrap"
+                >
+                  <p>
+                    {userData.nickname === ""
+                      ? userData.googleSignIn
+                        ? googleAuth
+                          ? ""
+                          : "Login"
+                        : "Login"
+                      : userData.googleSignIn
+                      ? googleAuth
+                        ? ""
+                        : "Login"
+                      : "Save Progress"}
+                  </p>{" "}
+                  <GoogleIcon />
+                </button>
+              )}
+
+              <button
+                style={{
+                  display:
+                    (userData.nickname === "" &&
+                      userData.googleSignIn === true) ||
+                    userData.nickname !== ""
+                      ? "flex"
+                      : "none",
+                }}
+                onClick={handleDeleteAccount}
+                className="w-full transition-all duration-300 p-1 px-2 flex-row gap-2 hover:bg-red-200 rounded-md items-center whitespace-nowrap"
+              >
+                {userData.googleSignIn ? "Log out" : "Delete Account"}
+              </button>
+            </div>
+          </div>
         </div>
       </nav>
     </header>
+  );
+}
+
+function GoogleIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      preserveAspectRatio="xMidYMid"
+      viewBox="0 0 256 262"
+      id="google"
+    >
+      <path
+        fill="#4285F4"
+        d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"
+      ></path>
+      <path
+        fill="#34A853"
+        d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"
+      ></path>
+      <path
+        fill="#FBBC05"
+        d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"
+      ></path>
+      <path
+        fill="#EB4335"
+        d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"
+      ></path>
+    </svg>
   );
 }
 

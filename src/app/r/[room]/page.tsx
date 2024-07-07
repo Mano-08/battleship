@@ -3,7 +3,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Cookies from "universal-cookie";
-import { CustomJwtPayload, displayOptions } from "@/utils/types";
+import {
+  CustomJwtPayload,
+  defaultUserData,
+  displayOptions,
+  UserData,
+} from "@/utils/types";
 import { jwtDecode } from "jwt-decode";
 import SignUp from "@/components/dialog/SignUp";
 import RoomFull from "@/components/dialog/Roomfull";
@@ -29,9 +34,7 @@ function Page() {
   const [gameStatus, setGameStatus] = useState<string>("initiating");
   const [exitGame, setExitGame] = useState<boolean>(false);
   const [mute, setMute] = useState<boolean>(false);
-  const [score, setScore] = useState<number>(0);
-  const [username, setUsername] = useState<string>("");
-  const [nickname, setNickname] = useState<string>("");
+  const [userData, setUserData] = useState<UserData>(defaultUserData);
   const [opponentReady, setOpponentReady] = useState<boolean>(false);
   const [roomFull, setRoomFull] = useState<boolean>(false);
 
@@ -47,11 +50,9 @@ function Page() {
       setLoggedin(false);
       return;
     }
-    const { nickname, score, username } = jwtDecode<CustomJwtPayload>(token);
-    setScore(score);
-    setNickname(nickname);
-    joinRoom(nickname);
-    setUsername(username);
+    const dataFromToken = jwtDecode<CustomJwtPayload>(token);
+    setUserData(dataFromToken);
+    joinRoom(dataFromToken.nickname);
 
     setTimeout(
       () => setDisplay((prev) => (prev === "share_link" ? "share_link" : "")),
@@ -224,15 +225,13 @@ function Page() {
           mysocket={mysocket}
           setWinner={setWinner}
           mute={mute}
-          username={username}
-          score={score}
-          setScore={setScore}
+          userData={userData}
+          setUserData={setUserData}
           setPlayerReady={setPlayerReady}
           setOpponentReady={setOpponentReady}
           gameStatus={gameStatus}
           setWhosTurn={setWhosTurn}
           setGameStatus={setGameStatus}
-          nickname={nickname}
         />
       </div>
 

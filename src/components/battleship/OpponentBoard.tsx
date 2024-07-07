@@ -2,11 +2,11 @@
 
 import { Fire, Skeleton } from "@/assets/svgs";
 import { initialBoardConfig } from "@/utils/board";
-import { shipColors } from "@/utils/ships";
 import MySocket from "@/utils/socket";
-import { Board, MyShipPlacement } from "@/utils/types";
+import { Board, MyShipPlacement, UserData } from "@/utils/types";
+import { updateScoreIntoCookie } from "@/utils/utils";
 import { useParams } from "next/navigation";
-import React, { use, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 function OpponentBoard({
@@ -17,21 +17,18 @@ function OpponentBoard({
   setWinner,
   mute,
   gameStatus,
-  setScore,
-  score,
-  username,
+  setUserData,
+  userData,
   setPlayerReady,
   setGameStatus,
-  nickname,
 }: {
   whosTurn: string | null;
   mysocket: MySocket;
   gameStatus: string;
-  nickname: string;
-  score: number;
-  setScore: React.Dispatch<React.SetStateAction<number>>;
+  googleSignIn: boolean;
+  userData: UserData;
+  setUserData: React.Dispatch<React.SetStateAction<UserData>>;
   mute: boolean;
-  username: string;
   setWinner: React.Dispatch<React.SetStateAction<string | null>>;
   setWhosTurn: React.Dispatch<React.SetStateAction<string | null>>;
   setOpponentReady: React.Dispatch<React.SetStateAction<boolean>>;
@@ -162,31 +159,19 @@ function OpponentBoard({
       toast.success("You win!");
       setGameStatus("gameover");
       setWinner("player");
-      updateScoreIntoCookie();
+      updateScoreIntoCookie({
+        userData,
+        hitCount,
+        setUserData,
+      });
       setHitCount(0);
-      mysocket.send("gameOver", { room, playerId: mysocket.getId(), nickname });
+      mysocket.send("gameOver", {
+        room,
+        playerId: mysocket.getId(),
+        nickname: userData.nickname,
+      });
     }
   }, [wreckedShips]);
-
-  async function updateScoreIntoCookie() {
-    const bonus = hitCount <= 30 ? 250 : 100;
-    const newScore = score + bonus;
-    setScore(newScore);
-    const res = await fetch("/api/update-score", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        newScore,
-        nickname,
-        username,
-      }),
-    });
-    if (res.status === 200) {
-      console.log(res.json());
-    }
-  }
 
   function handleDropTorpedo(rindex: number, cindex: number) {
     console.log("HOOO");

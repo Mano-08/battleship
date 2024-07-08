@@ -66,6 +66,8 @@ export interface Board {
   validHover: null | boolean;
 }
 
+export type WhosTurn = "player" | "opponent" | null;
+
 export type Ship = {
   id: shipIds;
   placed: boolean;

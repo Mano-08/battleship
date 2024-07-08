@@ -3,7 +3,7 @@
 import { Fire, Skeleton } from "@/assets/svgs";
 import { initialBoardConfig } from "@/utils/board";
 import MySocket from "@/utils/socket";
-import { Board, MyShipPlacement, UserData } from "@/utils/types";
+import { Board, MyShipPlacement, UserData, WhosTurn } from "@/utils/types";
 import { updateScoreIntoCookie } from "@/utils/utils";
 import { useParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
@@ -22,15 +22,14 @@ function OpponentBoard({
   setPlayerReady,
   setGameStatus,
 }: {
-  whosTurn: string | null;
+  whosTurn: "player" | "opponent" | null;
   mysocket: MySocket;
   gameStatus: string;
-  googleSignIn: boolean;
   userData: UserData;
   setUserData: React.Dispatch<React.SetStateAction<UserData>>;
   mute: boolean;
   setWinner: React.Dispatch<React.SetStateAction<string | null>>;
-  setWhosTurn: React.Dispatch<React.SetStateAction<string | null>>;
+  setWhosTurn: React.Dispatch<React.SetStateAction<WhosTurn>>;
   setOpponentReady: React.Dispatch<React.SetStateAction<boolean>>;
   setPlayerReady: React.Dispatch<React.SetStateAction<boolean>>;
   setGameStatus: React.Dispatch<React.SetStateAction<string>>;
@@ -174,7 +173,6 @@ function OpponentBoard({
   }, [wreckedShips]);
 
   function handleDropTorpedo(rindex: number, cindex: number) {
-    console.log("HOOO");
     if (gameStatus !== "initiated") {
       toast.error("game not initiated");
       return;
@@ -242,7 +240,20 @@ function OpponentBoard({
   }
 
   return (
-    <section className="flex flex-col outline outline-black p-[7px] rounded-xl">
+    <section
+      style={{
+        outlineWidth:
+          gameStatus === "initiated"
+            ? whosTurn === "player"
+              ? "4px"
+              : ""
+            : "",
+      }}
+      className={`${
+        gameStatus === "initiating" && "hidden"
+      } lg:flex flex-col outline outline-black p-[7px] rounded-xl transition-all duration-300`}
+    >
+      <h1 className="p-2 text-center">Opponent's Ships</h1>
       {opponentBoard.map((row: Board[], rindex: number) => (
         <div
           className="flex flex-row"

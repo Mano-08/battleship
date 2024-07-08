@@ -13,6 +13,7 @@ import { auth, db, provider } from "@/db/firebase";
 import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import toast from "react-hot-toast";
 import { doc, setDoc } from "firebase/firestore";
+import { fetchUserData } from "@/utils/utils";
 
 function Navbar() {
   const [googleAuth, setGoogleAuth] = useState<boolean>(false);
@@ -51,22 +52,28 @@ function Navbar() {
         // This gives you a Google Access Token. You can use it to access the Google API.
         // const credential = GoogleAuthProvider.credentialFromResult(result);
         const user = result.user;
+        const gmailAcc = user.email;
+        //  STEP 2 : Check if data is there in DB
+        const res = await fetchUserData(gmailAcc as string);
 
-        //  STEP 2 : grab userid, score, nickname, email, update googleSignIn to true and set up a  cookies
-
-        const data = {
+        let data = {
           nickname: userData.nickname,
           username:
             userData.username === ""
               ? uuidv4().replace(/-/g, "")
               : userData.username,
-          gmail: user.email,
+          gmail: gmailAcc,
           score: userData.score,
           googleSignIn: true,
         };
+        if (res !== null) {
+          data = res as any;
+        }
+
+        setUserData(data as any);
 
         try {
-          const res = await fetch("/api/update-token", {
+          await fetch("/api/update-token", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -77,11 +84,13 @@ function Navbar() {
           console.log(error);
         }
 
-        // STEP 3 :  push to DB
-        try {
-          await setDoc(doc(db, "users", data.username), data);
-        } catch (e) {
-          console.error("Error adding document: ", e);
+        if (res === null) {
+          // STEP 3 :  push to DB
+          try {
+            await setDoc(doc(db, "users", data.username), data);
+          } catch (e) {
+            console.error("Error adding document: ", e);
+          }
         }
       })
       .catch(() => {
@@ -90,14 +99,19 @@ function Navbar() {
   }
 
   function handleDeleteAccount() {
-    signOut(auth)
-      .then(() => {
-        setUserData(defaultUserData);
-        cookies.remove("bt_oken");
-      })
-      .catch(() => {
-        return false;
-      });
+    if (googleAuth) {
+      signOut(auth)
+        .then(() => {
+          setUserData(defaultUserData);
+          cookies.remove("bt_oken");
+        })
+        .catch(() => {
+          return false;
+        });
+    } else {
+      setUserData(defaultUserData);
+      cookies.remove("bt_oken");
+    }
   }
   return (
     <header className="w-full p-3 border-t border-neutral-400 min-h-[10vh] lg:h-auto py-5">
@@ -107,11 +121,19 @@ function Navbar() {
         </Link>
         <div className="flex flex-row gap-3 items-end">
           <div className="flex flex-row relative items-center gap-4">
-            {userData.nickname !== "" && (
-              <div>
-                score: <strong>{userData.score}</strong>
-              </div>
-            )}
+            <div
+              style={{
+                display:
+                  userData.nickname === ""
+                    ? userData.googleSignIn
+                      ? "block"
+                      : "none"
+                    : "block",
+              }}
+            >
+              score: <strong>{userData.score}</strong>
+            </div>
+
             <div
               className={`${
                 openSettings && "rotate-45"
@@ -125,15 +147,16 @@ function Navbar() {
                 openSettings ? "flex" : "hidden"
               } flex-col items-start p-2 rounded-lg bg-orange-50 absolute z-[500] top-9 right-0`}
             >
+              <Link
+                href="/about"
+                className="w-full flex transition-all duration-300 p-1 px-2 flex-row gap-2 hover:bg-orange-100 rounded-md items-center whitespace-nowrap"
+              >
+                About
+              </Link>
               {(!userData.googleSignIn || !googleAuth) && (
                 <button
                   onClick={
-                    // nickname === ""
-                    // ?
                     userData.googleSignIn ? undefined : handleSaveProgress
-                    // : googleSignIn
-                    // ? undefined
-                    // : handleSaveProgress
                   }
                   className="w-full flex transition-all duration-300 p-1 px-2 flex-row gap-2 hover:bg-orange-100 rounded-md items-center whitespace-nowrap"
                 >
@@ -153,7 +176,6 @@ function Navbar() {
                   <GoogleIcon />
                 </button>
               )}
-
               <button
                 style={{
                   display:

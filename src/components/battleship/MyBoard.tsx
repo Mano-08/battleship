@@ -7,6 +7,7 @@ import {
   Board,
   MyShipPlacement,
   Ship,
+  WhosTurn,
   displayOptions,
   shipIds,
 } from "@/utils/types";
@@ -22,6 +23,7 @@ function MyBoard({
   playerReady,
   display,
   winner,
+  whosTurn,
   setWhosTurn,
   mute,
   setPlayerReady,
@@ -32,8 +34,9 @@ function MyBoard({
   winner: string | null;
   playerReady: boolean;
   mute: boolean;
+  whosTurn: "player" | "opponent" | null;
   setPlayerReady: React.Dispatch<React.SetStateAction<boolean>>;
-  setWhosTurn: React.Dispatch<React.SetStateAction<string | null>>;
+  setWhosTurn: React.Dispatch<React.SetStateAction<WhosTurn>>;
 }) {
   const [myBoard, setMyBoard] = useState<Board[][]>(initialBoardConfig());
   const [vertical, setVertical] = useState<boolean>(false);
@@ -427,8 +430,6 @@ function MyBoard({
         gameStatus={gameStatus}
         setVertical={setVertical}
         vertical={vertical}
-        hide={playerReady}
-        display={display}
         mysocket={mysocket}
         myShips={myShips}
         myShipPlacements={myShipPlacements}
@@ -437,7 +438,18 @@ function MyBoard({
         handleRandomize={handleRandomize}
         setSelectedShip={setSelectedShip}
       />
-      <div className="flex flex-col outline outline-black p-[7px] rounded-xl">
+      <div
+        style={{
+          outlineWidth:
+            gameStatus === "initiated"
+              ? whosTurn === "opponent"
+                ? "4px"
+                : ""
+              : "",
+        }}
+        className="flex flex-col outline outline-black p-[7px] rounded-xl transition-all duration-300"
+      >
+        <h1 className="p-2 text-center">My Ships</h1>
         {myBoard.map((row: Board[], rindex: number) => (
           <div
             className="flex flex-row"

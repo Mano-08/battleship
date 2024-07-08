@@ -1,6 +1,38 @@
 import { db } from "@/db/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  setDoc,
+  where,
+} from "firebase/firestore";
 import { UserData } from "./types";
+
+export function sleep(duration: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, duration);
+  });
+}
+
+export async function fetchUserData(gmailAcc: string) {
+  try {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("gmail", "==", gmailAcc));
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      const userDoc = querySnapshot.docs[0]; // Assuming you expect one document per gmail
+      return userDoc.data();
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+  }
+}
 
 export async function updateScoreIntoCookie({
   hitCount,

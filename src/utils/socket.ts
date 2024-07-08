@@ -86,7 +86,6 @@ class MySocket {
       console.log("waiting to connect");
       await this.sleep(1000);
     }
-    console.log(" this.getId()", this.getId());
     this.socket.emit("join", { room, nickname, playerId: this.getId() });
   }
 

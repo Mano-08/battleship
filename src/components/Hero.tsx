@@ -102,16 +102,16 @@ function Hero() {
             </div>
           </div>
 
-          <div className="relative flex flex-row items-center w-full lg:w-auto">
+          <div className="relative flex flex-row items-center lg:w-auto">
             <img
               src={OppImage.src}
               alt="battle ship"
-              className="relative z-[200] hover:scale-105 transition-all duration-1000 -rotate-3 h-[230px] lg:h-[320px] w-auto bg-[--orange] rounded-lg overflow-hidden"
+              className="relative z-[200] hover:scale-105 -left-16 lg:left-0 transition-all duration-1000 -rotate-3 h-[230px] lg:h-[320px] w-auto bg-[--orange] rounded-lg overflow-hidden"
             />
             <img
               src={PlayerImage.src}
               alt="battle ship"
-              className="absolute hover:scale-105 transition-all duration-1000 z-[300] left-36  bottom-0 rotate-12 h-[230px] lg:h-[320px] w-auto bg-[--orange] rounded-lg overflow-hidden"
+              className="absolute hover:scale-105 transition-all duration-1000 z-[300] left-16 lg:left-36  bottom-0 rotate-12 h-[230px] lg:h-[320px] w-auto bg-[--orange] rounded-lg overflow-hidden"
             />
           </div>
           <span></span>

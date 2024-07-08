@@ -8,10 +8,10 @@ import {
   defaultUserData,
   displayOptions,
   UserData,
+  WhosTurn,
 } from "@/utils/types";
 import { jwtDecode } from "jwt-decode";
 import SignUp from "@/components/dialog/SignUp";
-import RoomFull from "@/components/dialog/Roomfull";
 import MyBoard from "@/components/battleship/MyBoard";
 import OpponentBoard from "@/components/battleship/OpponentBoard";
 import toast, { Toaster } from "react-hot-toast";
@@ -19,21 +19,22 @@ import ShareLink from "@/components/dialog/ShareLink";
 import MySocket from "@/utils/socket";
 import GameOver from "@/components/dialog/GameOver";
 import Connecting from "@/components/dialog/Connecting";
-import { LogOut, Volume2, VolumeX } from "lucide-react";
 import Link from "next/link";
+import Nav from "@/components/battleship/Nav";
+import ReturnToHomePage from "@/components/dialog/ReturnToHomePage";
 
 const mysocket = new MySocket();
 
 function Page() {
   const [loggedin, setLoggedin] = useState<boolean>(true);
-  const [whosTurn, setWhosTurn] = useState<string | null>(null);
+  const [whosTurn, setWhosTurn] = useState<WhosTurn>(null);
   const [playAgain, setPlayAgain] = useState<boolean>(false);
   const [playerReady, setPlayerReady] = useState<boolean>(false);
   const [display, setDisplay] = useState<displayOptions>("loading");
   const [winner, setWinner] = useState<string | null>(null);
   const [gameStatus, setGameStatus] = useState<string>("initiating");
   const [exitGame, setExitGame] = useState<boolean>(false);
-  const [mute, setMute] = useState<boolean>(false);
+  const [mute, setMute] = useState<boolean>(true);
   const [userData, setUserData] = useState<UserData>(defaultUserData);
   const [opponentReady, setOpponentReady] = useState<boolean>(false);
   const [roomFull, setRoomFull] = useState<boolean>(false);
@@ -121,7 +122,6 @@ function Page() {
 
   function handlePlayerleft() {
     toast.error("opponent left");
-    console.log("opponent left");
     setDisplay("player_left");
     setGameStatus("gameover");
   }
@@ -154,11 +154,12 @@ function Page() {
 
   function handleLoggedIn(nickname: string) {
     setLoggedin(true);
+    setDisplay("");
     joinRoom(nickname);
   }
 
   if (roomFull) {
-    return <RoomFull />;
+    return <ReturnToHomePage message="The room is Already full!" />;
   }
 
   if (!loggedin) {
@@ -173,6 +174,7 @@ function Page() {
           gameStatus={gameStatus}
           winner={winner}
           mute={mute}
+          whosTurn={whosTurn}
           display={display}
           mysocket={mysocket}
           playerReady={playerReady}
@@ -205,7 +207,9 @@ function Page() {
         )}
         {display === "loading" && <Connecting />}
         {display === "share_link" && <ShareLink room={room} />}
-        {display === "player_left" && <RoomFull />}
+        {display === "player_left" && (
+          <ReturnToHomePage message="Opponent Left!" />
+        )}
         {(display === "game_won" ||
           display === "game_lost" ||
           display === "play_again") && (
@@ -235,37 +239,12 @@ function Page() {
         />
       </div>
 
-      <footer className="w-full p-3 border-t border-neutral-400">
-        <div className="mx-auto w-[95%] lg:w-[860px] flex flex-row items-center justify-between gap-1">
-          <p>
-            score: <strong>{score}</strong>
-          </p>
-
-          <div className="flex flex-row items-center gap-2">
-            {mute ? (
-              <button
-                className="transition-all duration-200 text-gray-900 hover:bg-neutral-100 focus:outline-none focus:ring-4 focus:ring-gray-200 font-medium rounded-md p-2"
-                onClick={() => setMute(false)}
-              >
-                <VolumeX />
-              </button>
-            ) : (
-              <button
-                className="transition-all duration-200 text-gray-900 hover:bg-neutral-100 focus:outline-none focus:ring-4 focus:ring-gray-200 font-medium rounded-md p-2"
-                onClick={() => setMute(true)}
-              >
-                <Volume2 />
-              </button>
-            )}
-            <button
-              className="transition-all duration-200 text-gray-900 hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 font-medium rounded-md p-2"
-              onClick={() => setExitGame(true)}
-            >
-              <LogOut />
-            </button>
-          </div>
-        </div>
-      </footer>
+      <Nav
+        userData={userData}
+        setMute={setMute}
+        mute={mute}
+        setExitGame={setExitGame}
+      />
       <Toaster position="bottom-center" reverseOrder={false} />
     </main>
   );

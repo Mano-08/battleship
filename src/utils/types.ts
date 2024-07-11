@@ -4,7 +4,25 @@ export interface CustomJwtPayload extends JwtPayload {
   nickname: string;
   username: string;
   score: number;
+  googleSignIn: boolean;
+  gmail: string;
 }
+
+export interface UserData {
+  nickname: string;
+  username: string;
+  score: number;
+  googleSignIn: boolean;
+  gmail: string;
+}
+
+export const defaultUserData: UserData = {
+  nickname: "",
+  gmail: "NULL",
+  googleSignIn: false,
+  username: "",
+  score: 0,
+};
 
 export type SignUpModes = "signup-multiplayer" | "signup-solo";
 
@@ -47,6 +65,8 @@ export interface Board {
   };
   validHover: null | boolean;
 }
+
+export type WhosTurn = "player" | "opponent" | null;
 
 export type Ship = {
   id: shipIds;

@@ -2,11 +2,11 @@
 
 import { Fire, Skeleton } from "@/assets/svgs";
 import { initialBoardConfig } from "@/utils/board";
-import { shipColors } from "@/utils/ships";
 import MySocket from "@/utils/socket";
-import { Board, MyShipPlacement } from "@/utils/types";
+import { Board, MyShipPlacement, UserData, WhosTurn } from "@/utils/types";
+import { updateScoreIntoCookie } from "@/utils/utils";
 import { useParams } from "next/navigation";
-import React, { use, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 function OpponentBoard({
@@ -17,23 +17,19 @@ function OpponentBoard({
   setWinner,
   mute,
   gameStatus,
-  setScore,
-  score,
-  username,
+  setUserData,
+  userData,
   setPlayerReady,
   setGameStatus,
-  nickname,
 }: {
-  whosTurn: string | null;
+  whosTurn: "player" | "opponent" | null;
   mysocket: MySocket;
   gameStatus: string;
-  nickname: string;
-  score: number;
-  setScore: React.Dispatch<React.SetStateAction<number>>;
+  userData: UserData;
+  setUserData: React.Dispatch<React.SetStateAction<UserData>>;
   mute: boolean;
-  username: string;
   setWinner: React.Dispatch<React.SetStateAction<string | null>>;
-  setWhosTurn: React.Dispatch<React.SetStateAction<string | null>>;
+  setWhosTurn: React.Dispatch<React.SetStateAction<WhosTurn>>;
   setOpponentReady: React.Dispatch<React.SetStateAction<boolean>>;
   setPlayerReady: React.Dispatch<React.SetStateAction<boolean>>;
   setGameStatus: React.Dispatch<React.SetStateAction<string>>;
@@ -162,34 +158,21 @@ function OpponentBoard({
       toast.success("You win!");
       setGameStatus("gameover");
       setWinner("player");
-      updateScoreIntoCookie();
+      updateScoreIntoCookie({
+        userData,
+        hitCount,
+        setUserData,
+      });
       setHitCount(0);
-      mysocket.send("gameOver", { room, playerId: mysocket.getId(), nickname });
+      mysocket.send("gameOver", {
+        room,
+        playerId: mysocket.getId(),
+        nickname: userData.nickname,
+      });
     }
   }, [wreckedShips]);
 
-  async function updateScoreIntoCookie() {
-    const bonus = hitCount <= 30 ? 250 : 100;
-    const newScore = score + bonus;
-    setScore(newScore);
-    const res = await fetch("/api/update-score", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        newScore,
-        nickname,
-        username,
-      }),
-    });
-    if (res.status === 200) {
-      console.log(res.json());
-    }
-  }
-
   function handleDropTorpedo(rindex: number, cindex: number) {
-    console.log("HOOO");
     if (gameStatus !== "initiated") {
       toast.error("game not initiated");
       return;
@@ -257,7 +240,20 @@ function OpponentBoard({
   }
 
   return (
-    <section className="flex flex-col outline outline-black p-[7px] rounded-xl">
+    <section
+      style={{
+        outlineWidth:
+          gameStatus === "initiated"
+            ? whosTurn === "player"
+              ? "4px"
+              : ""
+            : "",
+      }}
+      className={`${
+        gameStatus === "initiating" && "hidden"
+      } lg:flex flex-col outline outline-black p-[7px] rounded-xl transition-all duration-300`}
+    >
+      <h1 className="p-2 text-center">Opponent's Ships</h1>
       {opponentBoard.map((row: Board[], rindex: number) => (
         <div
           className="flex flex-row"

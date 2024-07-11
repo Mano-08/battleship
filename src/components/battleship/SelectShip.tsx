@@ -6,12 +6,11 @@ import { MyShipPlacement, Ship, displayOptions } from "@/utils/types";
 import { useParams } from "next/navigation";
 import { shipIds } from "@/utils/types";
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 function SelectShip({
   vertical,
   gameStatus,
-  hide,
-  display,
   mysocket,
   removeShipFromPlacements,
   myShipPlacements,
@@ -24,11 +23,9 @@ function SelectShip({
   setSelectedShip,
   handleRandomize,
 }: {
-  hide: boolean;
   gameStatus: string;
   vertical: boolean;
   mysocket: MySocket;
-  display: displayOptions;
   removeShipFromPlacements: (id: shipIds) => void;
   myShips: Ship[];
   playerReady: boolean;
@@ -58,19 +55,19 @@ function SelectShip({
   }
   return (
     <section
-      className={`flex flex-col items-start overflow-hidden ${
-        hide
-          ? "max-h-0 lg:max-h-96 lg:max-w-0 opacity-0"
-          : "max-h-96 lg:max-h-96 lg:max-w-96"
-      } transition-all duration-[2s] ease-in-out w-full p-3`}
+      className={`flex flex-col gap-0.5 items-start overflow-hidden ${
+        gameStatus !== "initiating"
+          ? "max-h-0 lg:max-h-96 lg:max-w-0 opacity-0 py-0"
+          : "max-h-96 lg:max-h-96 lg:max-w-96 py-3"
+      } transition-all duration-[2s] ease-in-out w-full px-3`}
     >
       <button
         onClick={() => {
           resetBoard();
           setDisplayShips(true);
         }}
-        disabled={gameStatus === "initiated" && displayShips}
-        className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+        disabled={gameStatus === "initiated" || displayShips}
+        className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black hover:bg-orange-200 outline outline-black font-medium rounded-lg px-5 py-1"
       >
         Place Manually
       </button>
@@ -126,7 +123,7 @@ function SelectShip({
                     : { display: "none" }
                 }
                 onClick={() => removeShipFromPlacements(ship.id)}
-                className="transition-all duration-200 h-[18px] text-[14px] leading-none w-[18px] flex items-center justify-center text-gray-900 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-100 font-medium rounded-md"
+                className="transition-all duration-200 h-[18px] text-[14px] leading-none w-[18px] flex items-center justify-center text-gray-900 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-200 font-medium rounded-md"
               >
                 -{" "}
               </button>
@@ -139,7 +136,7 @@ function SelectShip({
               resetBoard();
               e.currentTarget.blur();
             }}
-            className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+            className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
           >
             Reset
           </button>
@@ -147,14 +144,14 @@ function SelectShip({
             {vertical ? (
               <button
                 onClick={() => setVertical(false)}
-                className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
               >
                 vertical
               </button>
             ) : (
               <button
                 onClick={() => setVertical(true)}
-                className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
               >
                 horizontal
               </button>
@@ -170,13 +167,17 @@ function SelectShip({
             handleRandomize();
             e.currentTarget.blur();
           }}
-          className="transition-all duration-200 w-full text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+          className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black hover:bg-orange-200 outline outline-black font-medium rounded-lg px-5 py-1"
         >
           Randomize
         </button>
         <button
           onClick={(e) => {
             e.currentTarget.blur();
+            if (Object.keys(myShipPlacements).length !== 5) {
+              toast.error("All ships not placed!");
+              return;
+            }
             setPlayerReady(true);
             mysocket.send("ready", {
               room: room,
@@ -184,8 +185,9 @@ function SelectShip({
               playerId: mysocket.getId(),
             });
           }}
+          autoFocus={true}
           disabled={playerReady}
-          className="w-full transition-all duration-200 focus:outline-none text-white bg-neutral-800 hover:bg-neutral-700 focus:ring-4  focus:ring-neutral-300 font-medium rounded-lg px-5 py-1"
+          className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden text-white bg-black hover:bg-neutral-800 outline outline-black font-medium rounded-lg px-5 py-1"
         >
           Ready
         </button>

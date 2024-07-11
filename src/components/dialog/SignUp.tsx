@@ -4,6 +4,10 @@ import React, { FormEvent, useEffect, useState } from "react";
 import Cookies from "universal-cookie";
 import Loading from "../Loading";
 import { v4 as uuidv4 } from "uuid";
+import { db } from "@/db/firebase";
+import { doc, setDoc } from "firebase/firestore";
+import { jwtDecode } from "jwt-decode";
+import { CustomJwtPayload } from "@/utils/types";
 
 type setDisplayProp = React.Dispatch<React.SetStateAction<string | null>>;
 
@@ -14,7 +18,7 @@ function SignUp({
   setDisplay: null | setDisplayProp;
   callback: (nickname: string) => void;
 }) {
-  const [nickname, setNickname] = useState<string>("");
+  const [nicknameInput, setNicknameInput] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -25,27 +29,48 @@ function SignUp({
     };
     return document.addEventListener("keydown", handleKeydown);
   }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNickname(e.target.value);
+    setNicknameInput(e.target.value);
   };
 
   const handleSubmit = async (e: FormEvent) => {
-    setLoading(true);
-    const username = uuidv4();
     e.preventDefault();
-    const res = await fetch("/api/create-user", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        nickname,
-        username,
-      }),
-    });
-    if (res.status === 200) {
-      callback(nickname);
+    if (nicknameInput.trim() === "") return;
+    setLoading(true);
+    const cookies = new Cookies();
+    const token = cookies.get("bt_oken");
+    const dataFromToken = token && jwtDecode<CustomJwtPayload>(token);
+    const data = {
+      nickname: nicknameInput.trim(),
+      username: token ? dataFromToken.username : uuidv4().replace(/-/g, ""),
+      score: token ? dataFromToken.score : 0,
+      gmail: token ? dataFromToken.gmail : "NULL",
+      googleSignIn: token ? dataFromToken.googleSignIn : false,
+    };
+
+    try {
+      const res = await fetch("/api/update-token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      if (res.status === 200) {
+        callback(nicknameInput);
+      }
+    } catch (error) {
+      console.log(error);
     }
+
+    // Create a record in Firebase DB
+    try {
+      await setDoc(doc(db, "users", data.username), data);
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
+
     setLoading(false);
   };
 
@@ -58,7 +83,7 @@ function SignUp({
   return (
     <div
       onClick={handleCloseDialog}
-      className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center"
+      className="fixed z-[900] h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center"
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -75,7 +100,7 @@ function SignUp({
           <input
             type="text"
             name="nickname"
-            value={nickname}
+            value={nicknameInput}
             autoFocus
             autoComplete="off"
             onChange={handleChange}

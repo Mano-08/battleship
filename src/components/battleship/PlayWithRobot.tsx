@@ -3,12 +3,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Cookies from "universal-cookie";
+
 import {
   Board,
   CustomJwtPayload,
+  defaultUserData,
   MyShipPlacement,
   Ship,
   shipIds,
+  UserData,
 } from "@/utils/types";
 import { jwtDecode } from "jwt-decode";
 import SignUp from "@/components/dialog/SignUp";
@@ -17,18 +20,19 @@ import { shipColors, ships } from "@/utils/ships";
 import toast, { Toaster } from "react-hot-toast";
 import { getRandomCoord } from "@/helper/randomize";
 import { Fire, Skeleton } from "@/assets/svgs";
-import { useRouter } from "next/navigation";
 import Confetti from "react-confetti";
 import useWindowSize from "react-use/lib/useWindowSize";
 import { LogOut, Volume2, VolumeX } from "lucide-react";
+import { updateScoreIntoCookie } from "@/utils/utils";
+import Nav from "./Nav";
+import { guessNextMove } from "@/helper/guesser";
 
 function PlayWithRobot() {
   const [loggedin, setLoggedin] = useState<boolean>(true);
   const [exitGame, setExitGame] = useState<boolean>(false);
   const [mute, setMute] = useState<boolean>(true);
-  const router = useRouter();
-  const [score, setScore] = useState<number>(0);
-  const [username, setUsername] = useState<string>("");
+  // const [score, setScore] = useState<number>(0);
+  // const [username, setUsername] = useState<string>("");
   const { width, height } = useWindowSize();
 
   const splashAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -42,7 +46,7 @@ function PlayWithRobot() {
   const [gameStatus, setGameStatus] = useState<
     "initiating" | "initiated" | "gameover"
   >("initiating");
-  const [nickname, setNickname] = useState<string>("");
+  // const [nickname, setNickname] = useState<string>("");
   const [myBoard, setMyBoard] = useState<Board[][]>(initialBoardConfig());
   const [vertical, setVertical] = useState<boolean>(false);
   const [myShips, setMyShips] = useState<Ship[]>(ships);
@@ -50,7 +54,11 @@ function PlayWithRobot() {
     useState<MyShipPlacement>({});
   const [randomBoard, setRandomBoard] = useState<MyShipPlacement>({});
   const [selectedShip, setSelectedShip] = useState<null | Ship>(null);
+  // const [gmail, setGmail] = useState<null | string>(null);
   const [displayShips, setDisplayShips] = useState<boolean>(false);
+  // const [googleSignIn, setGoogleSignIn] = useState<boolean>(false);
+  const [userData, setUserData] = useState<UserData>(defaultUserData);
+
   const [myShipPlacements, setMyShipPlacement] = useState<MyShipPlacement>({});
   const [opponentShipPlacement, setOpponentsShipPlacement] =
     useState<MyShipPlacement>({});
@@ -65,18 +73,16 @@ function PlayWithRobot() {
     [key: string]: boolean;
   }>({});
 
+  const cookies = new Cookies();
+
   useEffect(() => {
-    const cookies = new Cookies();
     const token = cookies.get("bt_oken");
     if (!token) {
       setLoggedin(false);
       return;
     }
-    const { nickname, score, username } = jwtDecode<CustomJwtPayload>(token);
-    console.log(nickname, score, username);
-    setNickname(nickname);
-    setUsername(username);
-    setScore(score);
+    const dataFromToken = jwtDecode<CustomJwtPayload>(token);
+    setUserData(dataFromToken);
 
     if (splashAudioRef.current) {
       splashAudioRef.current.volume = 0.2;
@@ -111,85 +117,27 @@ function PlayWithRobot() {
   }, [gameStatus]);
 
   useEffect(() => {
-    if (Object.keys(opponentsWreckedShips).length === 1) {
+    function handleEscape(e: Event) {
+      if ((e as KeyboardEvent).key === "Escape" && exitGame) setExitGame(false);
+    }
+    document.addEventListener("keyup", handleEscape);
+    return () => document.removeEventListener("keyup", handleEscape);
+  }, []);
+
+  useEffect(() => {
+    if (Object.keys(opponentsWreckedShips).length === 5) {
       setWinner("player");
       setGameStatus("gameover");
-      updateScoreIntoCookie();
-    } else if (Object.keys(myWreckedShips).length === 1) {
+      updateScoreIntoCookie({
+        hitCount,
+        userData,
+        setUserData,
+      });
+    } else if (Object.keys(myWreckedShips).length === 5) {
       setWinner("opponent");
       setGameStatus("gameover");
     }
   }, [opponentsWreckedShips, myWreckedShips]);
-
-  function sleep(duration: number): Promise<void> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, duration);
-    });
-  }
-
-  async function updateScoreIntoCookie() {
-    const bonus = hitCount <= 30 ? 250 : 100;
-    const newScore = score + bonus;
-    setScore(newScore);
-    const res = await fetch("/api/update-score", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        newScore,
-        nickname,
-        username,
-      }),
-    });
-    if (res.status === 200) {
-      console.log(res.json());
-    }
-  }
-
-  function handleShipBurst(row: number, col: number) {
-    const shipId = myBoard[row][col].details.id;
-    const {
-      length,
-      vertical,
-      startIndex: { rowStart, colStart },
-    } = myShipPlacements[shipId];
-    let wrecked = true;
-    if (vertical) {
-      for (let i = rowStart; i < rowStart + length; i++) {
-        if (!myBoard[i][colStart].details.burst && i !== row) {
-          wrecked = false;
-          break;
-        }
-      }
-      wrecked &&
-        setMyWreckedShips((old) => {
-          const newData = { ...old };
-          newData[shipId] = true;
-          return newData;
-        });
-    } else {
-      for (let i = colStart; i < colStart + length; i++) {
-        if (!myBoard[rowStart][i].details.burst && i !== col) {
-          wrecked = false;
-          break;
-        }
-      }
-      wrecked &&
-        setMyWreckedShips((old) => {
-          const newData = { ...old };
-          newData[shipId] = true;
-          return newData;
-        });
-    }
-    if (wrecked) {
-      return shipId;
-    } else {
-      return null;
-    }
-  }
 
   const [hitStack, setHitStack] = useState<
     {
@@ -200,214 +148,20 @@ function PlayWithRobot() {
     }[]
   >([]);
 
-  function removeShipFromHitStack(
-    lastHits: {
-      row: number;
-      col: number;
-      shipId: string;
-      direction: "vertical" | "horizontal" | null;
-    }[],
-    shipId: string
-  ) {
-    return lastHits.filter((hit) => hit.shipId !== shipId);
-  }
-
-  async function guessNextMove() {
-    let opponentsTurnOver = false;
-    let lastHits = hitStack;
-    let lastHit = hitStack.length > 0 ? hitStack[hitStack.length - 1] : null;
-    while (!opponentsTurnOver) {
-      await sleep(1300);
-      if (lastHit) {
-        console.log(lastHit, "INISIDE LAST HIT");
-        console.log(lastHits, "LAST HITS");
-        const { row, col, direction, shipId } = lastHit;
-        const directions = [
-          { row: row - 1, col, dir: "vertical" },
-          { row: row + 1, col, dir: "vertical" },
-          { row, col: col - 1, dir: "horizontal" },
-          { row, col: col + 1, dir: "horizontal" },
-        ];
-        const validDirections = directions.filter(
-          ({ row, col, dir }) =>
-            row >= 0 &&
-            row < 10 &&
-            col >= 0 &&
-            col < 10 &&
-            !myBoard[row][col].details.burst &&
-            (direction === null || dir === direction)
-        );
-        console.log(validDirections, "VALID DIRECTIONS");
-        if (validDirections.length === 0) {
-          if (direction === "horizontal") {
-            let curr = col;
-            if (lastHits.length > 1) {
-              const secondLastHit = lastHits[lastHits.length - 2];
-              if (secondLastHit.col < col) {
-                curr = col - 1;
-                while (
-                  curr >= 0 &&
-                  myBoard[row][curr].details.burst &&
-                  myBoard[row][curr].ship
-                ) {
-                  curr = curr - 1;
-                }
-              } else {
-                curr = col + 1;
-                while (
-                  curr < 10 &&
-                  myBoard[row][curr].details.burst &&
-                  myBoard[row][curr].ship
-                ) {
-                  curr = curr + 1;
-                }
-              }
-
-              if (curr >= 0 && curr < 10 && !myBoard[row][curr].details.burst) {
-                validDirections.push({
-                  row: row,
-                  col: curr,
-                  dir: "horizontal",
-                });
-              } else {
-                lastHits[lastHits.length - 1] = {
-                  ...lastHit,
-                  direction: "vertical",
-                };
-                lastHit = {
-                  ...lastHit,
-                  direction: "vertical",
-                };
-                continue;
-              }
-            }
-          } else {
-            let curr = row;
-            if (lastHits.length > 1) {
-              const secondLastHit = lastHits[lastHits.length - 2];
-              if (secondLastHit.row < row) {
-                curr = row - 1;
-                while (
-                  curr >= 0 &&
-                  myBoard[curr][col].details.burst &&
-                  myBoard[curr][col].ship
-                ) {
-                  curr = curr - 1;
-                }
-              } else {
-                curr = row + 1;
-                while (
-                  curr < 10 &&
-                  myBoard[curr][col].details.burst &&
-                  myBoard[curr][col].ship
-                ) {
-                  curr = curr + 1;
-                }
-              }
-
-              if (curr >= 0 && curr < 10 && !myBoard[curr][col].details.burst) {
-                validDirections.push({
-                  row: curr,
-                  col: col,
-                  dir: "vertical",
-                });
-              } else {
-                lastHits[lastHits.length - 1] = {
-                  ...lastHit,
-                  direction: "horizontal",
-                };
-                lastHit = {
-                  ...lastHit,
-                  direction: "horizontal",
-                };
-                continue;
-              }
-            }
-          }
-        }
-        if (validDirections.length > 0) {
-          const { row, col, dir } =
-            validDirections[Math.floor(Math.random() * validDirections.length)];
-
-          setMyBoard((old) => {
-            const newData = [...old];
-            const updatedElement = { ...newData[row][col] };
-            updatedElement.details.burst = true;
-            newData[row][col] = updatedElement;
-            return newData;
-          });
-
-          if (myBoard[row][col].ship) {
-            !mute && (oppExplotionAudioRef.current as HTMLAudioElement)?.play();
-            lastHit = {
-              row,
-              col,
-              shipId: myBoard[row][col].details.id,
-              direction: dir as "vertical" | "horizontal",
-            };
-            lastHits.push(lastHit);
-            const shipId = handleShipBurst(row, col);
-            console.log(shipId, "SHIP ID");
-            if (shipId !== null) {
-              lastHits = removeShipFromHitStack(lastHits, shipId);
-              lastHit =
-                lastHits.length > 0 ? lastHits[lastHits.length - 1] : null;
-            }
-          } else {
-            !mute && (oppSplashAudioRef.current as HTMLAudioElement)?.play();
-            lastHits[lastHits.length - 1].direction =
-              dir === "vertical" ? "horizontal" : "vertical";
-            opponentsTurnOver = true;
-          }
-        } else {
-          lastHit = null;
-          continue;
-        }
-      } else {
-        console.log("INSIDE RANDOM GUESS");
-        const row = Math.floor(Math.random() * 10);
-        const col = Math.floor(Math.random() * 10);
-        if (!myBoard[row][col].details.burst) {
-          setMyBoard((old) => {
-            const newData = [...old];
-            const updatedElement = { ...newData[row][col] };
-            updatedElement.details.burst = true;
-            newData[row][col] = updatedElement;
-            return newData;
-          });
-
-          if (myBoard[row][col].ship) {
-            !mute && (oppExplotionAudioRef.current as HTMLAudioElement)?.play();
-            const shipId = handleShipBurst(row, col);
-            if (shipId !== null) {
-              lastHits = removeShipFromHitStack(lastHits, shipId);
-              lastHit =
-                lastHits.length > 0 ? lastHits[lastHits.length - 1] : null;
-            } else {
-              lastHit = {
-                row,
-                col,
-                shipId: myBoard[row][col].details.id,
-                direction: null,
-              };
-              lastHits.push(lastHit);
-            }
-          } else {
-            !mute && (oppSplashAudioRef.current as HTMLAudioElement)?.play();
-            opponentsTurnOver = true;
-          }
-        } else {
-          continue;
-        }
-      }
-      setHitStack(lastHits);
-    }
-    setWhosTurn("player");
-  }
-
   useEffect(() => {
     if (whosTurn === "opponent") {
-      guessNextMove();
+      guessNextMove({
+        hitStack,
+        setHitStack,
+        myBoard,
+        mute,
+        setMyBoard,
+        oppExplotionAudioRef,
+        setWhosTurn,
+        oppSplashAudioRef,
+        setMyWreckedShips,
+        myShipPlacements,
+      });
     }
   }, [whosTurn]);
 
@@ -529,7 +283,10 @@ function PlayWithRobot() {
   }, [randomOpponentBoard]);
 
   function handleLoggedIn(nickname: string) {
-    setNickname(nickname);
+    setUserData((old) => {
+      const newData = { ...old, nickname: nickname };
+      return newData;
+    });
     setLoggedin(true);
   }
 
@@ -888,11 +645,11 @@ function PlayWithRobot() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col justify-between px-10">
+    <main className="min-h-screen flex flex-col justify-between px-5 lg:px-10">
       {gameStatus === "gameover" && (
         <div className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center">
           {winner === "player" && <Confetti width={width} height={height} />}
-          <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]">
+          <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-orange-50 w-[90vw] lg:w-[400px]">
             <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
               Game Over
             </h1>
@@ -903,13 +660,13 @@ function PlayWithRobot() {
               <button
                 autoFocus={true}
                 onClick={handlePlayAgain}
-                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-300 font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-200 font-medium rounded-lg px-5 py-1"
               >
                 Play again
               </button>
               <Link
                 href="/"
-                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-300 font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-200 font-medium rounded-lg px-5 py-1"
               >
                 Exit
               </Link>
@@ -920,7 +677,7 @@ function PlayWithRobot() {
 
       {exitGame && (
         <div className="fixed top-0 left-0 h-screen w-screen bg-black/60 flex items-center justify-center">
-          <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]">
+          <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-orange-50 w-[90vw] lg:w-[400px]">
             <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
               Exit Game
             </h1>
@@ -929,13 +686,13 @@ function PlayWithRobot() {
               <button
                 autoFocus={true}
                 onClick={() => setExitGame(false)}
-                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-300 font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-200 font-medium rounded-lg px-5 py-1"
               >
                 Stay
               </button>
               <Link
                 href="/"
-                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-300 font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-200 font-medium rounded-lg px-5 py-1"
               >
                 Exit
               </Link>
@@ -944,14 +701,14 @@ function PlayWithRobot() {
         </div>
       )}
 
-      <div className="flex grow flex-col items-center gap-5 py-10 justify-center lg:flex-row">
+      <div className="flex grow flex-col items-center gap-6 py-10 justify-center lg:flex-row">
         <section className="flex flex-col-reverse gap-5 lg:flex-row items-center ">
           <div
-            className={`flex flex-col items-start overflow-hidden ${
+            className={`flex flex-col gap-0.5 items-start overflow-hidden ${
               gameStatus !== "initiating"
-                ? "max-h-0 lg:max-h-96 lg:max-w-0 opacity-0"
-                : "max-h-96 lg:max-h-96 lg:max-w-96"
-            } transition-all duration-[2s] ease-in-out w-full p-3`}
+                ? "max-h-0 lg:max-h-96 lg:max-w-0 opacity-0 py-0"
+                : "max-h-96 lg:max-h-96 lg:max-w-96 py-3"
+            } transition-all duration-[2s] ease-in-out w-full px-3`}
           >
             <button
               onClick={() => {
@@ -959,7 +716,7 @@ function PlayWithRobot() {
                 setDisplayShips(true);
               }}
               disabled={gameStatus === "initiated" || displayShips}
-              className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+              className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black hover:bg-orange-200 outline outline-black font-medium rounded-lg px-5 py-1"
             >
               Place Manually
             </button>
@@ -1015,7 +772,7 @@ function PlayWithRobot() {
                           : { display: "none" }
                       }
                       onClick={() => removeShipFromPlacements(ship.id)}
-                      className="transition-all duration-200 h-[18px] text-[14px] leading-none w-[18px] flex items-center justify-center text-gray-900 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-100 font-medium rounded-md"
+                      className="transition-all duration-200 h-[18px] text-[14px] leading-none w-[18px] flex items-center justify-center text-gray-900 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-200 font-medium rounded-md"
                     >
                       -{" "}
                     </button>
@@ -1028,7 +785,7 @@ function PlayWithRobot() {
                     resetMyBoard();
                     e.currentTarget.blur();
                   }}
-                  className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+                  className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
                 >
                   Reset
                 </button>
@@ -1036,14 +793,14 @@ function PlayWithRobot() {
                   {vertical ? (
                     <button
                       onClick={() => setVertical(false)}
-                      className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+                      className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
                     >
                       vertical
                     </button>
                   ) : (
                     <button
                       onClick={() => setVertical(true)}
-                      className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+                      className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
                     >
                       horizontal
                     </button>
@@ -1052,32 +809,46 @@ function PlayWithRobot() {
               </div>
             </div>
 
-            <div className="w-full flex flex-col items-start gap-2">
+            <div className="w-full flex flex-col items-start gap-3">
               <button
                 onClick={(e) => {
                   setDisplayShips(false);
                   handleRandomize();
                   e.currentTarget.blur();
                 }}
-                className="transition-all duration-200 w-full text-black bg-neutral-200 hover:bg-neutral-300 focus:ring-4  focus:ring-neutral-200 font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black hover:bg-orange-200 outline outline-black font-medium rounded-lg px-5 py-1"
               >
                 Randomize
               </button>
               <button
                 onClick={(e) => {
                   e.currentTarget.blur();
-                  toast.success("war begun!");
-                  setGameStatus("initiated");
+                  if (Object.keys(myShipPlacements).length === 5) {
+                    toast.success("war begun!");
+                    setGameStatus("initiated");
+                  } else {
+                    toast.error("all ships not placed!");
+                  }
                 }}
                 autoFocus={true}
                 disabled={gameStatus === "initiated"}
-                className="transition-all duration-200 w-full focus:outline-none text-white bg-neutral-800 hover:bg-neutral-700 focus:ring-4  focus:ring-neutral-300 font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden text-white bg-black hover:bg-neutral-800 outline outline-black font-medium rounded-lg px-5 py-1"
               >
                 Start
               </button>
             </div>
           </div>
-          <div className="flex flex-col outline outline-black p-[7px] rounded-xl">
+          <div
+            style={{
+              outlineWidth:
+                gameStatus === "initiated"
+                  ? whosTurn === "opponent"
+                    ? "4px"
+                    : ""
+                  : "",
+            }}
+            className="flex flex-col outline outline-black p-[7px] rounded-xl transition-all duration-300"
+          >
             <h1 className="p-2 text-center">My Ships</h1>
 
             {myBoard.map((row: Board[], rindex: number) => (
@@ -1140,7 +911,19 @@ function PlayWithRobot() {
           </div>
         </section>
 
-        <section className="flex flex-col outline outline-black p-[7px] rounded-xl">
+        <section
+          style={{
+            outlineWidth:
+              gameStatus === "initiated"
+                ? whosTurn === "player"
+                  ? "4px"
+                  : ""
+                : "",
+          }}
+          className={`${
+            gameStatus === "initiating" && "hidden"
+          } lg:flex flex-col outline outline-black p-[7px] rounded-xl transition-all duration-300`}
+        >
           <h1 className="p-2 text-center">Opponent's Ships</h1>
           {opponentBoard.map((row: Board[], rindex: number) => (
             <div
@@ -1203,37 +986,12 @@ function PlayWithRobot() {
 
         <Toaster position="bottom-center" reverseOrder={false} />
       </div>
-      <footer className="w-full p-3 border-t border-neutral-400">
-        <div className="mx-auto w-[95%] lg:w-[860px] flex flex-row items-center justify-between gap-1">
-          <p>
-            score: <strong>{score}</strong>
-          </p>
-
-          <div className="flex flex-row items-center gap-2">
-            {mute ? (
-              <button
-                className="transition-all duration-200 text-gray-900 hover:bg-neutral-100 focus:outline-none focus:ring-4 focus:ring-gray-200 font-medium rounded-md p-2"
-                onClick={() => setMute(false)}
-              >
-                <VolumeX />
-              </button>
-            ) : (
-              <button
-                className="transition-all duration-200 text-gray-900 hover:bg-neutral-100 focus:outline-none focus:ring-4 focus:ring-gray-200 font-medium rounded-md p-2"
-                onClick={() => setMute(true)}
-              >
-                <Volume2 />
-              </button>
-            )}
-            <button
-              className="transition-all duration-200 text-gray-900 hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100 font-medium rounded-md p-2"
-              onClick={() => setExitGame(true)}
-            >
-              <LogOut />
-            </button>
-          </div>
-        </div>
-      </footer>
+      <Nav
+        userData={userData}
+        setMute={setMute}
+        mute={mute}
+        setExitGame={setExitGame}
+      />
     </main>
   );
 }

@@ -20,7 +20,8 @@ class MySocket {
   }) => void = () => {};
 
   constructor() {
-    this.URL = "http://localhost:5000";
+    // this.URL = "http://localhost:5000";
+    this.URL = process.env.NEXT_PUBLIC_SOCKET_END_POINT as string;
     this.socket = io(this.URL, {
       autoConnect: false,
       transports: ["websocket"],
@@ -86,7 +87,6 @@ class MySocket {
       console.log("waiting to connect");
       await this.sleep(1000);
     }
-    console.log(" this.getId()", this.getId());
     this.socket.emit("join", { room, nickname, playerId: this.getId() });
   }
 

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-function RoomFull() {
+function ReturnToHome({ message }: { message: string }) {
   const [timer, setTimer] = useState<number>(5);
   const router = useRouter();
   useEffect(() => {
@@ -25,7 +25,7 @@ function RoomFull() {
     <div className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center">
       <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]">
         <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
-          The room is Already full!{" "}
+          {message}
         </h1>
         <div className="pb-5">
           You would be redirected automatically to home page in {timer} seconds
@@ -42,4 +42,4 @@ function RoomFull() {
   );
 }
 
-export default RoomFull;
+export default ReturnToHome;

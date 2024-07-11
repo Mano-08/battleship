@@ -20,7 +20,8 @@ class MySocket {
   }) => void = () => {};
 
   constructor() {
-    this.URL = "http://localhost:5000";
+    // this.URL = "http://localhost:5000";
+    this.URL = process.env.NEXT_PUBLIC_SOCKET_END_POINT as string;
     this.socket = io(this.URL, {
       autoConnect: false,
       transports: ["websocket"],

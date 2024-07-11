@@ -1,5 +1,5 @@
 import React from "react";
-import { toast } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 function ShareLink({ room }: { room: string }) {
   function handleCopyLink() {

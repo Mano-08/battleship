@@ -1,18 +1,16 @@
 "use client";
 
-import Notepad from "@/assets/notepad";
-import Trophy from "@/assets/trophy";
 import React, { useEffect, useState } from "react";
 import Cookies from "universal-cookie";
-import Image from "next/image";
 import SignUp from "./dialog/SignUp";
 import { useRouter } from "next/navigation";
-import MySocket from "@/utils/socket";
 import OppImage from "../../public/opp.png";
 import PlayerImage from "../../public/player.png";
 import { v4 as uuidv4 } from "uuid";
-import { SignUpModes } from "@/utils/types";
+import { CustomJwtPayload, SignUpModes } from "@/utils/types";
 import { britney } from "@/app/fonts";
+import { jwtDecode } from "jwt-decode";
+import Image from "next/image";
 // import { mysocket } from "@/utils/socket";
 
 // const mysocket = new MySocket();
@@ -41,6 +39,12 @@ function Hero() {
     if (!token) {
       setDisplay(mode);
       return false;
+    } else {
+      const { nickname } = jwtDecode<CustomJwtPayload>(token);
+      if (nickname === "") {
+        setDisplay(mode);
+        return false;
+      }
     }
     return true;
   }
@@ -103,12 +107,18 @@ function Hero() {
           </div>
 
           <div className="relative flex flex-row items-center lg:w-auto">
-            <img
+            <Image
+              height={320}
+              width={320}
+              priority={true}
               src={OppImage.src}
               alt="battle ship"
               className="relative z-[200] hover:scale-105 -left-16 lg:left-0 transition-all duration-1000 -rotate-3 h-[230px] lg:h-[320px] w-auto bg-[--orange] rounded-lg overflow-hidden"
             />
-            <img
+            <Image
+              height={320}
+              width={320}
+              priority={true}
               src={PlayerImage.src}
               alt="battle ship"
               className="absolute hover:scale-105 transition-all duration-1000 z-[300] left-16 lg:left-36  bottom-0 rotate-12 h-[230px] lg:h-[320px] w-auto bg-[--orange] rounded-lg overflow-hidden"

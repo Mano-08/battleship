@@ -20,6 +20,7 @@
     "react-dom": "^18",
     "react-hot-toast": "^2.4.1",
     "react-use": "^17.5.0",
+    "sharp": "^0.33.4",
     "socket.io-client": "^4.7.5",
     "universal-cookie": "^7.1.4",
     "uuid": "^10.0.0"

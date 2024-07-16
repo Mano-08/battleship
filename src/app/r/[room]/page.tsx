@@ -53,12 +53,16 @@ function Page() {
     }
     const dataFromToken = jwtDecode<CustomJwtPayload>(token);
     setUserData(dataFromToken);
+    if (dataFromToken.nickname === "") {
+      setLoggedin(false);
+      return;
+    }
     joinRoom(dataFromToken.nickname);
 
-    setTimeout(
-      () => setDisplay((prev) => (prev === "share_link" ? "share_link" : "")),
-      3000
-    );
+    // setTimeout(
+    //   () => setDisplay((prev) => (prev === "share_link" ? "share_link" : "")),
+    //   3000
+    // );
 
     mysocket.setRoomFullCallback(handleRoomFull);
     mysocket.setOnPlayerJoined(handlePlayerJoined);
@@ -141,6 +145,7 @@ function Page() {
         setDisplay("share_link");
       } else {
         setWhosTurn("opponent");
+        setDisplay("");
       }
     } else {
       toast.success(`${nickname} joined`);
@@ -152,10 +157,11 @@ function Page() {
     setRoomFull(true);
   }
 
-  function handleLoggedIn(nickname: string) {
+  function handleLoggedIn(userData: UserData) {
     setLoggedin(true);
     setDisplay("");
-    joinRoom(nickname);
+    setUserData(userData);
+    joinRoom(userData.nickname);
   }
 
   if (roomFull) {

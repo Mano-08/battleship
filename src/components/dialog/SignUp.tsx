@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import { db } from "@/db/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { jwtDecode } from "jwt-decode";
-import { CustomJwtPayload } from "@/utils/types";
+import { CustomJwtPayload, UserData } from "@/utils/types";
 
 type setDisplayProp = React.Dispatch<React.SetStateAction<string | null>>;
 
@@ -16,7 +16,7 @@ function SignUp({
   callback,
 }: {
   setDisplay: null | setDisplayProp;
-  callback: (nickname: string) => void;
+  callback: (userData: UserData) => void;
 }) {
   const [nicknameInput, setNicknameInput] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -58,7 +58,7 @@ function SignUp({
         body: JSON.stringify(data),
       });
       if (res.status === 200) {
-        callback(nicknameInput);
+        callback(data);
       }
     } catch (error) {
       console.log(error);

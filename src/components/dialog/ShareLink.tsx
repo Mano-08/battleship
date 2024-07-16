@@ -14,10 +14,16 @@ function ShareLink({ room }: { room: string }) {
         </h1>
         <p className="pt-3 pb-2">Click to copy the URL</p>
         <button
-          onClick={handleCopyLink}
-          className="transition-all duration-200 min-w-[120px] focus:outline-none text-neutral-200 bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-300 font-medium rounded-lg px-5 py-2"
+          onClick={(e) => {
+            handleCopyLink();
+            e.currentTarget.blur();
+          }}
+          className="transition-all duration-200 break-words min-w-[120px] focus:outline-none text-neutral-200 bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-300 font-medium rounded-lg px-5 py-2"
         >
-          {`${window.location.origin}/r/${room}`}{" "}
+          {`${window.location.origin.slice(0, 12)}...${room.slice(
+            room.length - 12,
+            room.length
+          )}`}{" "}
         </button>
       </div>
     </div>

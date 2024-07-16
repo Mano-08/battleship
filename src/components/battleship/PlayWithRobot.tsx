@@ -84,6 +84,10 @@ function PlayWithRobot() {
     const dataFromToken = jwtDecode<CustomJwtPayload>(token);
     setUserData(dataFromToken);
 
+    if (dataFromToken.nickname === "") {
+      setLoggedin(false);
+    }
+
     if (splashAudioRef.current) {
       splashAudioRef.current.volume = 0.2;
     }
@@ -282,11 +286,8 @@ function PlayWithRobot() {
     }
   }, [randomOpponentBoard]);
 
-  function handleLoggedIn(nickname: string) {
-    setUserData((old) => {
-      const newData = { ...old, nickname: nickname };
-      return newData;
-    });
+  function handleLoggedIn(userData: UserData) {
+    setUserData(userData);
     setLoggedin(true);
   }
 

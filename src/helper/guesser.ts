@@ -133,6 +133,16 @@ export async function guessNextMove({
               };
               continue;
             }
+          } else {
+            lastHits[lastHits.length - 1] = {
+              ...lastHit,
+              direction: "vertical",
+            };
+            lastHit = {
+              ...lastHit,
+              direction: "vertical",
+            };
+            continue;
           }
         } else {
           let curr = row;
@@ -175,6 +185,16 @@ export async function guessNextMove({
               };
               continue;
             }
+          } else {
+            lastHits[lastHits.length - 1] = {
+              ...lastHit,
+              direction: "horizontal",
+            };
+            lastHit = {
+              ...lastHit,
+              direction: "horizontal",
+            };
+            continue;
           }
         }
       }

@@ -154,7 +154,7 @@ function OpponentBoard({
   }, []);
 
   useEffect(() => {
-    if (Object.keys(wreckedShips).length === 1) {
+    if (Object.keys(wreckedShips).length === 5) {
       toast.success("You win!");
       setGameStatus("gameover");
       setWinner("player");

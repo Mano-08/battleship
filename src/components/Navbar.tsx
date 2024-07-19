@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import React from "react";
 import Link from "next/link";
 import { v4 as uuidv4 } from "uuid";
@@ -12,11 +12,12 @@ import { Anchor, Settings } from "lucide-react";
 import { auth, db, provider } from "@/db/firebase";
 import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import toast from "react-hot-toast";
-import { doc, setDoc } from "firebase/firestore";
-import { fetchUserData } from "@/utils/utils";
+import { fetchUserData, pushDataToDB } from "@/utils/utils";
 
 function Navbar() {
   const [googleAuth, setGoogleAuth] = useState<boolean>(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
   const [openSettings, setOpenSettings] = useState<boolean>(false);
   const [userData, setUserData] = useState<UserData>(defaultUserData);
   const cookies = new Cookies();
@@ -43,7 +44,21 @@ function Navbar() {
     setUserData(dataFromToken);
   }, []);
 
-  useEffect(() => {}, []);
+  const handleClickOutside = (event: any) => {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target) &&
+      buttonRef.current &&
+      !buttonRef.current.contains(event.target)
+    ) {
+      setOpenSettings(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   function handleSaveProgress() {
     // STEP 1 : Sign in with google
@@ -52,7 +67,7 @@ function Navbar() {
         // This gives you a Google Access Token. You can use it to access the Google API.
         // const credential = GoogleAuthProvider.credentialFromResult(result);
         const user = result.user;
-        const gmailAcc = user.email;
+        const gmailAcc = user.email as string;
         //  STEP 2 : Check if data is there in DB
         const res = await fetchUserData(gmailAcc as string);
 
@@ -86,11 +101,7 @@ function Navbar() {
 
         if (res === null) {
           // STEP 3 :  push to DB
-          try {
-            await setDoc(doc(db, "users", data.username), data);
-          } catch (e) {
-            console.error("Error adding document: ", e);
-          }
+          pushDataToDB(data);
         }
       })
       .catch(() => {
@@ -131,10 +142,12 @@ function Navbar() {
                     : "block",
               }}
             >
-              score: <strong>{userData.score}</strong>
+              <strong className="mr-3">{userData.nickname}</strong> score:{" "}
+              <strong>{userData.score}</strong>
             </div>
 
             <div
+              ref={buttonRef}
               className={`${
                 openSettings && "rotate-45"
               } transition-all duration-300  cursor-pointer`}
@@ -143,6 +156,7 @@ function Navbar() {
               <Settings />
             </div>
             <div
+              ref={dropdownRef}
               className={`${
                 openSettings ? "flex" : "hidden"
               } flex-col items-start p-2 rounded-lg bg-orange-50 absolute z-[500] top-9 right-0`}
@@ -198,7 +212,7 @@ function Navbar() {
   );
 }
 
-function GoogleIcon() {
+export function GoogleIcon() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

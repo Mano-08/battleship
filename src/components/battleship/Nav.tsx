@@ -16,10 +16,11 @@ function Nav({
   mute: boolean;
 }) {
   return (
-    <footer className="w-full p-3 border-t border-neutral-400">
+    <nav className="w-full p-3 border-t border-neutral-400">
       <div className="mx-auto w-full lg:w-[860px] flex flex-row items-center justify-between gap-1">
         <p>
-          score: <strong>{userData.score}</strong>
+          score: <strong className="mr-3">{userData.score}</strong>
+          <strong>{userData.nickname}</strong>
         </p>
 
         <div className="flex flex-row items-center gap-2">
@@ -46,7 +47,7 @@ function Nav({
           </button>
         </div>
       </div>
-    </footer>
+    </nav>
   );
 }
 

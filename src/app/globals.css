@@ -72,7 +72,7 @@ button {
 @keyframes popup {
   0% {
     opacity: 0.5;
-    transform: scale(0.1);
+    transform: scale(0.6);
   }
   100% {
     opacity: 1;
@@ -81,5 +81,5 @@ button {
 }
 
 .animate-popup {
-  animation: popup 0.3s ease-in-out;
+  animation: popup 0.2s ease-in-out;
 }

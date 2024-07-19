@@ -8,9 +8,11 @@ import OppImage from "../../public/opp.png";
 import PlayerImage from "../../public/player.png";
 import { v4 as uuidv4 } from "uuid";
 import { CustomJwtPayload, SignUpModes } from "@/utils/types";
-import { britney } from "@/app/fonts";
+import { britney, monsterrat } from "@/app/fonts";
 import { jwtDecode } from "jwt-decode";
 import Image from "next/image";
+import { findUserCount } from "@/utils/utils";
+import Leaderboard from "./Leaderboard";
 // import { mysocket } from "@/utils/socket";
 
 // const mysocket = new MySocket();
@@ -18,12 +20,16 @@ import Image from "next/image";
 function Hero() {
   const [display, setDisplay] = useState<string | null>(null);
   const { push } = useRouter();
+  const [userCount, setUserCount] = useState<number>(0);
 
   // useEffect(() => {
   //   mysocket.connect();
   //   return () => mysocket.disconnect();
   // }, []);
 
+  useEffect(() => {
+    findUserCount(setUserCount);
+  }, []);
   function createRoom() {
     const room = uuidv4();
     push(`/r/${room}`);
@@ -49,6 +55,10 @@ function Hero() {
     return true;
   }
 
+  function handleCloseDialog() {
+    setDisplay(null);
+  }
+
   function handlePlayWithFriend() {
     if (userExist({ mode: "signup-multiplayer" })) {
       createRoom();
@@ -62,7 +72,7 @@ function Hero() {
   }
 
   useEffect(() => {
-    if (display) {
+    if (display !== null) {
       document.getElementsByTagName("html")[0].style.overflowY = "hidden";
     } else {
       document.getElementsByTagName("html")[0].style.overflowY = "auto";
@@ -78,6 +88,10 @@ function Hero() {
         <SignUp setDisplay={setDisplay} callback={enterBattlefield} />
       )}
 
+      {display === "leaderboard" && (
+        <Leaderboard handleCloseDialog={handleCloseDialog} />
+      )}
+
       <div className="min-h-[85vh] w-full flex flex-col justify-end pb-[10vh] lg:pb-[15vh]">
         <div className="mx-auto w-[95%] lg:w-[860px] lg:gap-1 flex flex-col-reverse lg:flex-row gap-5 justify-between items-center">
           <div className="flex flex-col lg:text-left text-center gap-5">
@@ -88,6 +102,21 @@ function Hero() {
               Dominate the seas, one battle at a time <br />
               Sink your enemies before they sink you!
             </p>
+            <div
+              style={{ display: userCount === 0 ? "hidden" : "block" }}
+              className={
+                monsterrat.className +
+                " text-xs lg:text-left text-center lg:text-sm text-neutral-500"
+              }
+            >
+              Played by <strong>{userCount}</strong> captains around the world!{" "}
+              <button
+                onClick={() => setDisplay("leaderboard")}
+                className="underline"
+              >
+                leaderboard
+              </button>
+            </div>
             <div className="grid grid-rows-2 grid-cols-1  lg:grid-cols-2 lg:grid-rows-1 gap-4 font-semibold">
               <button
                 onClick={handlePlayWithFriend}

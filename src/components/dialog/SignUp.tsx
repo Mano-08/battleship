@@ -4,10 +4,9 @@ import React, { FormEvent, useEffect, useState } from "react";
 import Cookies from "universal-cookie";
 import Loading from "../Loading";
 import { v4 as uuidv4 } from "uuid";
-import { db } from "@/db/firebase";
-import { doc, setDoc } from "firebase/firestore";
 import { jwtDecode } from "jwt-decode";
 import { CustomJwtPayload, UserData } from "@/utils/types";
+import { createRecordInDB } from "@/utils/utils";
 
 type setDisplayProp = React.Dispatch<React.SetStateAction<string | null>>;
 
@@ -65,11 +64,7 @@ function SignUp({
     }
 
     // Create a record in Firebase DB
-    try {
-      await setDoc(doc(db, "users", data.username), data);
-    } catch (e) {
-      console.error("Error adding document: ", e);
-    }
+    createRecordInDB(data);
 
     setLoading(false);
   };

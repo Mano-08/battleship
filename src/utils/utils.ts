@@ -2,7 +2,9 @@ import { db } from "@/db/firebase";
 import {
   collection,
   doc,
+  getCountFromServer,
   getDocs,
+  orderBy,
   query,
   setDoc,
   where,
@@ -15,6 +17,14 @@ export function sleep(duration: number): Promise<void> {
       resolve();
     }, duration);
   });
+}
+
+export async function findUserCount(
+  setUserCount: React.Dispatch<React.SetStateAction<number>>
+) {
+  const coll = collection(db, "users");
+  const snapshot = await getCountFromServer(coll);
+  setUserCount(snapshot.data().count);
 }
 
 export async function fetchUserData(gmailAcc: string) {
@@ -67,6 +77,48 @@ export async function updateScoreIntoCookie({
   }
 
   // Update Data Into DB
+  try {
+    await setDoc(doc(db, "users", data.username), data);
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+}
+
+export const fetchUserScores = async (
+  username: string
+): Promise<{ position: number; topPlayers: UserData[] }> => {
+  const q = query(collection(db, "users"), orderBy("score", "desc"));
+  const querySnapshot = await getDocs(q);
+  const topPlayers: UserData[] = [];
+  let position = 0;
+  let index = 0;
+  for (const doc of querySnapshot.docs) {
+    const userData = doc.data() as UserData;
+    if (index < 10) {
+      topPlayers.push(userData);
+    }
+    console.log(userData, username);
+    if (userData.username === username) {
+      position = index + 1;
+      if (index >= 9) {
+        break;
+      }
+    }
+    index += 1;
+  }
+
+  return { position, topPlayers };
+};
+
+export async function createRecordInDB(data: UserData) {
+  try {
+    await setDoc(doc(db, "users", data.username), data);
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+}
+
+export async function pushDataToDB(data: UserData) {
   try {
     await setDoc(doc(db, "users", data.username), data);
   } catch (e) {

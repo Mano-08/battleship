@@ -1,10 +1,12 @@
 "use client";
 
+import { GoogleIcon } from "@/components/Navbar";
 import Link from "next/link";
 import React from "react";
 import toast, { Toaster } from "react-hot-toast";
 
 function Page() {
+  const [feedback, setFeedback] = React.useState("");
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     try {
@@ -15,11 +17,11 @@ function Page() {
           Accept: "application/json",
         },
       });
-      e.currentTarget.reset();
+      setFeedback("");
       toast.success("Thanks for the Feedback!");
     } catch (error) {
       console.error(error);
-      toast.success("Feedback submission failed!");
+      toast.error("Feedback submission failed!");
     }
   }
   return (
@@ -137,6 +139,8 @@ function Page() {
               rows={7}
               autoFocus
               required
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
               className="resize-none rounded-2xl p-3 w-full focus:ring-orange-200 outline outline-black focus:outline-[2.5px] bg-transparent"
             />
 
@@ -152,26 +156,24 @@ function Page() {
 
         <div className="flex flex-col gap-3">
           <h1 className="text-2xl font-semibold">CREDITS</h1>
-          <span className=" whitespace-nowrap">
-            <a
-              href="https://iconscout.com/icons/google"
-              className="underline text-sm"
-              target="_blank"
-            >
-              Google
-            </a>{" "}
-            by{" "}
-            <a
-              href="https://iconscout.com/contributors/icon-mafia"
-              className="underline text-sm"
-            >
-              Icon Mafia
-            </a>{" "}
-            on{" "}
-            <a href="https://iconscout.com" className="underline text-sm">
-              IconScout
-            </a>
-          </span>
+          <div className="flex flex-row items-center gap-2">
+            <Link href="https://iconscout.com/icons/google" target="_blank">
+              <GoogleIcon />
+            </Link>
+            <span className=" whitespace-nowrap">
+              by{" "}
+              <a
+                href="https://iconscout.com/contributors/icon-mafia"
+                className="underline text-sm"
+              >
+                Icon Mafia
+              </a>{" "}
+              on{" "}
+              <a href="https://iconscout.com" className="underline text-sm">
+                IconScout
+              </a>
+            </span>
+          </div>
         </div>
       </section>
     </main>

@@ -60,6 +60,8 @@ function OpponentBoard({
   useEffect(() => {
     if (gameStatus === "restart") {
       resetBoard();
+      setWinner(null);
+      setGameStatus("initiating");
     }
   }, [gameStatus]);
 
@@ -262,7 +264,7 @@ function OpponentBoard({
         >
           {row.map((ele: Board, cindex) => (
             <div
-              className="h-[30px] w-[30px] flex items-center justify-center"
+              className="h-[25.5px] sm:h-[30px] w-[25.5px] sm:w-[30px] flex items-center justify-center"
               key={`ob-r-${rindex}-c-${cindex}`}
               id={`ob-r-${rindex}-c-${cindex}`}
               onMouseEnter={() =>

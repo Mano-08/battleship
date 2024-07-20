@@ -38,10 +38,10 @@ function GameOver({
   return (
     <div className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center">
       <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]">
-        <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
+        <h1 className="text-[1.1rem] sm:text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
           {message === "play_again" ? "Play Again?" : "Game Over"}
         </h1>
-        <div className="p-2">
+        <div className="p-2 text-sm sm:text-base">
           {message === "play_again" ? (
             <p>Your friend wants to play the game again</p>
           ) : message === "game_lost" ? (
@@ -60,13 +60,13 @@ function GameOver({
         <div className="flex flex-row justify-evenly">
           <button
             onClick={message === "play_again" ? handleSendAck : handlePlayAgain}
-            className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-300 font-medium rounded-lg px-5 py-1"
+            className="transition-all text-sm sm:text-base duration-200 min-w-[100px] sm:min-w-[120px] focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-300 font-medium rounded-lg px-5 py-1"
           >
             {message === "play_again" ? "Accept" : "Play Again"}
           </button>
           <Link
             href="/"
-            className="min-w-[120px] focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-300 font-medium rounded-lg px-5 py-1"
+            className="min-w-[100px] sm:min-w-[120px] text-sm sm:text-base focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-300 font-medium rounded-lg px-5 py-1"
           >
             {message === "play_again" ? "Reject" : "Exit"}
           </Link>

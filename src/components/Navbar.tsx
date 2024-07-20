@@ -126,7 +126,7 @@ function Navbar() {
   }
   return (
     <header className="w-full p-3 border-t border-neutral-400 min-h-[10vh] lg:h-auto py-5">
-      <nav className="mx-auto w-[95%] lg:w-[860px] gap-1 flex flex-row justify-between items-center">
+      <nav className="mx-auto w-full lg:w-[860px] gap-1 flex flex-row justify-between items-center">
         <Link href="/">
           <Anchor />
         </Link>

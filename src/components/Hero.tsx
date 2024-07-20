@@ -77,6 +77,9 @@ function Hero() {
     } else {
       document.getElementsByTagName("html")[0].style.overflowY = "auto";
     }
+    return () => {
+      document.getElementsByTagName("html")[0].style.overflowY = "auto";
+    };
   }, [display]);
 
   return (

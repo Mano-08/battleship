@@ -96,15 +96,22 @@ export const fetchUserScores = async (
     const userData = doc.data() as UserData;
     if (index < 10) {
       topPlayers.push(userData);
-    }
-    console.log(userData, username);
-    if (userData.username === username) {
-      position = index + 1;
-      if (index >= 9) {
-        break;
-      }
+    } else {
+      break;
     }
     index += 1;
+  }
+
+  index = 0;
+  if (username !== "") {
+    for (const doc of querySnapshot.docs) {
+      const userData = doc.data() as UserData;
+      if (userData.username === username) {
+        position = index + 1;
+        break;
+      }
+      index += 1;
+    }
   }
 
   return { position, topPlayers };

@@ -176,12 +176,13 @@ function Page() {
     <main className="min-h-screen flex flex-col justify-between px-1.5 sm:px-10">
       <div className="flex grow flex-col items-center gap-5 py-10 justify-center lg:flex-row">
         <MyBoard
+          setWinner={setWinner}
           setPlayerReady={setPlayerReady}
           gameStatus={gameStatus}
           winner={winner}
           mute={mute}
+          setGameStatus={setGameStatus}
           whosTurn={whosTurn}
-          display={display}
           mysocket={mysocket}
           playerReady={playerReady}
           setWhosTurn={setWhosTurn}

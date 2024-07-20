@@ -60,6 +60,8 @@ function OpponentBoard({
   useEffect(() => {
     if (gameStatus === "restart") {
       resetBoard();
+      setWinner(null);
+      setGameStatus("initiating");
     }
   }, [gameStatus]);
 

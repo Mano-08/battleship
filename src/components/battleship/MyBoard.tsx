@@ -19,9 +19,10 @@ import useWindowSize from "react-use/lib/useWindowSize";
 
 function MyBoard({
   gameStatus,
+  setWinner,
+  setGameStatus,
   mysocket,
   playerReady,
-  display,
   winner,
   whosTurn,
   setWhosTurn,
@@ -29,8 +30,9 @@ function MyBoard({
   setPlayerReady,
 }: {
   gameStatus: string;
+  setGameStatus: React.Dispatch<React.SetStateAction<string>>;
   mysocket: MySocket;
-  display: displayOptions;
+  setWinner: React.Dispatch<React.SetStateAction<string | null>>;
   winner: string | null;
   playerReady: boolean;
   mute: boolean;
@@ -71,6 +73,8 @@ function MyBoard({
       const randomCoord = getRandomCoord();
       setRandomBoard(randomCoord);
       setMyShipPlacement(randomCoord);
+      setGameStatus("initiating");
+      setWinner(null);
     }
   }, [gameStatus]);
 

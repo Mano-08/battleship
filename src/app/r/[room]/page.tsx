@@ -173,7 +173,7 @@ function Page() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col justify-between px-10">
+    <main className="min-h-screen flex flex-col justify-between px-1.5 sm:px-10">
       <div className="flex grow flex-col items-center gap-5 py-10 justify-center lg:flex-row">
         <MyBoard
           setPlayerReady={setPlayerReady}

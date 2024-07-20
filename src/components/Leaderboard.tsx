@@ -82,7 +82,7 @@ const Leaderboard = ({
                 >
                   <span className="flex flex-row items-center gap-4 ">
                     <span className="w-4">{index + 1}.</span>{" "}
-                    <span className="w-[200px] text-left overflow-hidden whitespace-nowrap text-ellipsis">
+                    <span className="w-[150px] sm:w-[200px] text-left overflow-hidden whitespace-nowrap text-ellipsis">
                       {player.nickname}
                     </span>{" "}
                   </span>{" "}
@@ -100,7 +100,7 @@ const Leaderboard = ({
               >
                 <span className="flex flex-row items-center gap-4 ">
                   <span className="w-4">{index + 1}.</span>{" "}
-                  <span className="w-[200px] text-left overflow-hidden whitespace-nowrap text-ellipsis">
+                  <span className="w-[150px] sm:w-[200px] text-left overflow-hidden whitespace-nowrap text-ellipsis">
                     {player.nickname}
                   </span>{" "}
                 </span>{" "}

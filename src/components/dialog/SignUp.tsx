@@ -90,7 +90,7 @@ function SignUp({
 
         <form
           onSubmit={handleSubmit}
-          className="flex flex-row items-center justify-between gap-5 p-5"
+          className="flex flex-row items-center justify-between gap-3 sm:gap-5 py-5"
         >
           <input
             type="text"

@@ -114,7 +114,7 @@ const Leaderboard = ({
           >
             <span className="flex flex-row items-center gap-4 ">
               <span className="w-4">{userPosition}.</span>{" "}
-              <span className="w-[200px] text-left overflow-hidden whitespace-nowrap text-ellipsis">
+              <span className="w-[150px] sm:w-[200px] text-left overflow-hidden whitespace-nowrap text-ellipsis">
                 {userData.nickname}
               </span>{" "}
             </span>{" "}

@@ -81,12 +81,18 @@ function PlayWithRobot() {
       setLoggedin(false);
       return;
     }
+
     const dataFromToken = jwtDecode<CustomJwtPayload>(token);
     setUserData(dataFromToken);
 
     if (dataFromToken.nickname === "") {
       setLoggedin(false);
     }
+
+    toast("Earn 250 points by winning within 40 moves!", {
+      duration: 6000,
+      style: { textAlign: "center" },
+    });
 
     if (splashAudioRef.current) {
       splashAudioRef.current.volume = 0.2;
@@ -860,7 +866,7 @@ function PlayWithRobot() {
               >
                 {row.map((ele: Board, cindex) => (
                   <div
-                    className="h-[30px] w-[30px] flex items-center justify-center"
+                    className="h-[25.5px] sm:h-[30px] w-[25.5px] sm:w-[30px] flex items-center justify-center"
                     key={`mb-r-${rindex}-c-${cindex}`}
                     id={`mb-r-${rindex}-c-${cindex}`}
                     onMouseEnter={() =>
@@ -893,15 +899,15 @@ function PlayWithRobot() {
                         ele.ship
                           ? ele.details.start
                             ? ele.details.vertical
-                              ? "h-[30px] w-[25px] rounded-t-full outline-black outline"
-                              : "h-[25px] w-[30px] rounded-s-full outline-black outline"
+                              ? "h-[25.5px] sm:h-[30px] w-[20.5px] sm:w-[25px] rounded-t-full outline-black outline"
+                              : "h-[20.5px] sm:h-[25px] w-[25.5px] sm:w-[30px] rounded-s-full outline-black outline"
                             : ele.details.end
                             ? ele.details.vertical
-                              ? "h-[30px] w-[25px] rounded-b-md outline-black outline"
-                              : "h-[25px] w-[30px] rounded-e-md outline-black outline"
+                              ? "h-[25.5px] sm:h-[30px] w-[20.5px] sm:w-[25px] rounded-b-md outline-black outline"
+                              : "h-[20.5px] sm:h-[25px] w-[25.5px] sm:w-[30px] rounded-e-md outline-black outline"
                             : ele.details.vertical
-                            ? "w-[25px] h-[30px] outline-black outline"
-                            : "w-[30px] h-[25px] outline-black outline"
+                            ? "w-[20.5px] sm:w-[25px] h-[25.5px] sm:h-[30px] outline-black outline"
+                            : "w-[25.5px] sm:w-[30px] h-[20.5px] sm:h-[25px] outline-black outline"
                           : "rounded-md h-[10px] w-[10px] outline-[0.01rem]"
                       }`}
                     ></div>
@@ -934,7 +940,7 @@ function PlayWithRobot() {
             >
               {row.map((ele: Board, cindex) => (
                 <div
-                  className="h-[30px] w-[30px] flex items-center justify-center"
+                  className="h-[25.5px] sm:h-[30px] w-[25.5px] sm:w-[30px] flex items-center justify-center"
                   key={`ob-r-${rindex}-c-${cindex}`}
                   id={`ob-r-${rindex}-c-${cindex}`}
                   onMouseEnter={() =>

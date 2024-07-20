@@ -130,7 +130,7 @@ function Hero() {
                 type="button"
                 className="outline-black outline p-3 lg:p-4 rounded-lg"
               >
-                Quick Game
+                Play with Robot
               </button>
             </div>
           </div>

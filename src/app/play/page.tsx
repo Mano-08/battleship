@@ -4,7 +4,8 @@ import React from "react";
 
 export const metadata: Metadata = {
   title: "Play Battleship",
-  description: "Play battleship",
+  description:
+    "Play Battleship with Robot; Strategize, Compete, and Have Fun!!",
 };
 
 function Page() {

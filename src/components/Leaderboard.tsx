@@ -39,6 +39,8 @@ const Leaderboard = ({
       const dataFromToken = jwtDecode<CustomJwtPayload>(token);
       setUserData(dataFromToken);
       getLeaderboardData(dataFromToken.username);
+    } else {
+      getLeaderboardData("");
     }
     setLoading(false);
   }, []);

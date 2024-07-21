@@ -13,6 +13,7 @@ import { jwtDecode } from "jwt-decode";
 import Image from "next/image";
 import { findUserCount } from "@/utils/utils";
 import Leaderboard from "./Leaderboard";
+import HowToPlay from "./dialog/HowToPlay";
 // import { mysocket } from "@/utils/socket";
 
 // const mysocket = new MySocket();
@@ -95,6 +96,10 @@ function Hero() {
         <Leaderboard handleCloseDialog={handleCloseDialog} />
       )}
 
+      {display === "how-to-play" && (
+        <HowToPlay handleCloseDialog={handleCloseDialog} />
+      )}
+
       <div className="min-h-[85vh] w-full flex flex-col justify-end pb-[10vh] lg:pb-[15vh]">
         <div className="mx-auto w-[95%] lg:w-[860px] lg:gap-1 flex flex-col-reverse lg:flex-row gap-5 justify-between items-center">
           <div className="flex flex-col lg:text-left text-center gap-5">
@@ -113,12 +118,21 @@ function Hero() {
               }
             >
               Played by <strong>{userCount}</strong> captains around the world!{" "}
-              <button
-                onClick={() => setDisplay("leaderboard")}
-                className="underline"
-              >
-                leaderboard
-              </button>
+              <br />
+              <div className="flex flex-row items-center gap-2">
+                <button
+                  onClick={() => setDisplay("leaderboard")}
+                  className="underline"
+                >
+                  leaderboard
+                </button>
+                <button
+                  onClick={() => setDisplay("how-to-play")}
+                  className="underline"
+                >
+                  how to play?
+                </button>
+              </div>
             </div>
             <div className="grid grid-rows-2 grid-cols-1  lg:grid-cols-2 lg:grid-rows-1 gap-4 font-semibold">
               <button

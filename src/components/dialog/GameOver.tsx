@@ -6,12 +6,14 @@ import Link from "next/link";
 import React, { useState } from "react";
 import Loading from "../Loading";
 import { displayOptions } from "@/utils/types";
+import { X } from "lucide-react";
 
 function GameOver({
   room,
   setPlayAgain,
   setDisplay,
   playAgain,
+  setShowGameOverDialog,
   message,
   setGameStatus,
   mysocket,
@@ -20,8 +22,11 @@ function GameOver({
   room: string;
   message: string;
   mysocket: MySocket;
+  setShowGameOverDialog: React.Dispatch<React.SetStateAction<boolean>>;
   setDisplay: React.Dispatch<React.SetStateAction<displayOptions>>;
-  setGameStatus: React.Dispatch<React.SetStateAction<string>>;
+  setGameStatus: React.Dispatch<
+    React.SetStateAction<"initiating" | "gameover" | "restart" | "initiated">
+  >;
   setPlayAgain: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   function handlePlayAgain() {
@@ -36,8 +41,20 @@ function GameOver({
     mysocket.send("acceptPlayAgain", { playerId: mysocket.getId(), room });
   }
   return (
-    <div className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center">
-      <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]">
+    <div
+      onClick={() => setShowGameOverDialog(false)}
+      className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex relative text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]"
+      >
+        <button
+          className="absolute top-3 right-3 rounded-full bg-red-100 hover:bg-red-200 p-1"
+          onClick={() => setShowGameOverDialog(false)}
+        >
+          <X size={15} />
+        </button>
         <h1 className="text-[1.1rem] sm:text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
           {message === "play_again" ? "Play Again?" : "Game Over"}
         </h1>
@@ -58,18 +75,18 @@ function GameOver({
         )}
 
         <div className="flex flex-row justify-evenly">
-          <button
-            onClick={message === "play_again" ? handleSendAck : handlePlayAgain}
-            className="transition-all text-sm sm:text-base duration-200 min-w-[100px] sm:min-w-[120px] focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-300 font-medium rounded-lg px-5 py-1"
-          >
-            {message === "play_again" ? "Accept" : "Play Again"}
-          </button>
           <Link
             href="/"
-            className="min-w-[100px] sm:min-w-[120px] text-sm sm:text-base focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-300 font-medium rounded-lg px-5 py-1"
+            className="transition-all duration-200 min-w-[100px] sm:min-w-[120px] text-sm sm:text-base whitespace-nowrap overflow-hidden text-white bg-black outline outline-black font-medium rounded-lg px-5 py-1"
           >
             {message === "play_again" ? "Reject" : "Exit"}
           </Link>
+          <button
+            onClick={message === "play_again" ? handleSendAck : handlePlayAgain}
+            className="transition-all text-sm sm:text-base duration-200 min-w-[100px] sm:min-w-[120px] whitespace-nowrap overflow-hidden text-black outline outline-black font-medium rounded-lg px-5 py-1"
+          >
+            {message === "play_again" ? "Accept" : "Play Again"}
+          </button>
         </div>
       </div>
     </div>

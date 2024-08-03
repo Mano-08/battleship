@@ -12,21 +12,23 @@ import React from "react";
 
 function Nav({
   userData,
+  showGameOverDialog,
+  setShowGameOverDialog,
   setExitGame,
   gameStatus,
   setGameStatus,
-  showGameOverDialog,
-  setShowGameOverDialog,
   setMute,
   mute,
 }: {
   userData: UserData;
-  gameStatus: "initiating" | "initiated" | "gameover";
-  showGameOverDialog: boolean;
+  showGameOverDialog: undefined | boolean;
+  setShowGameOverDialog:
+    | undefined
+    | React.Dispatch<React.SetStateAction<boolean>>;
+  gameStatus: "initiating" | "gameover" | "restart" | "initiated";
   setGameStatus: React.Dispatch<
-    React.SetStateAction<"initiating" | "initiated" | "gameover">
+    React.SetStateAction<"initiating" | "gameover" | "restart" | "initiated">
   >;
-  setShowGameOverDialog: React.Dispatch<React.SetStateAction<boolean>>;
   setExitGame: React.Dispatch<React.SetStateAction<boolean>>;
   setMute: React.Dispatch<React.SetStateAction<boolean>>;
   mute: boolean;
@@ -40,14 +42,26 @@ function Nav({
         </p>
 
         <div className="flex flex-row items-center gap-2">
-          {gameStatus === "gameover" && (
-            <button
-              className="transition-all duration-200 text-gray-900 focus:ring-4 focus:ring-orange-200 font-medium rounded-md p-2"
-              onClick={() => setGameStatus("initiating")}
-            >
-              <RotateCcw />
-            </button>
-          )}
+          {gameStatus === "gameover" &&
+            (showGameOverDialog !== undefined ? (
+              <button
+                className={`${
+                  !showGameOverDialog && "animate-pulse"
+                } transition-all duration-200 text-gray-900 focus:ring-4 focus:ring-orange-200 font-medium rounded-md p-2`}
+                onClick={() =>
+                  setShowGameOverDialog && setShowGameOverDialog(true)
+                }
+              >
+                <MessageSquareDot />
+              </button>
+            ) : (
+              <button
+                className="transition-all duration-200 text-gray-900 focus:ring-4 focus:ring-orange-200 font-medium rounded-md p-2"
+                onClick={() => setGameStatus("initiating")}
+              >
+                <RotateCcw />
+              </button>
+            ))}
           {mute ? (
             <button
               className="transition-all duration-200 text-gray-900 focus:ring-4 focus:ring-orange-200 font-medium rounded-md p-2"

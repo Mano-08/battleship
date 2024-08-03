@@ -2,6 +2,7 @@
 
 import { Fire, Skeleton } from "@/assets/svgs";
 import { initialBoardConfig } from "@/utils/board";
+import { shipColors } from "@/utils/ships";
 import MySocket from "@/utils/socket";
 import { Board, MyShipPlacement, UserData, WhosTurn } from "@/utils/types";
 import { updateScoreIntoCookie } from "@/utils/utils";
@@ -32,7 +33,9 @@ function OpponentBoard({
   setWhosTurn: React.Dispatch<React.SetStateAction<WhosTurn>>;
   setOpponentReady: React.Dispatch<React.SetStateAction<boolean>>;
   setPlayerReady: React.Dispatch<React.SetStateAction<boolean>>;
-  setGameStatus: React.Dispatch<React.SetStateAction<string>>;
+  setGameStatus: React.Dispatch<
+    React.SetStateAction<"initiating" | "gameover" | "restart" | "initiated">
+  >;
 }) {
   const { room }: { room: string } = useParams();
   const [shipPlacement, setShipPlacement] = useState<MyShipPlacement>({});
@@ -255,59 +258,111 @@ function OpponentBoard({
         gameStatus === "initiating" && "hidden"
       } lg:flex flex-col outline outline-black p-[7px] rounded-xl transition-all duration-300`}
     >
-      <h1 className="p-2 text-center">Opponent's Ships</h1>
-      {opponentBoard.map((row: Board[], rindex: number) => (
-        <div
-          className="flex flex-row"
-          id={`ob-r-${rindex}`}
-          key={`ob-r-${rindex}`}
-        >
-          {row.map((ele: Board, cindex) => (
+      <h1 className="p-2 text-center">Opponent&apos;s Board</h1>
+      {gameStatus !== "gameover"
+        ? opponentBoard.map((row: Board[], rindex: number) => (
             <div
-              className="h-[25.5px] sm:h-[30px] w-[25.5px] sm:w-[30px] flex items-center justify-center"
-              key={`ob-r-${rindex}-c-${cindex}`}
-              id={`ob-r-${rindex}-c-${cindex}`}
-              onMouseEnter={() =>
-                !opponentBoard[rindex][cindex].details.burst &&
-                gameStatus === "initiated" &&
-                setCoord({ row: rindex, col: cindex })
-              }
-              onMouseLeave={() => setCoord(null)}
-              onClick={() =>
-                !opponentBoard[rindex][cindex].details.burst &&
-                gameStatus === "initiated" &&
-                handleDropTorpedo(rindex, cindex)
-              }
+              className="flex flex-row"
+              id={`ob-r-${rindex}`}
+              key={`ob-r-${rindex}`}
             >
-              <div
-                style={
-                  ele.details.burst
-                    ? ele.ship
-                      ? {}
-                      : { background: "#000" }
-                    : { background: "rgb(0,0,0,0.1)" }
-                }
-                className={`${
-                  (!ele.ship && ele.details.burst) || !ele.details.burst
-                    ? "rounded-md h-[10px] w-[10px] outline-[0.01rem]"
-                    : ""
-                } ${
-                  rindex === coord?.row &&
-                  cindex === coord?.col &&
-                  "ring-2 ring-black m-2"
-                }`}
-              >
-                {ele.ship &&
-                  ele.details.burst &&
-                  wreckedShips[ele.details.id] && <Skeleton />}
-                {ele.ship &&
-                  ele.details.burst &&
-                  !wreckedShips[ele.details.id] && <Fire />}
-              </div>
+              {row.map((ele: Board, cindex) => (
+                <div
+                  className="h-[25.5px] sm:h-[30px] w-[25.5px] sm:w-[30px] flex items-center justify-center"
+                  key={`ob-r-${rindex}-c-${cindex}`}
+                  id={`ob-r-${rindex}-c-${cindex}`}
+                  onMouseEnter={() =>
+                    !opponentBoard[rindex][cindex].details.burst &&
+                    gameStatus === "initiated" &&
+                    setCoord({ row: rindex, col: cindex })
+                  }
+                  onMouseLeave={() => setCoord(null)}
+                  onClick={() =>
+                    !opponentBoard[rindex][cindex].details.burst &&
+                    gameStatus === "initiated" &&
+                    handleDropTorpedo(rindex, cindex)
+                  }
+                >
+                  <div
+                    style={
+                      ele.details.burst
+                        ? ele.ship
+                          ? {}
+                          : { background: "#000" }
+                        : { background: "rgb(0,0,0,0.1)" }
+                    }
+                    className={`${
+                      (!ele.ship && ele.details.burst) || !ele.details.burst
+                        ? "rounded-md h-[10px] w-[10px] outline-[0.01rem]"
+                        : ""
+                    } ${
+                      rindex === coord?.row &&
+                      cindex === coord?.col &&
+                      "ring-2 ring-black m-2"
+                    }`}
+                  >
+                    {ele.ship &&
+                      ele.details.burst &&
+                      wreckedShips[ele.details.id] && <Skeleton />}
+                    {ele.ship &&
+                      ele.details.burst &&
+                      !wreckedShips[ele.details.id] && <Fire />}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))
+        : opponentBoard.map((row: Board[], rindex: number) => (
+            <div
+              className="flex flex-row"
+              key={`mb-r-${rindex}`}
+              id={`mb-r-${rindex}`}
+            >
+              {row.map((ele: Board, cindex) => (
+                <div
+                  className="h-[25.5px] sm:h-[30px] w-[25.5px] sm:w-[30px] flex items-center justify-center"
+                  key={`mb-r-${rindex}-c-${cindex}`}
+                  id={`mb-r-${rindex}-c-${cindex}`}
+                >
+                  <div
+                    style={
+                      ele.validHover === null
+                        ? ele.ship
+                          ? ele.details.burst
+                            ? { background: "rgba(7,0,27,0.8)" }
+                            : {
+                                background:
+                                  shipColors[ele.details.id as string],
+                              }
+                          : ele.details.burst
+                          ? { background: "rgba(79,79,79,0.80)" }
+                          : { background: "rgba(0,0,0,0.1)" }
+                        : ele.validHover === true
+                        ? { background: "rgba(0,0,0,0.5)" }
+                        : ele.validHover === false
+                        ? { background: "rgba(195,56,56,0.73)" }
+                        : {}
+                    }
+                    className={`${
+                      ele.ship
+                        ? ele.details.start
+                          ? ele.details.vertical
+                            ? "h-[25.5px] sm:h-[30px] w-[20.5px] sm:w-[25px] rounded-t-full outline-black outline"
+                            : "h-[20.5px] sm:h-[25px] w-[25.5px] sm:w-[30px] rounded-s-full outline-black outline"
+                          : ele.details.end
+                          ? ele.details.vertical
+                            ? "h-[25.5px] sm:h-[30px] w-[20.5px] sm:w-[25px] rounded-b-md outline-black outline"
+                            : "h-[20.5px] sm:h-[25px] w-[25.5px] sm:w-[30px] rounded-e-md outline-black outline"
+                          : ele.details.vertical
+                          ? "w-[20.5px] sm:w-[25px] h-[25.5px] sm:h-[30px] outline-black outline"
+                          : "w-[25.5px] sm:w-[30px] h-[20.5px] sm:h-[25px] outline-black outline"
+                        : "rounded-md h-[10px] w-[10px] outline-[0.01rem]"
+                    }`}
+                  ></div>
+                </div>
+              ))}
             </div>
           ))}
-        </div>
-      ))}
       <audio ref={oppSplashAudioRef} src="/audio/splash.wav"></audio>
       <audio ref={oppExplotionAudioRef} src="/audio/explotion.wav"></audio>
     </section>

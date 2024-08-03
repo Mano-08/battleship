@@ -30,7 +30,9 @@ function MyBoard({
   setPlayerReady,
 }: {
   gameStatus: string;
-  setGameStatus: React.Dispatch<React.SetStateAction<string>>;
+  setGameStatus: React.Dispatch<
+    React.SetStateAction<"initiating" | "gameover" | "restart" | "initiated">
+  >;
   mysocket: MySocket;
   setWinner: React.Dispatch<React.SetStateAction<string | null>>;
   winner: string | null;
@@ -453,7 +455,7 @@ function MyBoard({
         }}
         className="flex flex-col outline outline-black p-[7px] rounded-xl transition-all duration-300"
       >
-        <h1 className="p-2 text-center">My Ships</h1>
+        <h1 className="p-2 text-center">My Board</h1>
         {myBoard.map((row: Board[], rindex: number) => (
           <div
             className="flex flex-row"

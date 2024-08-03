@@ -18,7 +18,7 @@ function ShareLink({ room }: { room: string }) {
             handleCopyLink();
             e.currentTarget.blur();
           }}
-          className="transition-all text-sm sm:text-base duration-200 break-words min-w-[120px] focus:outline-none text-neutral-200 bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-300 font-medium rounded-lg px-5 py-2"
+          className="transition-all text-sm sm:text-base duration-200 break-words min-w-[120px] focus:outline-none text-neutral-200 bg-black focus:ring-4  focus:ring-neutral-300 font-medium rounded-lg px-5 py-2"
         >
           {`${window.location.origin.slice(0, 12)}...${room.slice(
             room.length - 12,

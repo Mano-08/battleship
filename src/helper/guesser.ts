@@ -1,3 +1,4 @@
+import { ships } from "@/utils/ships";
 import { Board } from "@/utils/types";
 import { sleep } from "@/utils/utils";
 
@@ -17,6 +18,7 @@ export async function guessNextMove({
   hitStack,
   setHitStack,
   myBoard,
+  myWreckedShips,
   mute,
   setMyBoard,
   oppExplotionAudioRef,
@@ -238,42 +240,123 @@ export async function guessNextMove({
       }
     } else {
       console.log("INSIDE RANDOM GUESS");
-      const row = Math.floor(Math.random() * 10);
-      const col = Math.floor(Math.random() * 10);
-      if (!myBoard[row][col].details.burst) {
-        setMyBoard((old: Board[][]) => {
-          const newData = [...old];
-          const updatedElement = { ...newData[row][col] };
-          updatedElement.details.burst = true;
-          newData[row][col] = updatedElement;
-          return newData;
-        });
+      while (true) {
+        const row = Math.floor(Math.random() * 10);
+        const col = Math.floor(Math.random() * 10);
+        if (
+          !myBoard[row][col].details.burst &&
+          isPossible({ row, col, myBoard, myWreckedShips })
+        ) {
+          setMyBoard((old: Board[][]) => {
+            const newData = [...old];
+            const updatedElement = { ...newData[row][col] };
+            updatedElement.details.burst = true;
+            newData[row][col] = updatedElement;
+            return newData;
+          });
 
-        if (myBoard[row][col].ship) {
-          !mute && (oppExplotionAudioRef.current as HTMLAudioElement)?.play();
-          const shipId = handleShipBurst(row, col);
-          if (shipId !== null) {
-            lastHits = removeShipFromHitStack(lastHits, shipId);
-            lastHit =
-              lastHits.length > 0 ? lastHits[lastHits.length - 1] : null;
+          if (myBoard[row][col].ship) {
+            !mute && (oppExplotionAudioRef.current as HTMLAudioElement)?.play();
+            const shipId = handleShipBurst(row, col);
+            if (shipId !== null) {
+              lastHits = removeShipFromHitStack(lastHits, shipId);
+              lastHit =
+                lastHits.length > 0 ? lastHits[lastHits.length - 1] : null;
+            } else {
+              lastHit = {
+                row,
+                col,
+                shipId: myBoard[row][col].details.id,
+                direction: null,
+              };
+              lastHits.push(lastHit);
+            }
           } else {
-            lastHit = {
-              row,
-              col,
-              shipId: myBoard[row][col].details.id,
-              direction: null,
-            };
-            lastHits.push(lastHit);
+            !mute && (oppSplashAudioRef.current as HTMLAudioElement)?.play();
+            opponentsTurnOver = true;
           }
-        } else {
-          !mute && (oppSplashAudioRef.current as HTMLAudioElement)?.play();
-          opponentsTurnOver = true;
+
+          break;
         }
-      } else {
-        continue;
       }
     }
     setHitStack(lastHits);
   }
   setWhosTurn("player");
+}
+
+type BoardDetails = {
+  row: number;
+  col: number;
+  myBoard: Board[][];
+  myWreckedShips: {
+    [key: string]: boolean;
+  };
+};
+
+function isPossible({
+  row,
+  col,
+  myWreckedShips,
+  myBoard,
+}: BoardDetails): boolean {
+  for (let ship of ships) {
+    if (
+      myWreckedShips[ship.id] === undefined &&
+      shipPlacable(row, col, myBoard, ship.length)
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function shipPlacable(
+  row: number,
+  col: number,
+  myBoard: Board[][],
+  length: number
+): boolean {
+  let left = 0;
+  let right = 0;
+  let top = 0;
+  let bottom = 0;
+
+  // Check for empty cells on left
+  for (let i = col - 1; i >= 0; i--) {
+    if (myBoard[row][i].details.burst === false) {
+      left++;
+    } else {
+      break;
+    }
+  }
+
+  // Check for empty cells on right
+  for (let i = col + 1; i < 10; i++) {
+    if (myBoard[row][i].details.burst === false) {
+      right++;
+    } else {
+      break;
+    }
+  }
+
+  // Check for empty cells on bottom
+  for (let i = row + 1; i < 10; i++) {
+    if (myBoard[i][col].details.burst === false) {
+      bottom++;
+    } else {
+      break;
+    }
+  }
+
+  // Check for empty cells on top
+  for (let i = row - 1; i >= 0; i--) {
+    if (myBoard[i][col].details.burst === false) {
+      top++;
+    } else {
+      break;
+    }
+  }
+
+  return left + right + 1 >= length || top + bottom + 1 >= length;
 }

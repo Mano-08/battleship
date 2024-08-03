@@ -22,7 +22,7 @@ import { getRandomCoord } from "@/helper/randomize";
 import { Fire, Skeleton } from "@/assets/svgs";
 import Confetti from "react-confetti";
 import useWindowSize from "react-use/lib/useWindowSize";
-import { LogOut, Volume2, VolumeX } from "lucide-react";
+import { X } from "lucide-react";
 import { updateScoreIntoCookie } from "@/utils/utils";
 import Nav from "./Nav";
 import { guessNextMove } from "@/helper/guesser";
@@ -31,8 +31,7 @@ function PlayWithRobot() {
   const [loggedin, setLoggedin] = useState<boolean>(true);
   const [exitGame, setExitGame] = useState<boolean>(false);
   const [mute, setMute] = useState<boolean>(true);
-  // const [score, setScore] = useState<number>(0);
-  // const [username, setUsername] = useState<string>("");
+  const [showGameOverDialog, setShowGameOverDialog] = useState<boolean>(true);
   const { width, height } = useWindowSize();
 
   const splashAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -44,9 +43,13 @@ function PlayWithRobot() {
   const [whosTurn, setWhosTurn] = useState<"player" | "opponent">("player");
   const [winner, setWinner] = useState<"player" | "opponent" | null>(null);
   const [gameStatus, setGameStatus] = useState<
-    "initiating" | "initiated" | "gameover"
+    "initiating" | "gameover" | "restart" | "initiated"
   >("initiating");
-  // const [nickname, setNickname] = useState<string>("");
+
+  // TEST IF GAME BOARD OF OPPONENT VISIBLE AFTER GAME OVER
+  // useEffect(() => {
+  //   setTimeout(() => setGameStatus("gameover"), 1000);
+  // }, []);
   const [myBoard, setMyBoard] = useState<Board[][]>(initialBoardConfig());
   const [vertical, setVertical] = useState<boolean>(false);
   const [myShips, setMyShips] = useState<Ship[]>(ships);
@@ -54,9 +57,7 @@ function PlayWithRobot() {
     useState<MyShipPlacement>({});
   const [randomBoard, setRandomBoard] = useState<MyShipPlacement>({});
   const [selectedShip, setSelectedShip] = useState<null | Ship>(null);
-  // const [gmail, setGmail] = useState<null | string>(null);
   const [displayShips, setDisplayShips] = useState<boolean>(false);
-  // const [googleSignIn, setGoogleSignIn] = useState<boolean>(false);
   const [userData, setUserData] = useState<UserData>(defaultUserData);
 
   const [myShipPlacements, setMyShipPlacement] = useState<MyShipPlacement>({});
@@ -168,6 +169,7 @@ function PlayWithRobot() {
         setMyBoard,
         oppExplotionAudioRef,
         setWhosTurn,
+        myWreckedShips,
         oppSplashAudioRef,
         setMyWreckedShips,
         myShipPlacements,
@@ -653,56 +655,84 @@ function PlayWithRobot() {
 
   return (
     <main className="min-h-screen flex flex-col justify-between px-5 lg:px-10">
-      {gameStatus === "gameover" && (
-        <div className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center">
+      {gameStatus === "gameover" && showGameOverDialog && (
+        <div
+          onClick={() => setShowGameOverDialog(false)}
+          className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center"
+        >
           {winner === "player" && <Confetti width={width} height={height} />}
-          <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-orange-50 w-[90vw] lg:w-[400px]">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="flex relative text-center flex-col gap-2 px-4 py-6 rounded-lg bg-orange-50 w-[90vw] lg:w-[400px]"
+          >
+            <button
+              className="absolute top-3 right-3 rounded-full bg-red-100 hover:bg-red-200 p-1"
+              onClick={() => setShowGameOverDialog(false)}
+            >
+              <X size={15} />
+            </button>
             <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
               Game Over
             </h1>
-            <div className="pb-5">
-              {winner === "player" ? <p>You Won!</p> : <p>You Lost</p>}
+            <div className="pb-5 text-sm sm:text-base">
+              {winner === "player" ? (
+                <p>Congratulations! you&apos;ve won the game</p>
+              ) : (
+                <p>Oops! you&apos;ve lost the game</p>
+              )}
             </div>
             <div className="flex flex-row justify-evenly">
-              <button
-                autoFocus={true}
-                onClick={handlePlayAgain}
-                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-200 font-medium rounded-lg px-5 py-1"
-              >
-                Play again
-              </button>
               <Link
                 href="/"
-                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-200 font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-200 min-w-[120px] whitespace-nowrap overflow-hidden text-white bg-black outline outline-black font-medium rounded-lg px-5 py-1"
               >
                 Exit
               </Link>
+              <button
+                autoFocus={true}
+                onClick={handlePlayAgain}
+                className="transition-all duration-200 min-w-[120px] whitespace-nowrap overflow-hidden text-black outline outline-black font-medium rounded-lg px-5 py-1"
+              >
+                Play again
+              </button>
             </div>
           </div>
         </div>
       )}
 
       {exitGame && (
-        <div className="fixed top-0 left-0 h-screen w-screen bg-black/60 flex items-center justify-center">
-          <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-orange-50 w-[90vw] lg:w-[400px]">
+        <div
+          onClick={() => setExitGame(false)}
+          className="fixed top-0 left-0 h-screen w-screen bg-black/60 flex items-center justify-center"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="flex relative text-center flex-col gap-2 px-4 py-6 rounded-lg bg-orange-50 w-[90vw] lg:w-[400px]"
+          >
+            <button
+              className="absolute top-3 right-3 rounded-full bg-red-100 hover:bg-red-200 p-1"
+              onClick={() => setExitGame(false)}
+            >
+              <X size={15} />
+            </button>
             <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
               Exit Game
             </h1>
             <p className="p-2">Are you sure you want to exit?</p>
             <div className="flex flex-row justify-evenly pt-4">
-              <button
-                autoFocus={true}
-                onClick={() => setExitGame(false)}
-                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-200 font-medium rounded-lg px-5 py-1"
-              >
-                Stay
-              </button>
               <Link
                 href="/"
-                className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-200 font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-200 min-w-[120px] whitespace-nowrap overflow-hidden text-white bg-black outline outline-black font-medium rounded-lg px-5 py-1"
               >
                 Exit
               </Link>
+              <button
+                autoFocus={true}
+                onClick={() => setExitGame(false)}
+                className="transition-all duration-200 min-w-[120px] whitespace-nowrap overflow-hidden text-black outline outline-black font-medium rounded-lg px-5 py-1"
+              >
+                Stay
+              </button>
             </div>
           </div>
         </div>
@@ -723,7 +753,7 @@ function PlayWithRobot() {
                 setDisplayShips(true);
               }}
               disabled={gameStatus === "initiated" || displayShips}
-              className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black hover:bg-orange-200 outline outline-black font-medium rounded-lg px-5 py-1"
+              className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden text-black outline outline-black font-medium rounded-lg px-5 py-1"
             >
               Place Manually
             </button>
@@ -779,7 +809,7 @@ function PlayWithRobot() {
                           : { display: "none" }
                       }
                       onClick={() => removeShipFromPlacements(ship.id)}
-                      className="transition-all duration-200 h-[18px] text-[14px] leading-none w-[18px] flex items-center justify-center text-gray-900 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-200 font-medium rounded-md"
+                      className="transition-all duration-200 h-[18px] text-[14px] leading-none w-[18px] flex items-center justify-center text-gray-900 hover:bg-red-100 focus:ring-2 focus:ring-red-200 font-medium rounded-md"
                     >
                       -{" "}
                     </button>
@@ -792,22 +822,28 @@ function PlayWithRobot() {
                     resetMyBoard();
                     e.currentTarget.blur();
                   }}
-                  className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
+                  className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
                 >
                   Reset
                 </button>
                 <div>
                   {vertical ? (
                     <button
-                      onClick={() => setVertical(false)}
-                      className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
+                      onClick={(e) => {
+                        setVertical(false);
+                        e.currentTarget.blur();
+                      }}
+                      className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
                     >
                       vertical
                     </button>
                   ) : (
                     <button
-                      onClick={() => setVertical(true)}
-                      className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
+                      onClick={(e) => {
+                        setVertical(true);
+                        e.currentTarget.blur();
+                      }}
+                      className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
                     >
                       horizontal
                     </button>
@@ -821,9 +857,8 @@ function PlayWithRobot() {
                 onClick={(e) => {
                   setDisplayShips(false);
                   handleRandomize();
-                  e.currentTarget.blur();
                 }}
-                className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black hover:bg-orange-200 outline outline-black font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden text-black outline outline-black font-medium rounded-lg px-5 py-1"
               >
                 Randomize
               </button>
@@ -839,7 +874,7 @@ function PlayWithRobot() {
                 }}
                 autoFocus={true}
                 disabled={gameStatus === "initiated"}
-                className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden text-white bg-black hover:bg-neutral-800 outline outline-black font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden text-white bg-black outline outline-black font-medium rounded-lg px-5 py-1"
               >
                 Start
               </button>
@@ -856,7 +891,7 @@ function PlayWithRobot() {
             }}
             className="flex flex-col outline outline-black p-[7px] rounded-xl transition-all duration-300"
           >
-            <h1 className="p-2 text-center">My Ships</h1>
+            <h1 className="p-2 text-center">My Board</h1>
 
             {myBoard.map((row: Board[], rindex: number) => (
               <div
@@ -931,58 +966,110 @@ function PlayWithRobot() {
             gameStatus === "initiating" && "hidden"
           } lg:flex flex-col outline outline-black p-[7px] rounded-xl transition-all duration-300`}
         >
-          <h1 className="p-2 text-center">Opponent's Ships</h1>
-          {opponentBoard.map((row: Board[], rindex: number) => (
-            <div
-              className="flex flex-row"
-              id={`ob-r-${rindex}`}
-              key={`ob-r-${rindex}`}
-            >
-              {row.map((ele: Board, cindex) => (
+          <h1 className="p-2 text-center">Opponent&apos;s Board</h1>
+          {gameStatus !== "gameover"
+            ? opponentBoard.map((row: Board[], rindex: number) => (
                 <div
-                  className="h-[25.5px] sm:h-[30px] w-[25.5px] sm:w-[30px] flex items-center justify-center"
-                  key={`ob-r-${rindex}-c-${cindex}`}
-                  id={`ob-r-${rindex}-c-${cindex}`}
-                  onMouseEnter={() =>
-                    !opponentBoard[rindex][cindex].details.burst &&
-                    gameStatus === "initiated" &&
-                    setCoord({ row: rindex, col: cindex })
-                  }
-                  onMouseLeave={() => setCoord(null)}
-                  onClick={() =>
-                    !opponentBoard[rindex][cindex].details.burst &&
-                    handleDropTorpedo(rindex, cindex)
-                  }
+                  className="flex flex-row"
+                  id={`ob-r-${rindex}`}
+                  key={`ob-r-${rindex}`}
                 >
-                  <div
-                    style={
-                      ele.details.burst
-                        ? ele.ship
-                          ? {}
-                          : { background: "#000" }
-                        : { background: "rgb(0,0,0,0.1)" }
-                    }
-                    className={`${
-                      (!ele.ship && ele.details.burst) || !ele.details.burst
-                        ? "rounded-md h-[10px] w-[10px] outline-[0.01rem]"
-                        : ""
-                    } ${
-                      rindex === coord?.row &&
-                      cindex === coord?.col &&
-                      "ring-2 ring-black m-2"
-                    }`}
-                  >
-                    {ele.ship &&
-                      ele.details.burst &&
-                      opponentsWreckedShips[ele.details.id] && <Skeleton />}
-                    {ele.ship &&
-                      ele.details.burst &&
-                      !opponentsWreckedShips[ele.details.id] && <Fire />}
-                  </div>
+                  {row.map((ele: Board, cindex) => (
+                    <div
+                      className="h-[25.5px] sm:h-[30px] w-[25.5px] sm:w-[30px] flex items-center justify-center"
+                      key={`ob-r-${rindex}-c-${cindex}`}
+                      id={`ob-r-${rindex}-c-${cindex}`}
+                      onMouseEnter={() =>
+                        !opponentBoard[rindex][cindex].details.burst &&
+                        gameStatus === "initiated" &&
+                        setCoord({ row: rindex, col: cindex })
+                      }
+                      onMouseLeave={() => setCoord(null)}
+                      onClick={() =>
+                        !opponentBoard[rindex][cindex].details.burst &&
+                        handleDropTorpedo(rindex, cindex)
+                      }
+                    >
+                      <div
+                        style={
+                          ele.details.burst
+                            ? ele.ship
+                              ? {}
+                              : { background: "#000" }
+                            : { background: "rgb(0,0,0,0.1)" }
+                        }
+                        className={`${
+                          (!ele.ship && ele.details.burst) || !ele.details.burst
+                            ? "rounded-md h-[10px] w-[10px] outline-[0.01rem]"
+                            : ""
+                        } ${
+                          rindex === coord?.row &&
+                          cindex === coord?.col &&
+                          "ring-2 ring-black m-2"
+                        }`}
+                      >
+                        {ele.ship &&
+                          ele.details.burst &&
+                          opponentsWreckedShips[ele.details.id] && <Skeleton />}
+                        {ele.ship &&
+                          ele.details.burst &&
+                          !opponentsWreckedShips[ele.details.id] && <Fire />}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))
+            : opponentBoard.map((row: Board[], rindex: number) => (
+                <div
+                  className="flex flex-row"
+                  key={`mb-r-${rindex}`}
+                  id={`mb-r-${rindex}`}
+                >
+                  {row.map((ele: Board, cindex) => (
+                    <div
+                      className="h-[25.5px] sm:h-[30px] w-[25.5px] sm:w-[30px] flex items-center justify-center"
+                      key={`mb-r-${rindex}-c-${cindex}`}
+                      id={`mb-r-${rindex}-c-${cindex}`}
+                    >
+                      <div
+                        style={
+                          ele.validHover === null
+                            ? ele.ship
+                              ? ele.details.burst
+                                ? { background: "rgba(7,0,27,0.8)" }
+                                : {
+                                    background:
+                                      shipColors[ele.details.id as string],
+                                  }
+                              : ele.details.burst
+                              ? { background: "rgba(79,79,79,0.80)" }
+                              : { background: "rgba(0,0,0,0.1)" }
+                            : ele.validHover === true
+                            ? { background: "rgba(0,0,0,0.5)" }
+                            : ele.validHover === false
+                            ? { background: "rgba(195,56,56,0.73)" }
+                            : {}
+                        }
+                        className={`${
+                          ele.ship
+                            ? ele.details.start
+                              ? ele.details.vertical
+                                ? "h-[25.5px] sm:h-[30px] w-[20.5px] sm:w-[25px] rounded-t-full outline-black outline"
+                                : "h-[20.5px] sm:h-[25px] w-[25.5px] sm:w-[30px] rounded-s-full outline-black outline"
+                              : ele.details.end
+                              ? ele.details.vertical
+                                ? "h-[25.5px] sm:h-[30px] w-[20.5px] sm:w-[25px] rounded-b-md outline-black outline"
+                                : "h-[20.5px] sm:h-[25px] w-[25.5px] sm:w-[30px] rounded-e-md outline-black outline"
+                              : ele.details.vertical
+                              ? "w-[20.5px] sm:w-[25px] h-[25.5px] sm:h-[30px] outline-black outline"
+                              : "w-[25.5px] sm:w-[30px] h-[20.5px] sm:h-[25px] outline-black outline"
+                            : "rounded-md h-[10px] w-[10px] outline-[0.01rem]"
+                        }`}
+                      ></div>
+                    </div>
+                  ))}
                 </div>
               ))}
-            </div>
-          ))}
         </section>
 
         <audio ref={splashAudioRef} src="/audio/splash.wav"></audio>
@@ -994,9 +1081,13 @@ function PlayWithRobot() {
         <Toaster position="bottom-center" reverseOrder={false} />
       </div>
       <Nav
+        setGameStatus={setGameStatus}
         userData={userData}
         setMute={setMute}
         mute={mute}
+        setShowGameOverDialog={undefined}
+        showGameOverDialog={undefined}
+        gameStatus={gameStatus}
         setExitGame={setExitGame}
       />
     </main>

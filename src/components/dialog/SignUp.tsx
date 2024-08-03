@@ -99,14 +99,14 @@ function SignUp({
             autoFocus
             autoComplete="off"
             onChange={handleChange}
-            placeholder="thedracula"
+            placeholder="dracula"
             className="border-b text-center grow border-black outline-none px-0.5 py-1"
           />
 
           {!loading ? (
             <button
               disabled={loading}
-              className="transition-all duration-200 focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-300 font-medium rounded-lg px-5 py-1"
+              className="transition-all duration-200 text-white bg-black focus:ring-4  focus:ring-neutral-300 font-medium rounded-lg px-5 py-1"
             >
               Go
             </button>

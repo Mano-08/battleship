@@ -117,9 +117,10 @@ function Hero() {
                 " text-xs lg:text-left text-center lg:text-sm text-neutral-500"
               }
             >
-              Played by <strong>{userCount}</strong> captains around the world!{" "}
+              Join over <strong>{userCount}</strong> players from around the
+              world!
               <br />
-              <div className="flex flex-row items-center gap-2">
+              <div className="flex flex-row items-center sm:justify-start justify-center gap-2 w-full">
                 <button
                   onClick={() => setDisplay("leaderboard")}
                   className="underline"

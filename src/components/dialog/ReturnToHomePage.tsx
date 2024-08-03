@@ -30,10 +30,9 @@ function ReturnToHome({ message }: { message: string }) {
         <div className="pb-5 text-sm sm:text-base">
           You would be redirected automatically to home page in {timer} seconds
         </div>
-
         <Link
           href="/"
-          className="min-w-[120px] text-sm sm:text-base focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-300 font-medium rounded-lg px-5 py-1"
+          className="min-w-[120px] text-sm sm:text-base text-white bg-black focus:ring-4  focus:ring-neutral-300 font-medium rounded-lg px-5 py-1"
         >
           Return
         </Link>

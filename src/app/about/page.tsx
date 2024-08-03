@@ -54,38 +54,73 @@ function Page() {
           </div>
         </div>
 
-        {/* <div className="flex flex-col ">
-          <h1 className="text-2xl font-semibold">WHY DID I BUILD THIS?</h1>
-          <div>
-            I used to play Battleship with my friends with pen and paper,
-            sitting on the last bench of our class [2013]! One fine Sunday I
-            thought how it would be to build an online version of it and here we
-            are, it's not perfect but it was fun building it :D
-            <br />
-            <br />
-            
-          </div>
-        </div> */}
-
         <div className="flex flex-col gap-3">
           <h1 className="text-2xl font-semibold">
             BOT'S COORDINATE GUESSER LOGIC
           </h1>
           <div>
-            For building the game play against robot, I designed a
-            Coordinate-Guesser function which picks up a random coordinate or if
-            the knowledge base says that it already HIT a ship but not WRECKED
-            it, then the coordinates explored would be around the cell where the
-            ship was HIT, it also considers its prediction whether the ship is
-            placed horizontally or vertically, in case it keeps attacking along
-            the Vertical direction starting from the last hit coordinate but at
-            some point drops torpedo into ocean (without completely wrecking the
-            ship) then it corrects its prediction and tries Horizontally vis a
-            vis. Also, when there exists a Hit but 'no' coordinates around it
-            are empty, the robot moves along the path where it dropped bombs to
-            reach the other end of the ship where torpedoes can eventually be
-            dropped. I guess I made it confusing, sorry about that, but you can
-            checkout the Coordinate Guesser Logic&nbsp;
+            An intelligent coordinate guesser algorithm has been designed for
+            the robot to predict coordinates that leverages on the previous HIT
+            coordinates along with predicted direction of ship alignment
+            (vertical or horizontal) where the ship was HIT but not WRECKED.
+            <br />
+            <br />
+            Data Structure of the HIT Stack:
+            <br />
+            <pre className="p-5 rounded-2xl my-2 outline outline-1 outline-neutral-400">
+              {`{
+  row: number;
+  col: number;
+  shipId: string;
+  direction: "vertical" | "horizontal" | null;
+}[]`}
+            </pre>
+            <br />
+            The Algorithm is designed based on the following ideology:
+            <br />
+            <br />
+            <ul className="list-disc px-5">
+              <li>
+                First guess is random, if it is a HIT, then push it into HIT
+                Stack with direction set to null.
+              </li>
+              <li>
+                If there is data on HIT Stack, the next guess is around the most
+                recent hit, i.e. the top element of stack.
+              </li>
+              <li>
+                While dropping torpedo around valid coordinates of most recent
+                HIT, if we miss the guess then we would swap predicted direction
+                from vertical to horizontal or vice versa.
+              </li>
+              <li>
+                In case if there are no valid coordinates around the most recent
+                HIT, there again are 2 cases:
+                <ol className="list-item">
+                  <li>
+                    <strong>Case 1:</strong> If there are successive hits on my
+                    HIT Stack, then the next guess is along the direction of
+                    Successive hits, this way we reach the other end of the
+                    ship.
+                  </li>
+                  <li>
+                    <strong>Case 2:</strong> Else we just swap our predicted
+                    direction from horizontal to vertical or vertical to
+                    horizontal.
+                  </li>
+                </ol>
+              </li>
+              <li>
+                When a ship is wrecked completely, remove it&apos;s coordinates
+                from the HIT Stack.
+              </li>
+              <li>
+                If a ship is wrecked and no more coordinates are present inside
+                HIT Stack, just go with random guess.
+              </li>
+            </ul>
+            <br />
+            You can find the code of the Coordinate guesser&nbsp;
             <Link
               className="underline"
               href="https://github.com/Mano-08/battleship/blob/main/src/helper/guesser.ts"
@@ -94,15 +129,14 @@ function Page() {
             </Link>
             .
             <br />
-            <br />
-            Learn more about the code on&nbsp;
+            Learn more about this project on&nbsp;
             <Link
               className="underline"
               href="https://github.com/Mano-08/battleship"
             >
               github
             </Link>
-            &nbsp; and find me on&nbsp;
+            &nbsp;and find me on&nbsp;
             <Link className="underline" href="https://x.com/mano__08">
               twitter
             </Link>

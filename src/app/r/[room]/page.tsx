@@ -31,8 +31,11 @@ function Page() {
   const [playAgain, setPlayAgain] = useState<boolean>(false);
   const [playerReady, setPlayerReady] = useState<boolean>(false);
   const [display, setDisplay] = useState<displayOptions>("loading");
+  const [showGameOverDialog, setShowGameOverDialog] = useState<boolean>(true);
   const [winner, setWinner] = useState<string | null>(null);
-  const [gameStatus, setGameStatus] = useState<string>("initiating");
+  const [gameStatus, setGameStatus] = useState<
+    "initiating" | "gameover" | "restart" | "initiated"
+  >("initiating");
   const [exitGame, setExitGame] = useState<boolean>(false);
   const [mute, setMute] = useState<boolean>(true);
   const [userData, setUserData] = useState<UserData>(defaultUserData);
@@ -58,11 +61,6 @@ function Page() {
       return;
     }
     joinRoom(dataFromToken.nickname);
-
-    // setTimeout(
-    //   () => setDisplay((prev) => (prev === "share_link" ? "share_link" : "")),
-    //   3000
-    // );
 
     mysocket.setRoomFullCallback(handleRoomFull);
     mysocket.setOnPlayerJoined(handlePlayerJoined);
@@ -195,19 +193,19 @@ function Page() {
               </h1>
               <p className="p-2">Are you sure you want to exit?</p>
               <div className="flex flex-row justify-evenly pt-4">
-                <button
-                  autoFocus={true}
-                  onClick={() => setExitGame(false)}
-                  className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-green-800 hover:bg-green-700 focus:ring-4  focus:ring-green-300 font-medium rounded-lg px-5 py-1"
-                >
-                  Stay
-                </button>
                 <Link
                   href="/"
-                  className="transition-all duration-200 min-w-[120px] focus:outline-none text-white bg-red-800 hover:bg-red-700 focus:ring-4  focus:ring-red-300 font-medium rounded-lg px-5 py-1"
+                  className="transition-all duration-200 min-w-[120px] whitespace-nowrap overflow-hidden text-white bg-black outline outline-black font-medium rounded-lg px-5 py-1"
                 >
                   Exit
                 </Link>
+                <button
+                  autoFocus={true}
+                  onClick={() => setExitGame(false)}
+                  className="transition-all duration-200 min-w-[120px] whitespace-nowrap overflow-hidden text-black outline outline-black font-medium rounded-lg px-5 py-1"
+                >
+                  Stay
+                </button>
               </div>
             </div>
           </div>
@@ -219,17 +217,19 @@ function Page() {
         )}
         {(display === "game_won" ||
           display === "game_lost" ||
-          display === "play_again") && (
-          <GameOver
-            room={room}
-            setGameStatus={setGameStatus}
-            setDisplay={setDisplay}
-            playAgain={playAgain}
-            setPlayAgain={setPlayAgain}
-            mysocket={mysocket}
-            message={display}
-          />
-        )}
+          display === "play_again") &&
+          showGameOverDialog && (
+            <GameOver
+              room={room}
+              setGameStatus={setGameStatus}
+              setDisplay={setDisplay}
+              setShowGameOverDialog={setShowGameOverDialog}
+              playAgain={playAgain}
+              setPlayAgain={setPlayAgain}
+              mysocket={mysocket}
+              message={display}
+            />
+          )}
 
         <OpponentBoard
           whosTurn={whosTurn}
@@ -251,6 +251,10 @@ function Page() {
         setMute={setMute}
         mute={mute}
         setExitGame={setExitGame}
+        setShowGameOverDialog={setShowGameOverDialog}
+        showGameOverDialog={showGameOverDialog}
+        setGameStatus={setGameStatus}
+        gameStatus={gameStatus}
       />
       <Toaster position="bottom-center" reverseOrder={false} />
     </main>

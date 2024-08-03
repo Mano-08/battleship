@@ -41,14 +41,8 @@ function GameOver({
     mysocket.send("acceptPlayAgain", { playerId: mysocket.getId(), room });
   }
   return (
-    <div
-      onClick={() => setShowGameOverDialog(false)}
-      className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center"
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="flex relative text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]"
-      >
+    <div className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center">
+      <div className="flex relative text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]">
         <button
           className="absolute top-3 right-3 rounded-full bg-red-100 hover:bg-red-200 p-1"
           onClick={() => setShowGameOverDialog(false)}

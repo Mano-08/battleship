@@ -3,6 +3,7 @@ import { Karla } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import Head from "next/head";
+import Script from "next/script";
 
 // Bricolage_Grotesque
 
@@ -19,6 +20,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Head>
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-JGSMP1NM28"
+        ></Script>
+        <Script>
+          {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-JGSMP1NM28');`}
+        </Script>
+      </Head>
       <GoogleAnalytics gaId="G-JGSMP1NM28" />
       <body className={`${karla.className} noise`}>{children}</body>
     </html>

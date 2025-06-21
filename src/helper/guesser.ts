@@ -239,14 +239,11 @@ export async function guessNextMove({
         continue;
       }
     } else {
-      console.log("INSIDE RANDOM GUESS");
-      while (true) {
-        const row = Math.floor(Math.random() * 10);
-        const col = Math.floor(Math.random() * 10);
-        if (
-          !myBoard[row][col].details.burst &&
-          isPossible({ row, col, myBoard, myWreckedShips })
-        ) {
+      const manhattanDistance: ManhattanDistance[] =
+        computeManhattanDistance(myBoard);
+      for (let i = 0; i < manhattanDistance.length; i++) {
+        const [row, col, _] = manhattanDistance[i];
+        if (isPossible({ row, col, myBoard, myWreckedShips })) {
           setMyBoard((old: Board[][]) => {
             const newData = [...old];
             const updatedElement = { ...newData[row][col] };
@@ -279,10 +276,117 @@ export async function guessNextMove({
           break;
         }
       }
+      // while (true) {
+      //   const row = Math.floor(Math.random() * 10);
+      //   const col = Math.floor(Math.random() * 10);
+      //   if (isPossible({ row, col, myBoard, myWreckedShips })) {
+      //     setMyBoard((old: Board[][]) => {
+      //       const newData = [...old];
+      //       const updatedElement = { ...newData[row][col] };
+      //       updatedElement.details.burst = true;
+      //       newData[row][col] = updatedElement;
+      //       return newData;
+      //     });
+
+      //     if (myBoard[row][col].ship) {
+      //       !mute && (oppExplotionAudioRef.current as HTMLAudioElement)?.play();
+      //       const shipId = handleShipBurst(row, col);
+      //       if (shipId !== null) {
+      //         lastHits = removeShipFromHitStack(lastHits, shipId);
+      //         lastHit =
+      //           lastHits.length > 0 ? lastHits[lastHits.length - 1] : null;
+      //       } else {
+      //         lastHit = {
+      //           row,
+      //           col,
+      //           shipId: myBoard[row][col].details.id,
+      //           direction: null,
+      //         };
+      //         lastHits.push(lastHit);
+      //       }
+      //     } else {
+      //       !mute && (oppSplashAudioRef.current as HTMLAudioElement)?.play();
+      //       opponentsTurnOver = true;
+      //     }
+
+      //     break;
+      //   }
+      // }
     }
     setHitStack(lastHits);
   }
   setWhosTurn("player");
+}
+
+type Row = number;
+type Column = number;
+type MinimumDistance = number;
+type ManhattanDistance = [Row, Column, MinimumDistance];
+
+function computeManhattanDistance(myBoard: Board[][]): ManhattanDistance[] {
+  const rows = myBoard.length;
+  const cols = myBoard[0].length;
+  const allBombedCells = [] as [number, number][];
+  const boundaryRows: number[] = [-1, rows];
+  const boundaryCols: number[] = [-1, cols];
+  for (let i = 0; i < rows; i++) {
+    allBombedCells.push([i, boundaryCols[0]]);
+    allBombedCells.push([i, boundaryCols[1]]);
+  }
+
+  for (let j = 0; j < cols; j++) {
+    allBombedCells.push([boundaryRows[0], j]);
+    allBombedCells.push([boundaryRows[1], j]);
+  }
+
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      if (myBoard[i][j].details.burst === true) {
+        allBombedCells.push([i, j]);
+      }
+    }
+  }
+
+  console.log(allBombedCells, "ALL BOMBED CELLS");
+
+  const manhattanDistances: ManhattanDistance[] = [];
+
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      if (myBoard[i][j].details.burst === false) {
+        let mini = rows + cols;
+        for (let k = 0; k < allBombedCells.length; k++) {
+          const [bombedRow, bombedCol] = allBombedCells[k];
+          const distance = Math.abs(bombedRow - i) + Math.abs(bombedCol - j);
+          // console.log("distance", distance, i, j, bombedRow, bombedCol);
+          mini = Math.min(distance, mini);
+        }
+        manhattanDistances.push([i, j, mini]);
+      }
+    }
+  }
+  console.log(manhattanDistances, "MANHATTAN DISTANCES");
+  manhattanDistances.sort((a, b) => b[2] - a[2]);
+  const maxDistance = manhattanDistances[0][2];
+  const filteredDistances = manhattanDistances.filter(
+    ([, , distance]) => distance === maxDistance
+  );
+  return shuffle(filteredDistances);
+}
+
+function shuffle(array: ManhattanDistance[]) {
+  let currentIndex = array.length;
+
+  while (currentIndex != 0) {
+    let randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+  return array;
 }
 
 type BoardDetails = {

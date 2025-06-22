@@ -90,7 +90,7 @@ function SignUp({
 
         <form
           onSubmit={handleSubmit}
-          className="flex flex-row items-center justify-between gap-3 sm:gap-5 py-5"
+          className="flex flex-row items-center justify-center gap-3 sm:gap-5 py-5"
         >
           <input
             type="text"
@@ -100,7 +100,7 @@ function SignUp({
             autoComplete="off"
             onChange={handleChange}
             placeholder="dracula"
-            className="border-b text-center grow border-black outline-none px-0.5 py-1"
+            className="border-b max-w-[50%] text-center grow border-black outline-none px-0.5 py-1"
           />
 
           {!loading ? (

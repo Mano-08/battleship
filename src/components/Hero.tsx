@@ -843,12 +843,18 @@ function Hero() {
               </h1>
               <p className="p-2">Are you sure you want to exit?</p>
               <div className="flex flex-row justify-evenly pt-4">
-                <Link
-                  href="/"
+                <button
+                  onClick={() => {
+                    setDisplay("how-to-play");
+                    setGameStatus("initiating");
+                    setWhosTurn("player");
+                    setWinner(null);
+                    setExitGame(false);
+                  }}
                   className="holographic-card rounded-full px-5 py-2.5 bg-white border-solid border w-[47%] border-black text-black"
                 >
                   Exit
-                </Link>
+                </button>
                 <button
                   autoFocus={true}
                   onClick={() => setExitGame(false)}

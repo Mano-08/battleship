@@ -52,7 +52,7 @@ const Leaderboard = ({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="animate-popup relative flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]"
+        className="animate-popup relative flex text-center flex-col gap-2 p-10 rounded-[35px] bg-white w-[90vw] lg:w-[400px]"
       >
         <button
           className="absolute top-3 right-3 rounded-full bg-red-100 hover:bg-red-200 p-1"

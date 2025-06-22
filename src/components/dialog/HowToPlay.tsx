@@ -37,13 +37,13 @@ function HowToPlay({
         <div className="flex flex-row items-center justify-center gap-2 ">
           <button
             onClick={handlePlayWithFriend}
-            className="rounded-full px-5 py-2.5 bg-white border border-black border-solid text-black"
+            className="holographic-card rounded-full px-5 w-[47%] py-2.5 bg-white border border-black border-solid text-black"
           >
             Play with Friend
           </button>
           <button
             onClick={handlePlayWithRobot}
-            className="rounded-full px-5 py-2.5 bg-black text-white"
+            className="holographic-card rounded-full px-5 w-[47%] py-2.5 bg-black text-white"
           >
             Play with Robot
           </button>

@@ -172,7 +172,7 @@ function Page() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col justify-between px-1.5 sm:px-10">
+    <main className="min-h-screen flex flex-col px-1.5 sm:px-10">
       <Navbar
         setUserData={setUserData}
         userData={userData}
@@ -184,7 +184,31 @@ function Page() {
         setGameStatus={setGameStatus}
         gameStatus={gameStatus}
       />
-      <div className="flex grow flex-col items-center gap-5 py-10 justify-center lg:flex-row">
+      {gameStatus === "initiated" && (
+        <div className="w-full flex items-center justify-center">
+          <div className="relative rounded-full p-2 mt-10 flex flex-row items-center gap-2 bg-orange-100 text-black">
+            <span
+              className={`${
+                whosTurn === "opponent"
+                  ? "bg-black text-white rounded-full"
+                  : "text-black "
+              } px-8 py-1.5`}
+            >
+              OPPONENT
+            </span>
+            <span
+              className={`${
+                whosTurn === "player"
+                  ? "bg-black text-white rounded-full"
+                  : "text-black "
+              } px-8 py-1.5`}
+            >
+              YOU
+            </span>
+          </div>
+        </div>
+      )}
+      <div className="flex flex-col items-center gap-5 py-10 justify-center lg:flex-row">
         <MyBoard
           setWinner={setWinner}
           setPlayerReady={setPlayerReady}
@@ -199,7 +223,7 @@ function Page() {
         />
         {exitGame && (
           <div className="fixed top-0 left-0 h-screen w-screen bg-black/60 flex items-center justify-center">
-            <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]">
+            <div className="flex text-center flex-col gap-2 p-10 rounded-[35px] bg-white w-[90vw] lg:w-[500px]">
               <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
                 Exit Game
               </h1>
@@ -207,14 +231,14 @@ function Page() {
               <div className="flex flex-row justify-evenly pt-4">
                 <Link
                   href="/"
-                  className="transition-all duration-200 min-w-[120px] whitespace-nowrap overflow-hidden text-white bg-black outline outline-black font-medium rounded-lg px-5 py-1"
+                  className="transition-all holographic-card duration-300 w-[47%] whitespace-nowrap overflow-hidden text-black bg-white border-black border-solid border rounded-full px-5 py-2.5 "
                 >
                   Exit
                 </Link>
                 <button
                   autoFocus={true}
                   onClick={() => setExitGame(false)}
-                  className="transition-all duration-200 min-w-[120px] whitespace-nowrap overflow-hidden text-black outline outline-black font-medium rounded-lg px-5 py-1"
+                  className="transition-all holographic-card duration-300 w-[47%] whitespace-nowrap overflow-hidden text-white bg-black rounded-full px-5 py-2.5 "
                 >
                   Stay
                 </button>

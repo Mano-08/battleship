@@ -23,7 +23,7 @@ function ReturnToHome({ message }: { message: string }) {
 
   return (
     <div className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center">
-      <div className="flex text-center flex-col gap-2 px-4 py-6 rounded-lg bg-white w-[90vw] lg:w-[400px]">
+      <div className="flex text-center flex-col gap-2 p-10 rounded-[35px] bg-white w-[90vw] lg:w-[500px]">
         <h1 className="text-[1.1rem] sm:text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
           {message}
         </h1>
@@ -32,7 +32,7 @@ function ReturnToHome({ message }: { message: string }) {
         </div>
         <Link
           href="/"
-          className="min-w-[120px] text-sm sm:text-base text-white bg-black focus:ring-4  focus:ring-neutral-300 font-medium rounded-lg px-5 py-1"
+          className="w-full text-sm rounded-full sm:text-base text-white bg-black  px-5 py-2.5"
         >
           Return
         </Link>

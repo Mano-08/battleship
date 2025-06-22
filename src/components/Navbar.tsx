@@ -161,7 +161,7 @@ function Navbar({
                 <button
                   className={`${
                     !showGameOverDialog && "animate-pulse"
-                  } transition-all duration-200 text-gray-900 focus:ring-4 focus:ring-orange-200 font-medium rounded-md p-2`}
+                  } transition-all duration-300 `}
                   onClick={() =>
                     setShowGameOverDialog && setShowGameOverDialog(true)
                   }
@@ -170,7 +170,7 @@ function Navbar({
                 </button>
               ) : (
                 <button
-                  className="transition-all duration-200 text-gray-900 focus:ring-4 focus:ring-orange-200 font-medium rounded-md p-2"
+                  className="transition-all duration-300"
                   onClick={() => setGameStatus("initiating")}
                 >
                   <RotateCcw />

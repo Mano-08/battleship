@@ -704,6 +704,8 @@ function Hero() {
 
   function handlePlayAgain() {
     setWinner(null);
+    setShowGameOverDialog(false);
+    setExitGame(false);
     setGameStatus("initiating");
     setWhosTurn("player");
   }
@@ -769,13 +771,13 @@ function Hero() {
         gameStatus={gameStatus}
         setExitGame={setExitGame}
       />
-      <div className="min-h-[90vh] w-full flex flex-col justify-end">
+      <div className="min-h-[90vh] w-full flex flex-col items-center justify-center">
         {gameStatus === "gameover" && showGameOverDialog && (
           <div className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center">
             {winner === "player" && <Confetti width={width} height={height} />}
-            <div className="flex relative text-center flex-col gap-2 px-4 py-6 rounded-lg bg-orange-50 w-[90vw] lg:w-[400px]">
+            <div className="flex relative text-center flex-col gap-2 p-10 rounded-[35px] bg-orange-50 w-[90vw] lg:w-[400px]">
               <button
-                className="absolute top-3 right-3 rounded-full bg-red-100 hover:bg-red-200 p-1"
+                className="absolute holographic-card top-6 right-6 rounded-full bg-red-100 hover:bg-red-200 p-1"
                 onClick={() => setShowGameOverDialog(false)}
               >
                 <X size={15} />
@@ -791,16 +793,22 @@ function Hero() {
                 )}
               </div>
               <div className="flex flex-row justify-evenly">
-                <Link
-                  href="/"
-                  className="transition-all duration-200 min-w-[120px] whitespace-nowrap overflow-hidden text-white bg-black outline outline-black font-medium rounded-lg px-5 py-1"
+                <button
+                  onClick={() => {
+                    setDisplay("how-to-play");
+                    handlePlayAgain();
+                  }}
+                  className="rounded-full holographic-card px-5 py-2.5 bg-white border-solid border w-[47%] border-black text-black"
                 >
                   Exit
-                </Link>
+                </button>
                 <button
                   autoFocus={true}
-                  onClick={handlePlayAgain}
-                  className="transition-all duration-200 min-w-[120px] whitespace-nowrap overflow-hidden text-black outline outline-black font-medium rounded-lg px-5 py-1"
+                  onClick={() => {
+                    setDisplay(null);
+                    handlePlayAgain();
+                  }}
+                  className="rounded-full holographic-card px-5 py-2.5 w-[47%] bg-black text-white"
                 >
                   Play again
                 </button>
@@ -816,29 +824,29 @@ function Hero() {
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="flex relative text-center flex-col gap-2 px-4 py-6 rounded-lg bg-orange-50 w-[90vw] lg:w-[400px]"
+              className="flex relative text-center flex-col gap-2 p-10 rounded-[35px] bg-orange-50 w-[90vw] lg:w-[400px]"
             >
               <button
-                className="absolute top-3 right-3 rounded-full bg-red-100 hover:bg-red-200 p-1"
+                className="absolute  top-6 right-6 rounded-full bg-red-100 hover:bg-red-200 p-1"
                 onClick={() => setExitGame(false)}
               >
                 <X size={15} />
               </button>
-              <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
+              <h1 className="text-[1.3rem]  w-full border-b border-neutral-200 font-semibold">
                 Exit Game
               </h1>
               <p className="p-2">Are you sure you want to exit?</p>
               <div className="flex flex-row justify-evenly pt-4">
                 <Link
                   href="/"
-                  className="transition-all duration-200 min-w-[120px] whitespace-nowrap overflow-hidden text-white bg-black outline outline-black font-medium rounded-lg px-5 py-1"
+                  className="holographic-card rounded-full px-5 py-2.5 bg-white border-solid border w-[47%] border-black text-black"
                 >
                   Exit
                 </Link>
                 <button
                   autoFocus={true}
                   onClick={() => setExitGame(false)}
-                  className="transition-all duration-200 min-w-[120px] whitespace-nowrap overflow-hidden text-black outline outline-black font-medium rounded-lg px-5 py-1"
+                  className="holographic-card rounded-full px-5 py-2.5 bg-black w-[47%]  text-white"
                 >
                   Stay
                 </button>
@@ -847,7 +855,32 @@ function Hero() {
           </div>
         )}
 
-        <div className="flex grow flex-col items-center gap-6 py-10 justify-center lg:flex-row">
+        {gameStatus === "initiated" && (
+          <div className="w-full flex items-center justify-center">
+            <div className="relative rounded-full p-2 flex flex-row items-center gap-2 bg-orange-100 text-black">
+              <span
+                className={`${
+                  whosTurn === "opponent"
+                    ? "bg-black text-white rounded-full"
+                    : "text-black "
+                } px-8 py-1.5`}
+              >
+                ROBOT
+              </span>
+              <span
+                className={`${
+                  whosTurn === "player"
+                    ? "bg-black text-white rounded-full"
+                    : "text-black "
+                } px-8 py-1.5`}
+              >
+                YOU
+              </span>
+            </div>
+          </div>
+        )}
+
+        <div className="flex flex-col items-center gap-6 py-10 lg:flex-row">
           <section className="flex flex-col-reverse gap-5 lg:flex-row items-center ">
             <div
               className={`flex flex-col gap-0.5 items-start overflow-hidden ${
@@ -862,7 +895,7 @@ function Hero() {
                   setDisplayShips(true);
                 }}
                 disabled={gameStatus === "initiated" || displayShips}
-                className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden text-black outline outline-black font-medium rounded-lg px-5 py-1"
+                className="holographic-card transition-all duration-200 w-full whitespace-nowrap overflow-hidden text-black outline outline-black font-medium rounded-full px-5 py-2"
               >
                 Place Manually
               </button>
@@ -880,7 +913,7 @@ function Hero() {
                     >
                       <button
                         data-description={ship.id}
-                        className="transition-all duration-200 flex flex-row gap-[2px]"
+                        className="holographic-card transition-all duration-200 flex flex-row gap-[2px]"
                         onClick={() => !ship.placed && handleSelectShip(ship)}
                       >
                         {Array(ship.length)
@@ -920,7 +953,7 @@ function Hero() {
                             : { display: "none" }
                         }
                         onClick={() => removeShipFromPlacements(ship.id)}
-                        className="transition-all duration-200 h-[18px] text-[14px] leading-none w-[18px] flex items-center justify-center text-gray-900 hover:bg-red-100 focus:ring-2 focus:ring-red-200 font-medium rounded-md"
+                        className="holographic-card transition-all duration-200 h-[18px] text-[14px] leading-none w-[18px] flex items-center justify-center text-gray-900 hover:bg-red-100 focus:ring-2 focus:ring-red-200 font-medium rounded-md"
                       >
                         -{" "}
                       </button>
@@ -933,7 +966,7 @@ function Hero() {
                       resetMyBoard();
                       e.currentTarget.blur();
                     }}
-                    className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
+                    className="holographic-card transition-all duration-200 w-full whitespace-nowrap overflow-hidden text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
                   >
                     Reset
                   </button>
@@ -944,7 +977,7 @@ function Hero() {
                           setVertical(false);
                           e.currentTarget.blur();
                         }}
-                        className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
+                        className="holographic-card transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
                       >
                         vertical
                       </button>
@@ -954,7 +987,7 @@ function Hero() {
                           setVertical(true);
                           e.currentTarget.blur();
                         }}
-                        className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
+                        className="holographic-card transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
                       >
                         horizontal
                       </button>
@@ -969,7 +1002,7 @@ function Hero() {
                     setDisplayShips(false);
                     handleRandomize();
                   }}
-                  className="transition-all flex flex-row justify-center items-center gap-2 duration-200 w-full whitespace-nowrap overflow-hidden text-black outline outline-black font-medium rounded-lg px-5 py-1"
+                  className="holographic-card transition-all flex flex-row justify-center items-center gap-2 duration-200 w-full whitespace-nowrap overflow-hidden text-black outline outline-black font-medium rounded-full px-5 py-2"
                 >
                   Randomize <DicesIcon size={18} />
                 </button>
@@ -985,23 +1018,13 @@ function Hero() {
                   }}
                   autoFocus={true}
                   disabled={gameStatus === "initiated"}
-                  className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden text-white bg-black outline outline-black font-medium rounded-lg px-5 py-1"
+                  className="holographic-card transition-all duration-300 w-full whitespace-nowrap overflow-hidden text-white bg-black outline outline-black font-medium rounded-full px-5 py-2"
                 >
                   Start
                 </button>
               </div>
             </div>
-            <div
-              style={{
-                outlineWidth:
-                  gameStatus === "initiated"
-                    ? whosTurn === "opponent"
-                      ? "4px"
-                      : ""
-                    : "",
-              }}
-              className="flex flex-col outline outline-black p-[7px] rounded-xl transition-all duration-300"
-            >
+            <div className="flex flex-col outline outline-black p-[7px] rounded-xl transition-all duration-300">
               <h1 className="p-2 text-center">My Board</h1>
 
               {myBoard.map((row: Board[], rindex: number) => (

@@ -67,7 +67,7 @@ function SelectShip({
           setDisplayShips(true);
         }}
         disabled={gameStatus === "initiated" || displayShips}
-        className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black hover:bg-orange-200 outline outline-black font-medium rounded-lg px-5 py-1"
+        className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black hover:bg-orange-200 outline outline-black font-medium rounded-full px-5 py-2"
       >
         Place Manually
       </button>
@@ -136,7 +136,7 @@ function SelectShip({
               resetBoard();
               e.currentTarget.blur();
             }}
-            className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
+            className="transition-all duration-300 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-full px-5 py-2"
           >
             Reset
           </button>
@@ -144,14 +144,14 @@ function SelectShip({
             {vertical ? (
               <button
                 onClick={() => setVertical(false)}
-                className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-300 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-full px-5 py-2"
               >
                 vertical
               </button>
             ) : (
               <button
                 onClick={() => setVertical(true)}
-                className="transition-all duration-200 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-lg px-5 py-1"
+                className="transition-all duration-300 grow min-w-[120px] whitespace-nowrap overflow-hidden focus:outline-none text-black bg-orange-200 hover:bg-orange-300 focus:ring-4  focus:ring-orange-200 font-medium rounded-full px-5 py-2"
               >
                 horizontal
               </button>
@@ -167,7 +167,7 @@ function SelectShip({
             handleRandomize();
             e.currentTarget.blur();
           }}
-          className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black hover:bg-orange-200 outline outline-black font-medium rounded-lg px-5 py-1"
+          className="transition-all duration-300 w-full whitespace-nowrap overflow-hidden focus:outline-none text-black hover:bg-orange-200 outline outline-black font-medium rounded-full px-5 py-1"
         >
           Randomize
         </button>
@@ -187,7 +187,7 @@ function SelectShip({
           }}
           autoFocus={true}
           disabled={playerReady}
-          className="transition-all duration-200 w-full whitespace-nowrap overflow-hidden text-white bg-black hover:bg-neutral-800 outline outline-black font-medium rounded-lg px-5 py-1"
+          className="transition-all duration-300 w-full whitespace-nowrap overflow-hidden text-white bg-black hover:bg-neutral-800 outline outline-black font-medium rounded-full px-5 py-1"
         >
           Ready
         </button>

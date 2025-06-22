@@ -181,7 +181,7 @@ function Page() {
             <button
               type="submit"
               id="submit_button"
-              className="px-3 py-1.5 rounded-lg text-white bg-black"
+              className="px-3 holographic-card py-1.5 rounded-lg text-white bg-black"
             >
               Submit
             </button>

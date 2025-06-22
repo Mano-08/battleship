@@ -44,7 +44,7 @@ function GameOver({
     <div className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center">
       <div className="flex relative text-center flex-col gap-2 p-10 rounded-[35px] bg-white w-[90vw] lg:w-[500px]">
         <button
-          className="absolute top-3 right-3 rounded-full bg-red-100 hover:bg-red-200 p-1"
+          className="holographic-card absolute top-3 right-3 rounded-full bg-red-100 hover:bg-red-200 p-1"
           onClick={() => setShowGameOverDialog(false)}
         >
           <X size={15} />
@@ -70,7 +70,7 @@ function GameOver({
 
         <button
           onClick={message === "play_again" ? handleSendAck : handlePlayAgain}
-          className="transition-all text-sm w-full sm:text-base duration-200 min-w-[100px] sm:min-w-[120px] whitespace-nowrap overflow-hidden text-black outline outline-black font-medium rounded-lg px-5 py-1"
+          className="holographic-card transition-all text-sm w-full sm:text-base duration-200 min-w-[100px] sm:min-w-[120px] whitespace-nowrap overflow-hidden text-black outline outline-black font-medium rounded-lg px-5 py-1"
         >
           {message === "play_again" ? "Accept" : "Play Again"}
         </button>

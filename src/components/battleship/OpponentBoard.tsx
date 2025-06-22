@@ -206,8 +206,8 @@ function OpponentBoard({
       playerId: mysocket.getId(),
     });
     setHitCount((old) => old + 1);
+    setWhosTurn("opponent");
     if (!opponentBoard[rindex][cindex].ship) {
-      setWhosTurn("opponent");
       !mute && (oppSplashAudioRef.current as HTMLAudioElement)?.play();
     } else {
       !mute && (oppExplotionAudioRef.current as HTMLAudioElement)?.play();

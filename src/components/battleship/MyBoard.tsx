@@ -159,9 +159,7 @@ function MyBoard({
     if (playerId === mysocket.getId()) {
       return;
     }
-    if (!myBoard[rindex][cindex].ship) {
-      setWhosTurn("player");
-    }
+    setWhosTurn("player");
     if (myBoard[rindex][cindex].ship) {
       !mute && (explotionAudioRef.current as HTMLAudioElement)?.play();
     } else {

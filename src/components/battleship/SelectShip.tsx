@@ -103,7 +103,7 @@ function SelectShip({
                               backgroundColor: shipColors[ship.id] + "1",
                             }
                           : {
-                              backgroundColor: shipColors[ship.id] + "8",
+                              backgroundColor: shipColors[ship.id] + "3",
                             }
                       }
                       className={`${
@@ -125,7 +125,7 @@ function SelectShip({
                 onClick={() => removeShipFromPlacements(ship.id)}
                 className="transition-all duration-200 h-[18px] text-[14px] leading-none w-[18px] flex items-center justify-center text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-200 font-medium rounded-md"
               >
-                -{" "}
+                X{" "}
               </button>
             </div>
           );

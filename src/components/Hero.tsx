@@ -652,9 +652,7 @@ function Hero() {
       return;
     }
 
-    if (!opponentBoard[rindex][cindex].ship) {
-      setWhosTurn("opponent");
-    }
+    setWhosTurn("opponent");
 
     setHitCount((prev) => prev + 1);
     setOpponentBoard((old) => {
@@ -925,7 +923,7 @@ function Hero() {
                     >
                       <button
                         data-description={ship.id}
-                        className="holographic-card transition-all duration-200 flex flex-row gap-[2px]"
+                        className="transition-all duration-200 flex flex-row gap-[2px]"
                         onClick={() => !ship.placed && handleSelectShip(ship)}
                       >
                         {Array(ship.length)
@@ -945,7 +943,7 @@ function Hero() {
                                     }
                                   : {
                                       backgroundColor:
-                                        shipColors[ship.id] + "8",
+                                        shipColors[ship.id] + "3",
                                     }
                               }
                               className={`${
@@ -965,9 +963,9 @@ function Hero() {
                             : { display: "none" }
                         }
                         onClick={() => removeShipFromPlacements(ship.id)}
-                        className="holographic-card transition-all duration-200 h-[18px] text-[14px] leading-none w-[18px] flex items-center justify-center text-gray-900 hover:bg-red-100 focus:ring-2 focus:ring-red-200 font-medium rounded-md"
+                        className="transition-all duration-200 h-[18px] text-[14px] leading-none w-[18px] flex items-center justify-center text-gray-900 hover:bg-red-100 focus:ring-2 focus:ring-red-200 font-medium rounded-md"
                       >
-                        -{" "}
+                        X{" "}
                       </button>
                     </div>
                   );

@@ -33,10 +33,10 @@ function Page() {
           <h1 className="text-2xl font-semibold">ABOUT</h1>
           <p className="">
             Battleship is a classic board game where two players try to sink
-            each other's fleet of ships. Each player has a grid on which they
-            secretly place their ships. Players take turns calling out grid
-            coordinates to guess where the opponent's ships are located. It's a
-            game of strategy and luck.
+            each other&apos;s fleet of ships. Each player has a grid on which
+            they secretly place their ships. Players take turns calling out grid
+            coordinates to guess where the opponent&apos;s ships are located.
+            It&apos;s a game of strategy and luck.
           </p>
         </div>
 
@@ -56,7 +56,7 @@ function Page() {
 
         <div className="flex flex-col gap-3">
           <h1 className="text-2xl font-semibold">
-            BOT'S COORDINATE GUESSER LOGIC
+            BOT&apos;S COORDINATE GUESSER LOGIC
           </h1>
           <div>
             An intelligent coordinate guesser algorithm has been designed for

@@ -765,6 +765,7 @@ function Hero() {
       )}
 
       <Navbar
+        multiplayer={false}
         callback={handleDisplayLeaderboard}
         userData={userData}
         setUserData={setUserData}
@@ -861,7 +862,7 @@ function Hero() {
         )}
 
         {gameStatus === "initiated" && (
-          <div className="w-full flex items-center justify-center">
+          <div className="w-full hidden lg:flex items-center justify-center">
             <div className="relative rounded-full p-2 flex flex-row items-center gap-2 bg-orange-100 text-black">
               <span
                 className={`${
@@ -1014,6 +1015,10 @@ function Hero() {
                 <button
                   onClick={(e) => {
                     e.currentTarget.blur();
+                    if (userData.nickname === "") {
+                      setDisplay("signup-solo");
+                      return;
+                    }
                     if (Object.keys(myShipPlacements).length === 5) {
                       toast.success("war begun!");
                       setGameStatus("initiated");
@@ -1101,6 +1106,31 @@ function Hero() {
               ))}
             </div>
           </section>
+
+          {gameStatus === "initiated" && (
+            <div className="w-full lg:hidden flex items-center justify-center">
+              <div className="relative rounded-full p-2 flex flex-row items-center gap-2 bg-orange-100 text-black">
+                <span
+                  className={`${
+                    whosTurn === "opponent"
+                      ? "bg-black text-white rounded-full"
+                      : "text-black "
+                  } px-8 py-1.5`}
+                >
+                  ROBOT
+                </span>
+                <span
+                  className={`${
+                    whosTurn === "player"
+                      ? "bg-black text-white rounded-full"
+                      : "text-black "
+                  } px-8 py-1.5`}
+                >
+                  YOU
+                </span>
+              </div>
+            </div>
+          )}
 
           <section
             style={{

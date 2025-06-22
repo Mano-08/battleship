@@ -178,6 +178,7 @@ function Page() {
   return (
     <main className="min-h-screen flex flex-col px-1.5 sm:px-10">
       <Navbar
+        multiplayer={true}
         callback={handleDisplayLeaderboard}
         setUserData={setUserData}
         userData={userData}
@@ -190,7 +191,7 @@ function Page() {
         gameStatus={gameStatus}
       />
       {gameStatus === "initiated" && (
-        <div className="w-full flex items-center justify-center">
+        <div className="w-full hidden lg:flex items-center justify-center">
           <div className="relative rounded-full p-2 mt-10 flex flex-row items-center gap-2 bg-orange-100 text-black">
             <span
               className={`${
@@ -274,6 +275,31 @@ function Page() {
               message={display}
             />
           )}
+
+        {gameStatus === "initiated" && (
+          <div className="w-full lg:hidden flex items-center justify-center">
+            <div className="relative rounded-full p-2 mt-10 flex flex-row items-center gap-2 bg-orange-100 text-black">
+              <span
+                className={`${
+                  whosTurn === "opponent"
+                    ? "bg-black text-white rounded-full"
+                    : "text-black "
+                } px-8 py-1.5`}
+              >
+                OPPONENT
+              </span>
+              <span
+                className={`${
+                  whosTurn === "player"
+                    ? "bg-black text-white rounded-full"
+                    : "text-black "
+                } px-8 py-1.5`}
+              >
+                YOU
+              </span>
+            </div>
+          </div>
+        )}
 
         <OpponentBoard
           whosTurn={whosTurn}

@@ -24,11 +24,17 @@ import {
   VolumeX,
 } from "lucide-react";
 import { auth, provider } from "@/db/firebase";
-import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
+import {
+  onAuthStateChanged,
+  reload,
+  signInWithPopup,
+  signOut,
+} from "firebase/auth";
 import toast from "react-hot-toast";
 import { fetchUserData, pushDataToDB } from "@/utils/utils";
 
 function Navbar({
+  multiplayer,
   callback,
   userData,
   setUserData,
@@ -40,6 +46,7 @@ function Navbar({
   setMute,
   mute,
 }: {
+  multiplayer: undefined | boolean;
   callback: () => void;
   userData: UserData;
   showGameOverDialog: undefined | boolean;
@@ -235,18 +242,18 @@ function Navbar({
               ref={dropdownRef}
               className={`${
                 openSettings ? "flex" : "hidden"
-              } flex-col items-start p-2 rounded-lg bg-orange-50 absolute z-[500] top-9 right-0`}
+              } flex-col items-start p-2 rounded-lg bg-white absolute z-[500] top-9 right-0`}
             >
               {mute ? (
                 <button
-                  className="transition-all lg:hidden flex flex-row gap-2 duration-300 text-gray-900"
+                  className="w-full lg:hidden  flex transition-all duration-300 p-1 px-2 flex-row gap-2 hover:bg-orange-100 rounded-md items-center whitespace-nowrap"
                   onClick={() => setMute(false)}
                 >
                   No Music <VolumeX />
                 </button>
               ) : (
                 <button
-                  className="transition-all lg:hidden flex flex-row gap-2 duration-300 text-gray-900"
+                  className="w-full lg:hidden flex transition-all duration-300 p-1 px-2 flex-row gap-2 hover:bg-orange-100 rounded-md items-center whitespace-nowrap"
                   onClick={() => setMute(true)}
                 >
                   Music <Volume2 />
@@ -281,20 +288,22 @@ function Navbar({
                   <GoogleIcon />
                 </button>
               )}
-              <button
-                style={{
-                  display:
-                    (userData.nickname === "" &&
-                      userData.googleSignIn === true) ||
-                    userData.nickname !== ""
-                      ? "flex"
-                      : "none",
-                }}
-                onClick={handleDeleteAccount}
-                className="w-full transition-all duration-300 p-1 px-2 flex-row gap-2 hover:bg-red-200 rounded-md items-center whitespace-nowrap"
-              >
-                {userData.googleSignIn ? "Log out" : "Delete Account"}
-              </button>
+              {!multiplayer && (
+                <button
+                  style={{
+                    display:
+                      (userData.nickname === "" &&
+                        userData.googleSignIn === true) ||
+                      userData.nickname !== ""
+                        ? "flex"
+                        : "none",
+                  }}
+                  onClick={handleDeleteAccount}
+                  className="w-full transition-all duration-300 p-1 px-2 flex-row gap-2 hover:bg-red-200 rounded-md items-center whitespace-nowrap"
+                >
+                  {userData.googleSignIn ? "Log out" : "Delete Account"}
+                </button>
+              )}
             </div>
 
             <button

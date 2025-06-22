@@ -6,20 +6,50 @@ import Link from "next/link";
 import { v4 as uuidv4 } from "uuid";
 
 import Cookies from "universal-cookie";
-import { jwtDecode } from "jwt-decode";
-import { CustomJwtPayload, defaultUserData, UserData } from "@/utils/types";
-import { Anchor, Settings } from "lucide-react";
-import { auth, db, provider } from "@/db/firebase";
+import { defaultUserData, UserData } from "@/utils/types";
+import {
+  Anchor,
+  LogOut,
+  MessageSquareDot,
+  RotateCcw,
+  Settings,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
+import { auth, provider } from "@/db/firebase";
 import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import toast from "react-hot-toast";
 import { fetchUserData, pushDataToDB } from "@/utils/utils";
 
-function Navbar() {
+function Navbar({
+  userData,
+  setUserData,
+  showGameOverDialog,
+  setShowGameOverDialog,
+  setExitGame,
+  gameStatus,
+  setGameStatus,
+  setMute,
+  mute,
+}: {
+  userData: UserData;
+  showGameOverDialog: undefined | boolean;
+  setShowGameOverDialog:
+    | undefined
+    | React.Dispatch<React.SetStateAction<boolean>>;
+  gameStatus: "initiating" | "gameover" | "restart" | "initiated";
+  setGameStatus: React.Dispatch<
+    React.SetStateAction<"initiating" | "gameover" | "restart" | "initiated">
+  >;
+  setExitGame: React.Dispatch<React.SetStateAction<boolean>>;
+  setMute: React.Dispatch<React.SetStateAction<boolean>>;
+  mute: boolean;
+  setUserData: React.Dispatch<React.SetStateAction<UserData>>;
+}) {
   const [googleAuth, setGoogleAuth] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
   const [openSettings, setOpenSettings] = useState<boolean>(false);
-  const [userData, setUserData] = useState<UserData>(defaultUserData);
   const cookies = new Cookies();
 
   useEffect(() => {
@@ -36,12 +66,6 @@ function Navbar() {
         setGoogleAuth(false);
       }
     });
-    const token = cookies.get("bt_oken");
-    if (!token) {
-      return;
-    }
-    const dataFromToken = jwtDecode<CustomJwtPayload>(token);
-    setUserData(dataFromToken);
   }, []);
 
   const handleClickOutside = (event: any) => {
@@ -125,13 +149,34 @@ function Navbar() {
     }
   }
   return (
-    <header className="w-full p-3 border-t border-neutral-400 min-h-[10vh] lg:h-auto py-5">
+    <header className="w-full p-3 border-b border-solid border-neutral-300 h-[10vh] lg:h-auto py-5">
       <nav className="mx-auto w-full lg:w-[860px] gap-1 flex flex-row justify-between items-center">
         <Link href="/">
           <Anchor />
         </Link>
         <div className="flex flex-row gap-3 items-end">
-          <div className="flex flex-row relative items-center gap-4">
+          <div className="flex flex-row relative items-center gap-5">
+            {gameStatus === "gameover" &&
+              (showGameOverDialog !== undefined ? (
+                <button
+                  className={`${
+                    !showGameOverDialog && "animate-pulse"
+                  } transition-all duration-200 text-gray-900 focus:ring-4 focus:ring-orange-200 font-medium rounded-md p-2`}
+                  onClick={() =>
+                    setShowGameOverDialog && setShowGameOverDialog(true)
+                  }
+                >
+                  <MessageSquareDot />
+                </button>
+              ) : (
+                <button
+                  className="transition-all duration-200 text-gray-900 focus:ring-4 focus:ring-orange-200 font-medium rounded-md p-2"
+                  onClick={() => setGameStatus("initiating")}
+                >
+                  <RotateCcw />
+                </button>
+              ))}
+
             <div
               style={{
                 display:
@@ -155,6 +200,21 @@ function Navbar() {
             >
               <Settings />
             </div>
+            {mute ? (
+              <button
+                className="transition-all duration-300 text-gray-900"
+                onClick={() => setMute(false)}
+              >
+                <VolumeX />
+              </button>
+            ) : (
+              <button
+                className="transition-all duration-300 text-gray-900"
+                onClick={() => setMute(true)}
+              >
+                <Volume2 />
+              </button>
+            )}
             <div
               ref={dropdownRef}
               className={`${
@@ -205,6 +265,13 @@ function Navbar() {
                 {userData.googleSignIn ? "Log out" : "Delete Account"}
               </button>
             </div>
+
+            <button
+              className="transition-all duration-300 text-gray-900"
+              onClick={() => setExitGame(true)}
+            >
+              <LogOut />
+            </button>
           </div>
         </div>
       </nav>

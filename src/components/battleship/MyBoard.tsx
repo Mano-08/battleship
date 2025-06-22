@@ -1,6 +1,5 @@
 "use client";
 
-import { initialBoardConfig } from "@/utils/board";
 import { shipColors, ships } from "@/utils/ships";
 import MySocket from "@/utils/socket";
 import {
@@ -16,6 +15,22 @@ import React, { useEffect, useRef, useState } from "react";
 import SelectShip from "./SelectShip";
 import { getRandomCoord } from "@/helper/randomize";
 import useWindowSize from "react-use/lib/useWindowSize";
+
+const board = Array(10)
+  .fill(null)
+  .map((_) =>
+    Array(10).fill({
+      ship: false,
+      details: {
+        id: "noship",
+        burst: false,
+        start: false,
+        end: false,
+        vertical: false,
+      },
+      validHover: null,
+    })
+  );
 
 function MyBoard({
   gameStatus,
@@ -42,7 +57,7 @@ function MyBoard({
   setPlayerReady: React.Dispatch<React.SetStateAction<boolean>>;
   setWhosTurn: React.Dispatch<React.SetStateAction<WhosTurn>>;
 }) {
-  const [myBoard, setMyBoard] = useState<Board[][]>(initialBoardConfig());
+  const [myBoard, setMyBoard] = useState<Board[][]>(board);
   const [vertical, setVertical] = useState<boolean>(false);
   const [myShips, setMyShips] = useState<Ship[]>(ships);
   const [randomBoard, setRandomBoard] = useState<MyShipPlacement>({});

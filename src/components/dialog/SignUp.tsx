@@ -5,10 +5,10 @@ import Cookies from "universal-cookie";
 import Loading from "../Loading";
 import { v4 as uuidv4 } from "uuid";
 import { jwtDecode } from "jwt-decode";
-import { CustomJwtPayload, UserData } from "@/utils/types";
+import { CustomJwtPayload, DisplayModes, UserData } from "@/utils/types";
 import { createRecordInDB } from "@/utils/utils";
 
-type setDisplayProp = React.Dispatch<React.SetStateAction<string | null>>;
+type setDisplayProp = React.Dispatch<React.SetStateAction<DisplayModes>>;
 
 function SignUp({
   setDisplay,

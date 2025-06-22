@@ -8,6 +8,15 @@ export interface CustomJwtPayload extends JwtPayload {
   gmail: string;
 }
 
+export type GameStatus = "initiating" | "gameover" | "restart" | "initiated";
+
+export type DisplayModes =
+  | "leaderboard"
+  | "signup-solo"
+  | "signup-multiplayer"
+  | "how-to-play"
+  | null;
+
 export interface UserData {
   nickname: string;
   username: string;

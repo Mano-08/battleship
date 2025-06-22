@@ -22,6 +22,7 @@ import Connecting from "@/components/dialog/Connecting";
 import Link from "next/link";
 import Nav from "@/components/battleship/Nav";
 import ReturnToHomePage from "@/components/dialog/ReturnToHomePage";
+import Navbar from "@/components/Navbar";
 
 const mysocket = new MySocket();
 
@@ -172,6 +173,17 @@ function Page() {
 
   return (
     <main className="min-h-screen flex flex-col justify-between px-1.5 sm:px-10">
+      <Navbar
+        setUserData={setUserData}
+        userData={userData}
+        setMute={setMute}
+        mute={mute}
+        setExitGame={setExitGame}
+        setShowGameOverDialog={setShowGameOverDialog}
+        showGameOverDialog={showGameOverDialog}
+        setGameStatus={setGameStatus}
+        gameStatus={gameStatus}
+      />
       <div className="flex grow flex-col items-center gap-5 py-10 justify-center lg:flex-row">
         <MyBoard
           setWinner={setWinner}
@@ -246,16 +258,6 @@ function Page() {
         />
       </div>
 
-      <Nav
-        userData={userData}
-        setMute={setMute}
-        mute={mute}
-        setExitGame={setExitGame}
-        setShowGameOverDialog={setShowGameOverDialog}
-        showGameOverDialog={showGameOverDialog}
-        setGameStatus={setGameStatus}
-        gameStatus={gameStatus}
-      />
       <Toaster position="bottom-center" reverseOrder={false} />
     </main>
   );

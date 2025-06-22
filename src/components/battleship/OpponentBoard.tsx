@@ -1,7 +1,6 @@
 "use client";
 
 import { Fire, Skeleton } from "@/assets/svgs";
-import { initialBoardConfig } from "@/utils/board";
 import { shipColors } from "@/utils/ships";
 import MySocket from "@/utils/socket";
 import { Board, MyShipPlacement, UserData, WhosTurn } from "@/utils/types";
@@ -9,6 +8,22 @@ import { updateScoreIntoCookie } from "@/utils/utils";
 import { useParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
+
+const board = Array(10)
+  .fill(null)
+  .map((_) =>
+    Array(10).fill({
+      ship: false,
+      details: {
+        id: "noship",
+        burst: false,
+        start: false,
+        end: false,
+        vertical: false,
+      },
+      validHover: null,
+    })
+  );
 
 function OpponentBoard({
   whosTurn,
@@ -39,9 +54,7 @@ function OpponentBoard({
 }) {
   const { room }: { room: string } = useParams();
   const [shipPlacement, setShipPlacement] = useState<MyShipPlacement>({});
-  const [opponentBoard, setOpponentBoard] = useState<Board[][]>(
-    initialBoardConfig()
-  );
+  const [opponentBoard, setOpponentBoard] = useState<Board[][]>(board);
 
   const oppExplotionAudioRef = useRef<HTMLAudioElement | null>(null);
   const oppSplashAudioRef = useRef<HTMLAudioElement | null>(null);

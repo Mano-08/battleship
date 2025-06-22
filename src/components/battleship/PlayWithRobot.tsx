@@ -15,7 +15,6 @@ import {
 } from "@/utils/types";
 import { jwtDecode } from "jwt-decode";
 import SignUp from "@/components/dialog/SignUp";
-import { initialBoardConfig } from "@/utils/board";
 import { shipColors, ships } from "@/utils/ships";
 import toast, { Toaster } from "react-hot-toast";
 import { getRandomCoord } from "@/helper/randomize";
@@ -26,6 +25,38 @@ import { X } from "lucide-react";
 import { updateScoreIntoCookie } from "@/utils/utils";
 import Nav from "./Nav";
 import { guessNextMove } from "@/helper/guesser";
+
+const oppboard = Array(10)
+  .fill(null)
+  .map((_) =>
+    Array(10).fill({
+      ship: false,
+      details: {
+        id: "noship",
+        burst: false,
+        start: false,
+        end: false,
+        vertical: false,
+      },
+      validHover: null,
+    })
+  );
+
+const myboard = Array(10)
+  .fill(null)
+  .map((_) =>
+    Array(10).fill({
+      ship: false,
+      details: {
+        id: "noship",
+        burst: false,
+        start: false,
+        end: false,
+        vertical: false,
+      },
+      validHover: null,
+    })
+  );
 
 function PlayWithRobot() {
   const [loggedin, setLoggedin] = useState<boolean>(true);
@@ -50,7 +81,7 @@ function PlayWithRobot() {
   // useEffect(() => {
   //   setTimeout(() => setGameStatus("gameover"), 1000);
   // }, []);
-  const [myBoard, setMyBoard] = useState<Board[][]>(initialBoardConfig());
+  const [myBoard, setMyBoard] = useState<Board[][]>(myboard);
   const [vertical, setVertical] = useState<boolean>(false);
   const [myShips, setMyShips] = useState<Ship[]>(ships);
   const [randomOpponentBoard, setRandomOpponentBoard] =
@@ -63,9 +94,7 @@ function PlayWithRobot() {
   const [myShipPlacements, setMyShipPlacement] = useState<MyShipPlacement>({});
   const [opponentShipPlacement, setOpponentsShipPlacement] =
     useState<MyShipPlacement>({});
-  const [opponentBoard, setOpponentBoard] = useState<Board[][]>(
-    initialBoardConfig()
-  );
+  const [opponentBoard, setOpponentBoard] = useState<Board[][]>(oppboard);
   const [coord, setCoord] = useState<{ row: number; col: number } | null>(null);
   const [opponentsWreckedShips, setOpponentsWreckedShips] = useState<{
     [key: string]: boolean;
@@ -89,11 +118,6 @@ function PlayWithRobot() {
     if (dataFromToken.nickname === "") {
       setLoggedin(false);
     }
-
-    toast("Earn 250 points by winning within 40 moves!", {
-      duration: 6000,
-      style: { textAlign: "center" },
-    });
 
     if (splashAudioRef.current) {
       splashAudioRef.current.volume = 0.2;
@@ -957,8 +981,8 @@ function PlayWithRobot() {
                 : "",
           }}
           className={`${
-            gameStatus === "initiating" && "hidden"
-          } lg:flex flex-col outline outline-black p-[7px] rounded-xl transition-all duration-300`}
+            gameStatus === "initiating" ? "hidden" : "flex"
+          } flex-col outline outline-black p-[7px] rounded-xl transition-all duration-300`}
         >
           <h1 className="p-2 text-center">Opponent&apos;s Board</h1>
           {gameStatus !== "gameover"

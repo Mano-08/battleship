@@ -19,14 +19,12 @@ body {
 * {
   box-sizing: border-box;
 }
-
 .noise {
   background: linear-gradient(
-      132deg,
-      rgba(255, 245, 220, 0.64),
-      rgba(255, 245, 220, 0.64)
-    ),
-    url(./../../public/noise.svg);
+    132deg,
+    rgba(255, 245, 220, 0.64),
+    rgba(255, 245, 220, 0.64)
+  );
 }
 
 button {

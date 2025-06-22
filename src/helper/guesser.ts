@@ -366,8 +366,12 @@ function computeManhattanDistance(myBoard: Board[][]): ManhattanDistance[] {
     }
   }
   console.log(manhattanDistances, "MANHATTAN DISTANCES");
-  manhattanDistances.sort((a, b) => b[2] - a[2]);
-  const maxDistance = manhattanDistances[0][2];
+
+  let maxDistance = 0;
+  for (let i = 0; i < manhattanDistances.length; i++) {
+    const [, , distance] = manhattanDistances[i];
+    maxDistance = Math.max(maxDistance, distance);
+  }
   const filteredDistances = manhattanDistances.filter(
     ([, , distance]) => distance === maxDistance
   );

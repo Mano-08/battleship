@@ -85,6 +85,7 @@ export type Ship = {
 };
 
 export type displayOptions =
+  | "leaderboard"
   | "loading"
   | "share_link"
   | "player_left"

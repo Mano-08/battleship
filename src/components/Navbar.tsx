@@ -6,13 +6,20 @@ import Link from "next/link";
 import { v4 as uuidv4 } from "uuid";
 
 import Cookies from "universal-cookie";
-import { defaultUserData, UserData } from "@/utils/types";
+import {
+  defaultUserData,
+  DisplayModes,
+  displayOptions,
+  GameStatus,
+  UserData,
+} from "@/utils/types";
 import {
   Anchor,
   LogOut,
   MessageSquareDot,
   RotateCcw,
   Settings,
+  Trophy,
   Volume2,
   VolumeX,
 } from "lucide-react";
@@ -22,6 +29,7 @@ import toast from "react-hot-toast";
 import { fetchUserData, pushDataToDB } from "@/utils/utils";
 
 function Navbar({
+  callback,
   userData,
   setUserData,
   showGameOverDialog,
@@ -32,6 +40,7 @@ function Navbar({
   setMute,
   mute,
 }: {
+  callback: () => void;
   userData: UserData;
   showGameOverDialog: undefined | boolean;
   setShowGameOverDialog:
@@ -190,6 +199,13 @@ function Navbar({
               <strong className="mr-3">{userData.nickname}</strong> score:{" "}
               <strong>{userData.score}</strong>
             </div>
+
+            <button
+              className="flex flex-row items-center gap-2"
+              onClick={callback}
+            >
+              Leaderboard <Trophy />
+            </button>
 
             <div
               ref={buttonRef}

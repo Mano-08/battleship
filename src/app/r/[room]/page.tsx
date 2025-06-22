@@ -20,9 +20,9 @@ import MySocket from "@/utils/socket";
 import GameOver from "@/components/dialog/GameOver";
 import Connecting from "@/components/dialog/Connecting";
 import Link from "next/link";
-import Nav from "@/components/battleship/Nav";
 import ReturnToHomePage from "@/components/dialog/ReturnToHomePage";
 import Navbar from "@/components/Navbar";
+import Leaderboard from "@/components/Leaderboard";
 
 const mysocket = new MySocket();
 
@@ -88,6 +88,10 @@ function Page() {
       setDisplay("game_lost");
     }
   }, [winner]);
+
+  function handleDisplayLeaderboard() {
+    setDisplay("leaderboard");
+  }
 
   function handleGameOver({
     playerId,
@@ -174,6 +178,7 @@ function Page() {
   return (
     <main className="min-h-screen flex flex-col px-1.5 sm:px-10">
       <Navbar
+        callback={handleDisplayLeaderboard}
         setUserData={setUserData}
         userData={userData}
         setMute={setMute}
@@ -245,6 +250,9 @@ function Page() {
               </div>
             </div>
           </div>
+        )}
+        {display === "leaderboard" && (
+          <Leaderboard handleCloseDialog={() => setDisplay("")} />
         )}
         {display === "loading" && <Connecting />}
         {display === "share_link" && <ShareLink room={room} />}

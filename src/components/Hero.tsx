@@ -492,6 +492,10 @@ function Hero() {
     }
   }
 
+  function handleDisplayLeaderboard() {
+    setDisplay("leaderboard");
+  }
+
   function removeHoverStatus() {
     setMyBoard((oldData) => {
       const newMyBoard = [...oldData];
@@ -761,6 +765,7 @@ function Hero() {
       )}
 
       <Navbar
+        callback={handleDisplayLeaderboard}
         userData={userData}
         setUserData={setUserData}
         setGameStatus={setGameStatus}
@@ -773,11 +778,11 @@ function Hero() {
       />
       <div className="min-h-[90vh] w-full flex flex-col items-center justify-center">
         {gameStatus === "gameover" && showGameOverDialog && (
-          <div className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center">
+          <div className="fixed h-screen w-screen z-50 top-0 left-0 bg-black/60 flex items-center justify-center">
             {winner === "player" && <Confetti width={width} height={height} />}
             <div className="flex relative text-center flex-col gap-2 p-10 rounded-[35px] bg-orange-50 w-[90vw] lg:w-[400px]">
               <button
-                className="absolute holographic-card top-6 right-6 rounded-full bg-red-100 hover:bg-red-200 p-1"
+                className="absolute top-6 right-6 rounded-full bg-red-100 hover:bg-red-200 p-1"
                 onClick={() => setShowGameOverDialog(false)}
               >
                 <X size={15} />
@@ -820,11 +825,11 @@ function Hero() {
         {exitGame && (
           <div
             onClick={() => setExitGame(false)}
-            className="fixed top-0 left-0 h-screen w-screen bg-black/60 flex items-center justify-center"
+            className="fixed top-0 left-0 h-screen z-50 w-screen bg-black/60 flex items-center justify-center"
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="flex relative text-center flex-col gap-2 p-10 rounded-[35px] bg-orange-50 w-[90vw] lg:w-[400px]"
+              className="flex relative text-center flex-col gap-2 p-10 rounded-[35px] bg-orange-50 w-[90vw] lg:w-[500px]"
             >
               <button
                 className="absolute  top-6 right-6 rounded-full bg-red-100 hover:bg-red-200 p-1"
@@ -1024,7 +1029,17 @@ function Hero() {
                 </button>
               </div>
             </div>
-            <div className="flex flex-col outline outline-black p-[7px] rounded-xl transition-all duration-300">
+            <div
+              style={{
+                outlineWidth:
+                  gameStatus === "initiated"
+                    ? whosTurn === "opponent"
+                      ? "4px"
+                      : ""
+                    : "",
+              }}
+              className="flex flex-col outline outline-black p-[7px] rounded-xl transition-all duration-300"
+            >
               <h1 className="p-2 text-center">My Board</h1>
 
               {myBoard.map((row: Board[], rindex: number) => (

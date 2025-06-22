@@ -3,7 +3,7 @@ import { fetchUserScores } from "@/utils/utils";
 import Cookies from "universal-cookie";
 import React, { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
-import { X } from "lucide-react";
+import { Trophy, X } from "lucide-react";
 
 const Leaderboard = ({
   handleCloseDialog,
@@ -55,13 +55,13 @@ const Leaderboard = ({
         className="animate-popup relative flex text-center flex-col gap-2 p-10 rounded-[35px] bg-white w-[90vw] lg:w-[400px]"
       >
         <button
-          className="absolute top-3 right-3 rounded-full bg-red-100 hover:bg-red-200 p-1"
+          className="absolute top-6 right-6 rounded-full bg-red-100 hover:bg-red-200 p-1"
           onClick={handleCloseDialog}
         >
           <X size={15} />
         </button>
-        <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
-          LEADER BOARD 🏆
+        <h1 className="text-[1.3rem] w-full flex flex-row items-center justify-center gap-2 py-1 border-b border-neutral-200 font-semibold">
+          LEADER BOARD <Trophy />
         </h1>
         <ol className="rounded-md overflow-hidden">
           {topPlayers === null &&

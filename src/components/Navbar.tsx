@@ -204,7 +204,7 @@ function Navbar({
               className="flex flex-row items-center gap-2"
               onClick={callback}
             >
-              Leaderboard <Trophy />
+              <span className="lg:block hidden">Leaderboard</span> <Trophy />
             </button>
 
             <div
@@ -218,14 +218,14 @@ function Navbar({
             </div>
             {mute ? (
               <button
-                className="transition-all duration-300 text-gray-900"
+                className="transition-all hidden lg:block duration-300 text-gray-900"
                 onClick={() => setMute(false)}
               >
                 <VolumeX />
               </button>
             ) : (
               <button
-                className="transition-all duration-300 text-gray-900"
+                className="transition-all  hidden lg:block duration-300 text-gray-900"
                 onClick={() => setMute(true)}
               >
                 <Volume2 />
@@ -237,6 +237,21 @@ function Navbar({
                 openSettings ? "flex" : "hidden"
               } flex-col items-start p-2 rounded-lg bg-orange-50 absolute z-[500] top-9 right-0`}
             >
+              {mute ? (
+                <button
+                  className="transition-all lg:hidden flex flex-row gap-2 duration-300 text-gray-900"
+                  onClick={() => setMute(false)}
+                >
+                  No Music <VolumeX />
+                </button>
+              ) : (
+                <button
+                  className="transition-all lg:hidden flex flex-row gap-2 duration-300 text-gray-900"
+                  onClick={() => setMute(true)}
+                >
+                  Music <Volume2 />
+                </button>
+              )}
               <Link
                 href="/about"
                 className="w-full flex transition-all duration-300 p-1 px-2 flex-row gap-2 hover:bg-orange-100 rounded-md items-center whitespace-nowrap"

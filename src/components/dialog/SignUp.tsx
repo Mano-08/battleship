@@ -82,7 +82,7 @@ function SignUp({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="animate-popup flex text-center flex-col gap-2 p-10 rounded-[35px] bg-white w-[90vw] lg:w-[400px]"
+        className="animate-popup flex text-center flex-col gap-2 p-5 lg:p-10 rounded-[35px] bg-white w-[90vw] lg:w-[400px]"
       >
         <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
           Enter Nickname

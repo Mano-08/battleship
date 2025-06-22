@@ -9,7 +9,7 @@ function HowToPlay({
 }) {
   return (
     <div className="fixed z-[900] h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center">
-      <div className="animate-popup relative flex text-left flex-col gap-2 p-10 rounded-[35px] bg-white w-[90vw] lg:w-[500px]">
+      <div className="animate-popup relative flex text-left flex-col gap-2 p-5 lg:p-10 rounded-[35px] bg-white w-[90vw] lg:w-[500px]">
         <h1 className="text-[1.3rem] text-center w-full border-b border-neutral-200 font-semibold">
           How to Play?
         </h1>
@@ -37,13 +37,13 @@ function HowToPlay({
         <div className="flex flex-row items-center justify-center gap-2 ">
           <button
             onClick={handlePlayWithFriend}
-            className="holographic-card rounded-full px-5 w-[47%] py-2.5 bg-white border border-black border-solid text-black"
+            className="holographic-card rounded-full whitespace-nowrap px-3 lg:px-5 w-[47%] py-2.5 bg-white border border-black border-solid text-black"
           >
             Play with Friend
           </button>
           <button
             onClick={handlePlayWithRobot}
-            className="holographic-card rounded-full px-5 w-[47%] py-2.5 bg-black text-white"
+            className="holographic-card rounded-full whitespace-nowrap px-3 lg:px-5 w-[47%] py-2.5 bg-black text-white"
           >
             Play with Robot
           </button>

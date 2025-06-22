@@ -780,7 +780,7 @@ function Hero() {
         {gameStatus === "gameover" && showGameOverDialog && (
           <div className="fixed h-screen w-screen z-50 top-0 left-0 bg-black/60 flex items-center justify-center">
             {winner === "player" && <Confetti width={width} height={height} />}
-            <div className="flex relative text-center flex-col gap-2 p-10 rounded-[35px] bg-orange-50 w-[90vw] lg:w-[400px]">
+            <div className="flex relative text-center flex-col gap-2 p-5 lg:p-10 rounded-[35px] bg-orange-50 w-[90vw] lg:w-[400px]">
               <button
                 className="absolute top-6 right-6 rounded-full bg-red-100 hover:bg-red-200 p-1"
                 onClick={() => setShowGameOverDialog(false)}
@@ -829,7 +829,7 @@ function Hero() {
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="flex relative text-center flex-col gap-2 p-10 rounded-[35px] bg-orange-50 w-[90vw] lg:w-[500px]"
+              className="flex relative text-center flex-col gap-2 p-5 lg:p-10 rounded-[35px] bg-orange-50 w-[90vw] lg:w-[500px]"
             >
               <button
                 className="absolute  top-6 right-6 rounded-full bg-red-100 hover:bg-red-200 p-1"

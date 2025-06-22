@@ -8,7 +8,7 @@ function ShareLink({ room }: { room: string }) {
   }
   return (
     <div className="fixed h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center">
-      <div className="animate-popup flex text-center flex-col gap-2 p-10 rounded-[35px] bg-white w-[90vw] lg:w-[400px]">
+      <div className="animate-popup flex text-center flex-col gap-2 p-5 lg:p-10 rounded-[35px] bg-white w-[90vw] lg:w-[400px]">
         <h1 className="text-[1.1rem] sm:text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
           Share Link with your friend
         </h1>

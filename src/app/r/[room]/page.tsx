@@ -228,7 +228,7 @@ function Page() {
         />
         {exitGame && (
           <div className="fixed top-0 left-0 h-screen w-screen bg-black/60 flex items-center justify-center">
-            <div className="flex text-center flex-col gap-2 p-10 rounded-[35px] bg-white w-[90vw] lg:w-[500px]">
+            <div className="flex text-center flex-col gap-2 p-5 lg:p-10 rounded-[35px] bg-white w-[90vw] lg:w-[500px]">
               <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
                 Exit Game
               </h1>

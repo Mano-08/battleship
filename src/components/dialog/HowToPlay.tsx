@@ -10,8 +10,14 @@ function HowToPlay({
   handlePlayWithRobot: () => void;
 }) {
   return (
-    <div className="fixed z-[900] h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center">
-      <div className="animate-popup relative flex text-left flex-col gap-2 p-5 lg:p-10 rounded-[35px] bg-white w-[90vw] lg:w-[500px]">
+    <div
+      onClick={handlePlayWithRobot}
+      className="fixed z-[900] h-screen w-screen top-0 left-0 bg-black/60 flex items-center justify-center"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="animate-popup relative flex text-left flex-col gap-2 p-5 lg:p-10 rounded-[35px] bg-white w-[90vw] lg:w-[500px]"
+      >
         <h1 className="text-[1.3rem] text-center w-full border-b border-neutral-200 font-semibold">
           How to Play?
         </h1>

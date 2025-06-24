@@ -149,9 +149,7 @@ function Hero() {
   }
 
   function handlePlayWithRobot() {
-    if (userExist({ mode: "signup-solo" })) {
-      enterBattlefield();
-    }
+    setDisplay(null);
   }
 
   useEffect(() => {

@@ -1,9 +1,11 @@
 import React from "react";
 
 function HowToPlay({
+  userCount = 350,
   handlePlayWithFriend,
   handlePlayWithRobot,
 }: {
+  userCount?: number;
   handlePlayWithFriend: () => void;
   handlePlayWithRobot: () => void;
 }) {
@@ -27,23 +29,25 @@ function HowToPlay({
             The game continues until all the ships of one player are bombed.
           </li>
 
-          <li className="text-green-600">
-            Earn 250 points by winning within 40 moves!
-          </li>
+          <li>Earn 250 points by winning within 40 moves!</li>
 
           <li className="mt-3">Good Luck!</li>
         </ul>
 
-        <div className="flex flex-row items-center justify-center gap-2 ">
+        <p className="w-full text-violet-600 text-center p-2 text-sm border-black/20 mb-4 rounded-full border border-solid ">
+          Played by over {userCount} players worldwide
+        </p>
+
+        <div className="flex flex-row items-center justify-between">
           <button
             onClick={handlePlayWithFriend}
-            className="holographic-card rounded-full whitespace-nowrap px-3 lg:px-5 w-[47%] py-2.5 bg-white border border-black border-solid text-black"
+            className="holographic-card rounded-full whitespace-nowrap px-3 lg:px-5 w-[48%] py-2.5 bg-white border border-black border-solid text-black"
           >
             Play with Friend
           </button>
           <button
             onClick={handlePlayWithRobot}
-            className="holographic-card rounded-full whitespace-nowrap px-3 lg:px-5 w-[47%] py-2.5 bg-black text-white"
+            className="holographic-card rounded-full whitespace-nowrap px-3 lg:px-5 w-[48%] py-2.5 bg-black text-white"
           >
             Play with Robot
           </button>

@@ -747,6 +747,7 @@ function Hero() {
     <>
       {display === "how-to-play" && (
         <HowToPlay
+          userCount={userCount}
           handlePlayWithFriend={handlePlayWithFriend}
           handlePlayWithRobot={handlePlayWithRobot}
         />

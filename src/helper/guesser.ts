@@ -74,8 +74,6 @@ export async function guessNextMove({
   while (!opponentsTurnOver) {
     await sleep(1300);
     if (lastHit) {
-      console.log(lastHit, "INISIDE LAST HIT");
-      console.log(lastHits, "LAST HITS");
       const { row, col, direction, shipId } = lastHit;
       const directions = [
         { row: row - 1, col, dir: "vertical" },
@@ -92,7 +90,6 @@ export async function guessNextMove({
           !myBoard[row][col].details.burst &&
           (direction === null || dir === direction)
       );
-      console.log(validDirections, "VALID DIRECTIONS");
       if (validDirections.length === 0) {
         if (direction === "horizontal") {
           let curr = col;
@@ -212,6 +209,8 @@ export async function guessNextMove({
           return newData;
         });
 
+        opponentsTurnOver = true;
+
         if (myBoard[row][col].ship) {
           !mute && (oppExplotionAudioRef.current as HTMLAudioElement)?.play();
           lastHit = {
@@ -222,7 +221,6 @@ export async function guessNextMove({
           };
           lastHits.push(lastHit);
           const shipId = handleShipBurst(row, col);
-          console.log(shipId, "SHIP ID");
           if (shipId !== null) {
             lastHits = removeShipFromHitStack(lastHits, shipId);
             lastHit =
@@ -232,7 +230,6 @@ export async function guessNextMove({
           !mute && (oppSplashAudioRef.current as HTMLAudioElement)?.play();
           lastHits[lastHits.length - 1].direction =
             dir === "vertical" ? "horizontal" : "vertical";
-          opponentsTurnOver = true;
         }
       } else {
         lastHit = null;
@@ -252,6 +249,8 @@ export async function guessNextMove({
             return newData;
           });
 
+          opponentsTurnOver = true;
+
           if (myBoard[row][col].ship) {
             !mute && (oppExplotionAudioRef.current as HTMLAudioElement)?.play();
             const shipId = handleShipBurst(row, col);
@@ -270,48 +269,11 @@ export async function guessNextMove({
             }
           } else {
             !mute && (oppSplashAudioRef.current as HTMLAudioElement)?.play();
-            opponentsTurnOver = true;
           }
 
           break;
         }
       }
-      // while (true) {
-      //   const row = Math.floor(Math.random() * 10);
-      //   const col = Math.floor(Math.random() * 10);
-      //   if (isPossible({ row, col, myBoard, myWreckedShips })) {
-      //     setMyBoard((old: Board[][]) => {
-      //       const newData = [...old];
-      //       const updatedElement = { ...newData[row][col] };
-      //       updatedElement.details.burst = true;
-      //       newData[row][col] = updatedElement;
-      //       return newData;
-      //     });
-
-      //     if (myBoard[row][col].ship) {
-      //       !mute && (oppExplotionAudioRef.current as HTMLAudioElement)?.play();
-      //       const shipId = handleShipBurst(row, col);
-      //       if (shipId !== null) {
-      //         lastHits = removeShipFromHitStack(lastHits, shipId);
-      //         lastHit =
-      //           lastHits.length > 0 ? lastHits[lastHits.length - 1] : null;
-      //       } else {
-      //         lastHit = {
-      //           row,
-      //           col,
-      //           shipId: myBoard[row][col].details.id,
-      //           direction: null,
-      //         };
-      //         lastHits.push(lastHit);
-      //       }
-      //     } else {
-      //       !mute && (oppSplashAudioRef.current as HTMLAudioElement)?.play();
-      //       opponentsTurnOver = true;
-      //     }
-
-      //     break;
-      //   }
-      // }
     }
     setHitStack(lastHits);
   }
@@ -347,8 +309,6 @@ function computeManhattanDistance(myBoard: Board[][]): ManhattanDistance[] {
     }
   }
 
-  console.log(allBombedCells, "ALL BOMBED CELLS");
-
   const manhattanDistances: ManhattanDistance[] = [];
 
   for (let i = 0; i < rows; i++) {
@@ -358,16 +318,18 @@ function computeManhattanDistance(myBoard: Board[][]): ManhattanDistance[] {
         for (let k = 0; k < allBombedCells.length; k++) {
           const [bombedRow, bombedCol] = allBombedCells[k];
           const distance = Math.abs(bombedRow - i) + Math.abs(bombedCol - j);
-          // console.log("distance", distance, i, j, bombedRow, bombedCol);
           mini = Math.min(distance, mini);
         }
         manhattanDistances.push([i, j, mini]);
       }
     }
   }
-  console.log(manhattanDistances, "MANHATTAN DISTANCES");
-  manhattanDistances.sort((a, b) => b[2] - a[2]);
-  const maxDistance = manhattanDistances[0][2];
+
+  let maxDistance = 0;
+  for (let i = 0; i < manhattanDistances.length; i++) {
+    const [, , distance] = manhattanDistances[i];
+    maxDistance = Math.max(maxDistance, distance);
+  }
   const filteredDistances = manhattanDistances.filter(
     ([, , distance]) => distance === maxDistance
   );

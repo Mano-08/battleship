@@ -558,9 +558,7 @@ function PlayWithRobot() {
       return;
     }
 
-    if (!opponentBoard[rindex][cindex].ship) {
-      setWhosTurn("opponent");
-    }
+    setWhosTurn("opponent");
 
     setHitCount((prev) => prev + 1);
     setOpponentBoard((old) => {

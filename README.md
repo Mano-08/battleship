@@ -30,9 +30,41 @@
 
 ---
 
-Find the backend system code serving Battleship at <a href="https://github.com/Mano-08/server.battleship">server.battleship</a>
+Find the backend system code serving Battleship at <a href="https://github.com/Mano-08/server.battleship">server.battleship</a>.
 
+### Local Setup
 
+---
+
+1. Clone Battleship backend
+
+```typescript
+git clone https://github.com/Mano-08/server.battleship.git
+```
+
+2. Clone Battleship frontend (branch socket-v2)
+
+```typescript
+git clone -b https://github.com/Mano-08/battleship.git
+```
+
+3. Install packages for Battleship frontend using
+
+```typescript
+pnpm install
+```
+
+4. Run backend using
+
+```typescript
+./gradlew bootRun
+```
+
+5. Run frontend using
+
+```typescript
+pnpm run dev
+```
 
 ### Bot&apos;s Coordinate Guesser Logic
 
@@ -111,4 +143,3 @@ The Algorithm is designed based on the following ideology:
               twitter
             </a>
             .
-

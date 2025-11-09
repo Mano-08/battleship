@@ -664,7 +664,7 @@ function PlayWithRobot() {
               <X size={15} />
             </button>
             <h1 className="text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
-              Game Over
+              {winner === "player" ? "You Won!" : "Game Over!"}
             </h1>
             <div className="pb-5 text-sm sm:text-base">
               {winner === "player" ? (

@@ -48,6 +48,12 @@ function Page() {
   }
 
   useEffect(() => {
+    mysocket.setRoomFullCallback(handleRoomFull);
+    mysocket.setOnPlayerJoined(handlePlayerJoined);
+    mysocket.setOnGameOver(handleGameOver);
+    mysocket.setOnPlayerLeft(handlePlayerleft);
+    mysocket.setOnPlayAgain(handlePlayAgain);
+    mysocket.setOnAcceptPlayAgain(handleAcceptPlayAgain);
     const cookies = new Cookies();
     const token = cookies.get("bt_oken");
     if (!token) {
@@ -62,12 +68,6 @@ function Page() {
     }
     joinRoom(dataFromToken.nickname);
 
-    mysocket.setRoomFullCallback(handleRoomFull);
-    mysocket.setOnPlayerJoined(handlePlayerJoined);
-    mysocket.setOnGameOver(handleGameOver);
-    mysocket.setOnPlayerLeft(handlePlayerleft);
-    mysocket.setOnPlayAgain(handlePlayAgain);
-    mysocket.setOnAcceptPlayAgain(handleAcceptPlayAgain);
     return () => mysocket.disconnect();
   }, []);
 
@@ -105,6 +105,7 @@ function Page() {
   function handleAcceptPlayAgain(playerId: string) {
     if (playerId !== mysocket.getId()) {
       setDisplay("");
+      setPlayAgain(false);
       setGameStatus("restart");
     }
   }
@@ -152,22 +153,23 @@ function Page() {
   }
 
   function handleRoomFull() {
+    setDisplay("");
     setRoomFull(true);
   }
 
   function handleLoggedIn(userData: UserData) {
     setLoggedin(true);
-    setDisplay("");
     setUserData(userData);
     joinRoom(userData.nickname);
-  }
-
-  if (roomFull) {
-    return <ReturnToHomePage message="The room is Already full!" />;
+    setDisplay("loading");
   }
 
   if (!loggedin) {
     return <SignUp setDisplay={null} callback={handleLoggedIn} />;
+  }
+
+  if (roomFull) {
+    return <ReturnToHomePage message="The room is Already full!" />;
   }
 
   return (

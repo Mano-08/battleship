@@ -50,7 +50,11 @@ function GameOver({
           <X size={15} />
         </button>
         <h1 className="text-[1.1rem] sm:text-[1.3rem] w-full border-b border-neutral-200 font-semibold">
-          {message === "play_again" ? "Play Again?" : "Game Over"}
+          {message === "play_again"
+            ? "Play Again?"
+            : message === "game_lost"
+            ? "You Lost!"
+            : "You Won!"}
         </h1>
         <div className="p-2 text-sm sm:text-base">
           {message === "play_again" ? (

@@ -1,4 +1,4 @@
-import { io } from "socket.io-client";
+import io from "socket.io-client";
 import { MyShipPlacement } from "./types";
 
 class MySocket {
@@ -20,16 +20,17 @@ class MySocket {
   }) => void = () => {};
 
   constructor() {
-    // this.URL = "http://localhost:5000";
-    this.URL = process.env.NEXT_PUBLIC_SOCKET_END_POINT as string;
+    this.URL = "http://localhost:5000";
+    // this.URL = process.env.NEXT_PUBLIC_SOCKET_END_POINT as string;
     this.socket = io(this.URL, {
       autoConnect: false,
-      transports: ["websocket"],
+      transports: ["polling", "websocket"],
     });
-    this.socket.onAny((event: any, ...args: any) => {
-      console.log(event, args);
-    });
+    // this.socket.onAny((event: any, ...args: any) => {
+    //   console.log(event, args);
+    // });
     this.socket.on("full", () => {
+      console.log("FULLLLLLLLLLL");
       this.alertFull();
     });
     this.socket.on("gameOver", (data: any) => {
@@ -87,6 +88,7 @@ class MySocket {
       console.log("waiting to connect");
       await this.sleep(1000);
     }
+    console.log("connected to socket server");
     this.socket.emit("join", { room, nickname, playerId: this.getId() });
   }
 

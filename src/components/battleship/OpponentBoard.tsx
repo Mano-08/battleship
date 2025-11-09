@@ -178,6 +178,7 @@ function OpponentBoard({
   }, [wreckedShips]);
 
   function handleDropTorpedo(rindex: number, cindex: number) {
+    console.log("handleDropTorpedo called");
     if (gameStatus !== "initiated") {
       toast.error("game not initiated");
       return;

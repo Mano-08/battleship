@@ -22,9 +22,17 @@
 
 - Next.js
 - Socket.io
-- Node.js
-- Express.js
+- Java Spring Boot
+- Java netty-socket-io
 - Firebase
+
+## Battleship Backend
+
+---
+
+Find the backend system code serving Battleship at <a href="https://github.com/Mano-08/server.battleship">server.battleship</a>
+
+
 
 ### Bot&apos;s Coordinate Guesser Logic
 
@@ -103,3 +111,4 @@ The Algorithm is designed based on the following ideology:
               twitter
             </a>
             .
+

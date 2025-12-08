@@ -21,7 +21,7 @@ import HowToPlay from "./dialog/HowToPlay";
 function Hero() {
   const [display, setDisplay] = useState<string | null>(null);
   const { push } = useRouter();
-  const [userCount, setUserCount] = useState<number>(410);
+  const [userCount, setUserCount] = useState<number>(451);
 
   // useEffect(() => {
   //   mysocket.connect();

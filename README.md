@@ -91,7 +91,9 @@ The Algorithm is designed based on the following ideology:
 <br/>
 <br/>
             <ul className="list-disc px-5">
-              <li>First guess is random, if it is a HIT, then push it into HIT Stack with direction set to null.</li>
+              <li>Choose the cell that is farthest (by Manhattan distance) from any previously bombed cell.
+This targets the largest unexplored region of the board, systematically shrinking the search space and increasing the probability of locating ships.</li>
+              <li>If it is a HIT, then push it into HIT Stack with direction set to null.</li>
               <li>
                 If there is data on HIT Stack, the next guess is around the most recent hit, i.e. the top element of stack.
               </li>
@@ -121,7 +123,7 @@ The Algorithm is designed based on the following ideology:
               </li>
               <li>
                 If a ship is wrecked and no more coordinates are present inside
-                HIT Stack, just go with random guess.
+                HIT Stack, go back to step 1.
               </li>
             </ul>
             <br />

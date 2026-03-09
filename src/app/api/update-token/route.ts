@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     // var decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
     const token = jwt.sign(data, process.env.JWTSECRETKEY as string);
     const cookieStore = cookies();
-    cookieStore.set("bt_oken", token, {
+    (await cookieStore).set("bt_oken", token, {
       path: "/",
       sameSite: "strict",
       secure: true,
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
   } catch (error) {
     return new NextResponse(
       JSON.stringify({ message: "Internal Server Error" }),
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
